@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux"
@@ -44,8 +45,34 @@ func connect() error {
 
 	fmt.Println(conn.Name(), conn.Addr())
 
+	p, err := conn.DiscoverProfile(false)
+	if err != nil {
+		return errors.Wrap(err, "discover profile")
+	}
+
+	for i, service := range p.Services {
+		fmt.Println(i, service.UUID.String())
+		for j, ch := range service.Characteristics {
+			fmt.Println(" ", j, ch.UUID.String())
+			if service.UUID.String() == "1826" && ch.UUID.String() == "2ad2" {
+				sub(conn, service, ch)
+			}
+		}
+	}
+
+	select {}
 	//conn.DiscoverServices()
 	return nil
+}
+
+func sub(conn ble.Client, service *ble.Service, ch *ble.Characteristic) {
+	fmt.Println("  subscribe", service.UUID, ch.UUID)
+	err := conn.Subscribe(ch, false, func(req []byte) {
+		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
+	})
+	if err != nil {
+		fmt.Println("error:", errors.Wrap(err, "subscribe"))
+	}
 }
 
 func scan() error {
