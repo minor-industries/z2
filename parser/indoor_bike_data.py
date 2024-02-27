@@ -3,23 +3,25 @@ from collections import namedtuple
 IndoorBikeData = namedtuple(
     "IndoorBikeData",
     [
-        "instant_speed", # km/h
-        "average_speed", # km/h
-        "instant_cadence", # rpm
-        "average_cadence", # rpm
-        "total_distance", # m
-        "resistance_level", # unitless
-        "instant_power", # W
-        "average_power", # W
-        "total_energy", # kcal
-        "energy_per_hour", # kcal/h
-        "energy_per_minute", # kcal/min
-        "heart_rate", # bpm
-        "metabolic_equivalent", # unitless; metas
-        "elapsed_time", # s
-        "remaining_time", # s
+        "instant_speed",  # km/h
+        "average_speed",  # km/h
+        "instant_cadence",  # rpm
+        "average_cadence",  # rpm
+        "total_distance",  # m
+        "resistance_level",  # unitless
+        "instant_power",  # W
+        "average_power",  # W
+        "total_energy",  # kcal
+        "energy_per_hour",  # kcal/h
+        "energy_per_minute",  # kcal/min
+        "heart_rate",  # bpm
+        "metabolic_equivalent",  # unitless; metas
+        "elapsed_time",  # s
+        "remaining_time",  # s
     ]
 )
+
+
 def parse_indoor_bike_data(message) -> IndoorBikeData:
     flag_more_data = bool(message[0] & 0b00000001)
     flag_average_speed = bool(message[0] & 0b00000010)
@@ -60,49 +62,49 @@ def parse_indoor_bike_data(message) -> IndoorBikeData:
     # values
     i = 2  # start after the flags
     if flag_more_data == 0:
-        instant_speed = int.from_bytes(message[i : i + 2], "little", signed=False)/100
+        instant_speed = int.from_bytes(message[i: i + 2], "little", signed=False) / 100
         i += 2
     if flag_average_speed:
-        average_speed = int.from_bytes(message[i : i + 2], "little", signed=False)/100
+        average_speed = int.from_bytes(message[i: i + 2], "little", signed=False) / 100
         i += 2
     if flag_instantaneous_cadence:
-        instant_cadence = int.from_bytes(message[i : i + 2], "little", signed=False) / 2
+        instant_cadence = int.from_bytes(message[i: i + 2], "little", signed=False) / 2
         i += 2
     if flag_average_cadence:
-        average_cadence = int.from_bytes(message[i : i + 2], "little", signed=False) / 2
+        average_cadence = int.from_bytes(message[i: i + 2], "little", signed=False) / 2
         i += 2
     if flag_total_distance:
-        total_distance = int.from_bytes(message[i : i + 3], "little", signed=False)
+        total_distance = int.from_bytes(message[i: i + 3], "little", signed=False)
         i += 3
     if flag_resistance_level:
-        resistance_level = int.from_bytes(message[i : i + 2], "little", signed=True)
+        resistance_level = int.from_bytes(message[i: i + 2], "little", signed=True)
         i += 2
     if flag_instantaneous_power:
-        instant_power = int.from_bytes(message[i : i + 2], "little", signed=True)
+        instant_power = int.from_bytes(message[i: i + 2], "little", signed=True)
         i += 2
     if flag_average_power:
-        average_power = int.from_bytes(message[i : i + 2], "little", signed=True)
+        average_power = int.from_bytes(message[i: i + 2], "little", signed=True)
         i += 2
     if flag_expended_energy:
-        total_energy = int.from_bytes(message[i : i + 2], "little", signed=False)
-        energy_per_hour = int.from_bytes(message[i + 2 : i + 4], "little", signed=False)
+        total_energy = int.from_bytes(message[i: i + 2], "little", signed=False)
+        energy_per_hour = int.from_bytes(message[i + 2: i + 4], "little", signed=False)
         energy_per_minute = int.from_bytes(
-            message[i + 4 : i + 5], "little", signed=False
+            message[i + 4: i + 5], "little", signed=False
         )
         i += 5
     if flag_heart_rate:
-        heart_rate = int.from_bytes(message[i : i + 1], "little", signed=False)
+        heart_rate = int.from_bytes(message[i: i + 1], "little", signed=False)
         i += 1
     if flag_metabolic_equivalent:
         metabolic_equivalent = int.from_bytes(
-            message[i : i + 1], "little", signed=False
+            message[i: i + 1], "little", signed=False
         ) / 10
         i += 1
     if flag_elapsed_time:
-        elapsed_time = int.from_bytes(message[i : i + 2], "little", signed=False)
+        elapsed_time = int.from_bytes(message[i: i + 2], "little", signed=False)
         i += 2
     if flag_remaining_time:
-        remaining_time = int.from_bytes(message[i : i + 2], "little", signed=False)
+        remaining_time = int.from_bytes(message[i: i + 2], "little", signed=False)
         i += 2
 
     return IndoorBikeData(
