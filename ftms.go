@@ -70,7 +70,7 @@ func parseIndoorBikeData(message []byte) IndoorBikeData {
 		i += 2
 	}
 	if c3 {
-		instantCadence = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.01
+		instantCadence = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.5
 		i += 2
 	}
 	if c4 {

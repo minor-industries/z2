@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux"
+	"github.com/go-ble/ble/linux/hci/evt"
 	"github.com/pkg/errors"
 	"os"
 	"time"
@@ -14,7 +15,12 @@ import (
 const deviceName = "go-bike"
 
 func run() error {
-	d, err := linux.NewDeviceWithName(deviceName)
+	d, err := linux.NewDeviceWithName(
+		deviceName,
+		ble.OptDisconnectHandler(func(complete evt.DisconnectionComplete) {
+			fmt.Println("disconnect", complete.Reason())
+		}),
+	)
 	if err != nil {
 		return errors.Wrap(err, "new device")
 	}
@@ -26,7 +32,7 @@ func run() error {
 	case "scan":
 		err = scan()
 	case "connect":
-		err = connect()
+		err = connectLoop()
 	default:
 		err = errors.New("unknown verb")
 	}
@@ -34,16 +40,33 @@ func run() error {
 	return err
 }
 
+func connectLoop() error {
+	for {
+		err := connect()
+		if err != nil {
+			fmt.Println("connect error:", err.Error())
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
 func connect() error {
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+
 	conn, err := ble.Connect(ctx, func(a ble.Advertisement) bool {
-		return a.LocalName() == "IC Bike"
+		fmt.Println(a.LocalName(), a.Addr(), a.RSSI(), a.Connectable())
+		if a.LocalName() == "IC Bike" {
+			return a.Connectable()
+		}
+
+		return false
 	})
 	if err != nil {
 		return errors.Wrap(err, "connect")
 	}
 
 	fmt.Println(conn.Name(), conn.Addr())
+	time.Sleep(time.Second)
 
 	p, err := conn.DiscoverProfile(false)
 	if err != nil {
