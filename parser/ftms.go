@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/binary"
+	"fmt"
 	"reflect"
 )
 
@@ -21,13 +22,13 @@ type IndoorBikeData struct {
 	InstantCadence      OptFloat64 `series:"bike_instant_cadence"`
 	AverageCadence      OptFloat64
 	TotalDistance       OptFloat64 `series:"bike_total_distance"`
-	ResistanceLevel     OptFloat64
+	ResistanceLevel     OptFloat64 `series:"bike_resistance_level"`
 	InstantPower        OptFloat64 `series:"bike_instant_power"`
 	AveragePower        OptFloat64
 	TotalEnergy         OptFloat64 `series:"bike_total_energy"`
-	EnergyPerHour       OptFloat64
-	EnergyPerMinute     OptFloat64
-	HeartRate           OptFloat64
+	EnergyPerHour       OptFloat64 `series:"bike_energy_per_hour"`
+	EnergyPerMinute     OptFloat64 `series:"bike_energy_per_minute"`
+	HeartRate           OptFloat64 `series:"bike_heartrate"`
 	MetabolicEquivalent OptFloat64
 	ElapsedTime         OptFloat64
 	RemainingTime       OptFloat64
@@ -38,17 +39,17 @@ func (ibd *IndoorBikeData) AllPresentFields(callback func(series string, value f
 	//structName := val.Type().String()
 
 	for i := 0; i < val.NumField(); i++ {
-		series := val.Type().Field(i).Tag.Get("series")
-		if series == "" {
-			continue // series not tagged
-		}
-
+		name := val.Type().Field(i).Tag.Get("series")
 		if !val.Field(i).Field(1).Bool() {
 			continue // field value not present
 		}
 
+		if name == "" {
+			panic(fmt.Errorf("value present but field not tagged for %s", val.Type().Field(i).Name)) // TODO: replace with continue
+		}
+
 		v := val.Field(i).Field(0).Float()
-		callback(series, v)
+		callback(name, v)
 	}
 }
 

@@ -58,8 +58,12 @@ func TestGet(t *testing.T) {
 			"bike_instant_speed",
 			"bike_instant_cadence",
 			"bike_total_distance",
+			"bike_resistance_level",
 			"bike_instant_power",
 			"bike_total_energy",
+			"bike_energy_per_hour",
+			"bike_energy_per_minute",
+			"bike_heartrate",
 		}
 
 		for _, name := range names {
