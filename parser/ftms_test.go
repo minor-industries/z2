@@ -6,7 +6,6 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/minor-industries/codelab/cmd/bike/parser"
 	"github.com/stretchr/testify/require"
-	"reflect"
 	"testing"
 )
 
@@ -17,21 +16,8 @@ func Test_parseIndoorBikeData(t *testing.T) {
 	fmt.Println(spew.Sdump(datum))
 
 	t.Run("test fields", func(t *testing.T) {
-		val := reflect.ValueOf(datum).Elem()
-		//structName := val.Type().String()
-
-		for i := 0; i < val.NumField(); i++ {
-			series := val.Type().Field(i).Tag.Get("series")
-			if series == "" {
-				continue // series not tagged
-			}
-
-			if !val.Field(i).Field(1).Bool() {
-				continue // field value not present
-			}
-
-			v := val.Field(i).Field(0).Float()
+		datum.AllPresentFields(func(series string, v float64) {
 			fmt.Println(series, v)
-		}
+		})
 	})
 }

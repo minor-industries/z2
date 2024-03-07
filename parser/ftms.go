@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/binary"
+	"reflect"
 )
 
 type OptFloat64 struct {
@@ -16,7 +17,7 @@ func (f *OptFloat64) Set(v float64) {
 
 type IndoorBikeData struct {
 	InstantSpeed        OptFloat64 `series:"bike_instant_speed"`
-	AverageSpeed        OptFloat64 `series:"bike_abc"`
+	AverageSpeed        OptFloat64
 	InstantCadence      OptFloat64 `series:"bike_instant_cadence"`
 	AverageCadence      OptFloat64
 	TotalDistance       OptFloat64 `series:"bike_total_distance"`
@@ -30,6 +31,25 @@ type IndoorBikeData struct {
 	MetabolicEquivalent OptFloat64
 	ElapsedTime         OptFloat64
 	RemainingTime       OptFloat64
+}
+
+func (ibd *IndoorBikeData) AllPresentFields(callback func(series string, value float64)) {
+	val := reflect.ValueOf(ibd).Elem()
+	//structName := val.Type().String()
+
+	for i := 0; i < val.NumField(); i++ {
+		series := val.Type().Field(i).Tag.Get("series")
+		if series == "" {
+			continue // series not tagged
+		}
+
+		if !val.Field(i).Field(1).Bool() {
+			continue // field value not present
+		}
+
+		v := val.Field(i).Field(0).Float()
+		callback(series, v)
+	}
 }
 
 func bit(flags uint16, index int) bool {
