@@ -7,6 +7,7 @@ import (
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux"
 	"github.com/go-ble/ble/linux/hci/evt"
+	"github.com/minor-industries/codelab/cmd/bike/parser"
 	"github.com/pkg/errors"
 	"os"
 	"time"
@@ -92,6 +93,10 @@ func sub(conn ble.Client, service *ble.Service, ch *ble.Characteristic) {
 	fmt.Println("  subscribe", service.UUID, ch.UUID)
 	err := conn.Subscribe(ch, false, func(req []byte) {
 		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
+		datum := parser.ParseIndoorBikeData(req)
+		datum.AllPresentFields(func(series string, value float64) {
+			fmt.Println(series, value)
+		})
 	})
 	if err != nil {
 		fmt.Println("error:", errors.Wrap(err, "subscribe"))
