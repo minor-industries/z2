@@ -16,10 +16,12 @@ import (
 const deviceName = "go-bike"
 
 func run() error {
+	disconnectCh := make(chan error)
+
 	d, err := linux.NewDeviceWithName(
 		deviceName,
 		ble.OptDisconnectHandler(func(complete evt.DisconnectionComplete) {
-			fmt.Println("disconnect", complete.Reason())
+			disconnectCh <- fmt.Errorf("disconnect %d", complete.Reason())
 		}),
 	)
 	if err != nil {
@@ -33,7 +35,7 @@ func run() error {
 	case "scan":
 		err = scan()
 	case "connect":
-		err = connectLoop()
+		err = connectLoop(disconnectCh)
 	default:
 		err = errors.New("unknown verb")
 	}
@@ -41,9 +43,9 @@ func run() error {
 	return err
 }
 
-func connectLoop() error {
+func connectLoop(disconnectCh chan error) error {
 	for {
-		err := connect()
+		err := connectAndSubscribe(disconnectCh)
 		if err != nil {
 			fmt.Println("connect error:", err.Error())
 		}
@@ -51,17 +53,21 @@ func connectLoop() error {
 	}
 }
 
-func connect() error {
-	ctx, _ := context.WithTimeout(context.Background(), time.Minute)
+func connectAndSubscribe(disconnectCh chan error) error {
+	fmt.Println("connecting")
+	topCtx, topCancel := context.WithCancel(context.Background())
+	defer topCancel()
+
+	ctx, connectCancel := context.WithTimeout(topCtx, time.Minute)
 
 	conn, err := ble.Connect(ctx, func(a ble.Advertisement) bool {
 		fmt.Println(a.LocalName(), a.Addr(), a.RSSI(), a.Connectable())
 		if a.LocalName() == "IC Bike" {
 			return a.Connectable()
 		}
-
 		return false
 	})
+	connectCancel()
 	if err != nil {
 		return errors.Wrap(err, "connect")
 	}
@@ -84,9 +90,12 @@ func connect() error {
 		}
 	}
 
-	select {}
-	//conn.DiscoverServices()
-	return nil
+	select {
+	case err = <-disconnectCh:
+	case <-topCtx.Done():
+	}
+
+	return err
 }
 
 func sub(conn ble.Client, service *ble.Service, ch *ble.Characteristic) {
