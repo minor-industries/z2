@@ -4,29 +4,39 @@ import (
 	"encoding/binary"
 )
 
+type OptFloat64 struct {
+	float64
+	present bool
+}
+
+func (f *OptFloat64) Set(v float64) {
+	f.present = true
+	f.float64 = v
+}
+
 type IndoorBikeData struct {
-	InstantSpeed        float64
-	AverageSpeed        float64
-	InstantCadence      float64
-	AverageCadence      float64
-	TotalDistance       float64
-	ResistanceLevel     float64
-	InstantPower        float64
-	AveragePower        float64
-	TotalEnergy         float64
-	EnergyPerHour       float64
-	EnergyPerMinute     float64
-	HeartRate           float64
-	MetabolicEquivalent float64
-	ElapsedTime         float64
-	RemainingTime       float64
+	InstantSpeed        OptFloat64 `series:"bike_instant_speed"`
+	AverageSpeed        OptFloat64 `series:"bike_abc"`
+	InstantCadence      OptFloat64 `series:"bike_instant_cadence"`
+	AverageCadence      OptFloat64
+	TotalDistance       OptFloat64 `series:"bike_total_distance"`
+	ResistanceLevel     OptFloat64
+	InstantPower        OptFloat64 `series:"bike_instant_power"`
+	AveragePower        OptFloat64
+	TotalEnergy         OptFloat64 `series:"bike_total_energy"`
+	EnergyPerHour       OptFloat64
+	EnergyPerMinute     OptFloat64
+	HeartRate           OptFloat64
+	MetabolicEquivalent OptFloat64
+	ElapsedTime         OptFloat64
+	RemainingTime       OptFloat64
 }
 
 func bit(flags uint16, index int) bool {
 	return flags&(1<<index) != 0
 }
 
-func parseIndoorBikeData(message []byte) IndoorBikeData {
+func ParseIndoorBikeData(message []byte) *IndoorBikeData {
 	flags := binary.LittleEndian.Uint16(message[0:2])
 	c1 := !bit(flags, 0)
 	c2 := bit(flags, 1)
@@ -42,96 +52,64 @@ func parseIndoorBikeData(message []byte) IndoorBikeData {
 	c12 := bit(flags, 11)
 	c13 := bit(flags, 12)
 
-	var (
-		instantSpeed,
-		averageSpeed,
-		instantCadence,
-		averageCadence,
-		totalDistance,
-		resistanceLevel,
-		instantPower,
-		averagePower,
-		totalEnergy,
-		energyPerHour,
-		energyPerMinute,
-		heartRate,
-		metabolicEquivalent,
-		elapsedTime,
-		remainingTime float64
-	)
+	v := &IndoorBikeData{}
 
 	i := 2
 	if c1 {
-		instantSpeed = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.01
+		v.InstantSpeed.Set(float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.01)
 		i += 2
 	}
 	if c2 {
-		averageSpeed = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.01
+		v.AverageSpeed.Set(float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.01)
 		i += 2
 	}
 	if c3 {
-		instantCadence = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.5
+		v.InstantCadence.Set(float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.5)
 		i += 2
 	}
 	if c4 {
-		averageCadence = float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.5
+		v.AverageCadence.Set(float64(binary.LittleEndian.Uint16(message[i:i+2])) * 0.5)
 		i += 2
 	}
 	if c5 {
-		totalDistance = float64(int(binary.LittleEndian.Uint32(append(message[i:i+3], 0))))
+		v.TotalDistance.Set(float64(int(binary.LittleEndian.Uint32(append(message[i:i+3], 0)))))
 		i += 3
 	}
 	if c6 {
-		resistanceLevel = float64(int(binary.LittleEndian.Uint16(message[i : i+2])))
+		v.ResistanceLevel.Set(float64(int(binary.LittleEndian.Uint16(message[i : i+2]))))
 		i += 2
 	}
 	if c7 {
-		instantPower = float64(int(binary.LittleEndian.Uint16(message[i : i+2])))
+		v.InstantPower.Set(float64(int(binary.LittleEndian.Uint16(message[i : i+2]))))
 		i += 2
 	}
 	if c8 {
-		averagePower = float64(int(binary.LittleEndian.Uint16(message[i : i+2])))
+		v.AveragePower.Set(float64(int(binary.LittleEndian.Uint16(message[i : i+2]))))
 		i += 2
 	}
 	if c9 {
-		totalEnergy = float64(int(binary.LittleEndian.Uint16(message[i : i+2])))
-		energyPerHour = float64(int(binary.LittleEndian.Uint16(message[i+2 : i+4])))
-		energyPerMinute = float64(int(message[i+4]))
+		v.TotalEnergy.Set(float64(int(binary.LittleEndian.Uint16(message[i : i+2]))))
+		v.EnergyPerHour.Set(float64(int(binary.LittleEndian.Uint16(message[i+2 : i+4]))))
+		v.EnergyPerMinute.Set(float64(int(message[i+4])))
 		i += 5
 	}
 	if c10 {
-		heartRate = float64(message[i])
+		v.HeartRate.Set(float64(message[i]))
 		i += 1
 	}
 	if c11 {
-		metabolicEquivalent = float64(message[i]) * 0.1
+		v.MetabolicEquivalent.Set(float64(message[i]) * 0.1)
 		i += 1
 	}
 	if c12 {
-		elapsedTime = float64(binary.LittleEndian.Uint16(message[i : i+2]))
+		v.ElapsedTime.Set(float64(binary.LittleEndian.Uint16(message[i : i+2])))
 		i += 2
 	}
 
 	if c13 {
-		remainingTime = float64(binary.LittleEndian.Uint16(message[i : i+2]))
+		v.RemainingTime.Set(float64(binary.LittleEndian.Uint16(message[i : i+2])))
 		i += 2
 	}
 
-	return IndoorBikeData{
-		InstantSpeed:        instantSpeed,
-		AverageSpeed:        averageSpeed,
-		InstantCadence:      instantCadence,
-		AverageCadence:      averageCadence,
-		TotalDistance:       totalDistance,
-		ResistanceLevel:     resistanceLevel,
-		InstantPower:        instantPower,
-		AveragePower:        averagePower,
-		TotalEnergy:         totalEnergy,
-		EnergyPerHour:       energyPerHour,
-		EnergyPerMinute:     energyPerMinute,
-		HeartRate:           heartRate,
-		MetabolicEquivalent: metabolicEquivalent,
-		ElapsedTime:         elapsedTime,
-		RemainingTime:       remainingTime,
-	}
+	return v
 }
