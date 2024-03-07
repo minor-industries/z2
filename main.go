@@ -15,6 +15,16 @@ import (
 
 const deviceName = "go-bike"
 
+type subscriptionCallback func(service *ble.Service, ch *ble.Characteristic, req []byte)
+
+func cb(service *ble.Service, ch *ble.Characteristic, req []byte) {
+	fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
+	datum := parser.ParseIndoorBikeData(req)
+	datum.AllPresentFields(func(series string, value float64) {
+		fmt.Println(series, value)
+	})
+}
+
 func run() error {
 	disconnectCh := make(chan error)
 
@@ -35,7 +45,7 @@ func run() error {
 	case "scan":
 		err = scan()
 	case "connect":
-		err = connectLoop(disconnectCh)
+		err = connectLoop(disconnectCh, cb)
 	default:
 		err = errors.New("unknown verb")
 	}
@@ -43,9 +53,12 @@ func run() error {
 	return err
 }
 
-func connectLoop(disconnectCh chan error) error {
+func connectLoop(
+	disconnectCh chan error,
+	callback subscriptionCallback,
+) error {
 	for {
-		err := connectAndSubscribe(disconnectCh)
+		err := connectAndSubscribe(disconnectCh, callback)
 		if err != nil {
 			fmt.Println("connect error:", err.Error())
 		}
@@ -53,7 +66,10 @@ func connectLoop(disconnectCh chan error) error {
 	}
 }
 
-func connectAndSubscribe(disconnectCh chan error) error {
+func connectAndSubscribe(
+	disconnectCh chan error,
+	callback subscriptionCallback,
+) error {
 	fmt.Println("connecting...")
 	topCtx, topCancel := context.WithCancel(context.Background())
 	defer topCancel()
@@ -84,7 +100,7 @@ func connectAndSubscribe(disconnectCh chan error) error {
 		for _, ch := range service.Characteristics {
 			//fmt.Println(" ", j, ch.UUID.String())
 			if service.UUID.String() == "1826" && ch.UUID.String() == "2ad2" {
-				sub(conn, service, ch)
+				sub(conn, service, ch, callback)
 			}
 		}
 	}
@@ -97,14 +113,15 @@ func connectAndSubscribe(disconnectCh chan error) error {
 	return err
 }
 
-func sub(conn ble.Client, service *ble.Service, ch *ble.Characteristic) {
+func sub(
+	conn ble.Client,
+	service *ble.Service,
+	ch *ble.Characteristic,
+	callback subscriptionCallback,
+) {
 	fmt.Println("  subscribe", service.UUID, ch.UUID)
 	err := conn.Subscribe(ch, false, func(req []byte) {
-		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
-		datum := parser.ParseIndoorBikeData(req)
-		datum.AllPresentFields(func(series string, value float64) {
-			fmt.Println(series, value)
-		})
+		callback(service, ch, req)
 	})
 	if err != nil {
 		fmt.Println("error:", errors.Wrap(err, "subscribe"))
