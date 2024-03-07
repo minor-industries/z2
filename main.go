@@ -30,10 +30,20 @@ func run() error {
 		return errors.Wrap(err, "load series")
 	}
 
+	fp, err := os.OpenFile(os.ExpandEnv("$HOME/raw.txt"), os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return errors.Wrap(err, "open")
+	}
+
 	cb := func(service *ble.Service, ch *ble.Characteristic, req []byte) {
 		t := time.Now()
 		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
 		datum := parser.ParseIndoorBikeData(req)
+		line := fmt.Sprintf("%d %s\n", t.UnixMilli(), hex.EncodeToString(req))
+		_, err := fp.WriteString(line)
+		if err != nil {
+			panic(errors.Wrap(err, "write line"))
+		}
 		datum.AllPresentFields(func(seriesName string, value float64) {
 			series, ok := allSeries[seriesName]
 			if !ok {
