@@ -50,7 +50,7 @@ func TestGet(t *testing.T) {
 	db, err := database.Get(dbname)
 	require.NoError(t, err)
 
-	seriesMap, err := database.LoadSeries(db)
+	seriesMap, err := database.loadSeries(db)
 	require.NoError(t, err)
 
 	t.Run("create types", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGet(t *testing.T) {
 		}
 	})
 
-	seriesMap, err = database.LoadSeries(db)
+	seriesMap, err = database.loadSeries(db)
 	require.NoError(t, err)
 
 	t.Run("measurement", func(t *testing.T) {
