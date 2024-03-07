@@ -39,3 +39,20 @@ func Get(filename string) (*gorm.DB, error) {
 	}
 	return db, nil
 }
+
+func LoadSeries(db *gorm.DB) (map[string]*Series, error) {
+	typeMap := map[string]*Series{}
+	{
+		var types []*Series
+		tx := db.Find(&types)
+		if tx.Error != nil {
+			return nil, errors.Wrap(tx.Error, "find")
+		}
+
+		for _, mt := range types {
+			typeMap[mt.Name] = mt
+		}
+	}
+
+	return typeMap, nil
+}

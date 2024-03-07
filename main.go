@@ -7,6 +7,8 @@ import (
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux"
 	"github.com/go-ble/ble/linux/hci/evt"
+	"github.com/google/uuid"
+	"github.com/minor-industries/codelab/cmd/bike/database"
 	"github.com/minor-industries/codelab/cmd/bike/parser"
 	"github.com/pkg/errors"
 	"os"
@@ -17,15 +19,38 @@ const deviceName = "go-bike"
 
 type subscriptionCallback func(service *ble.Service, ch *ble.Characteristic, req []byte)
 
-func cb(service *ble.Service, ch *ble.Characteristic, req []byte) {
-	fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
-	datum := parser.ParseIndoorBikeData(req)
-	datum.AllPresentFields(func(series string, value float64) {
-		fmt.Println(series, value)
-	})
-}
-
 func run() error {
+	db, err := database.Get(os.ExpandEnv("$HOME/bike.db"))
+	if err != nil {
+		return errors.Wrap(err, "get database")
+	}
+
+	allSeries, err := database.LoadSeries(db)
+	if err != nil {
+		return errors.Wrap(err, "load series")
+	}
+
+	cb := func(service *ble.Service, ch *ble.Characteristic, req []byte) {
+		t := time.Now()
+		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
+		datum := parser.ParseIndoorBikeData(req)
+		datum.AllPresentFields(func(seriesName string, value float64) {
+			series, ok := allSeries[seriesName]
+			if !ok {
+				panic(fmt.Errorf("unknown database series: %s", seriesName))
+			}
+			tx := db.Create(&database.Value{
+				ID:        uuid.New(),
+				Timestamp: t,
+				Value:     value,
+				Series:    series,
+			})
+			if tx.Error != nil {
+				panic(errors.Wrap(tx.Error, "create value"))
+			}
+		})
+	}
+
 	disconnectCh := make(chan error)
 
 	d, err := linux.NewDeviceWithName(

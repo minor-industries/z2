@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/minor-industries/codelab/cmd/bike/database"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 	"os"
 	"testing"
 	"time"
@@ -51,7 +50,8 @@ func TestGet(t *testing.T) {
 	db, err := database.Get(dbname)
 	require.NoError(t, err)
 
-	seriesMap := loadSeries(db)
+	seriesMap, err := database.LoadSeries(db)
+	require.NoError(t, err)
 
 	t.Run("create types", func(t *testing.T) {
 		names := []string{
@@ -77,7 +77,8 @@ func TestGet(t *testing.T) {
 		}
 	})
 
-	seriesMap = loadSeries(db)
+	seriesMap, err = database.LoadSeries(db)
+	require.NoError(t, err)
 
 	t.Run("measurement", func(t *testing.T) {
 		m := &database.Value{
@@ -89,17 +90,4 @@ func TestGet(t *testing.T) {
 		tx := db.Create(m)
 		require.NoError(t, tx.Error)
 	})
-}
-
-func loadSeries(db *gorm.DB) map[string]*database.Series {
-	typeMap := map[string]*database.Series{}
-	{
-		var types []*database.Series
-		db.Find(&types)
-
-		for _, mt := range types {
-			typeMap[mt.Name] = mt
-		}
-	}
-	return typeMap
 }
