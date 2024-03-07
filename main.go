@@ -7,9 +7,8 @@ import (
 	"github.com/go-ble/ble"
 	"github.com/go-ble/ble/linux"
 	"github.com/go-ble/ble/linux/hci/evt"
-	"github.com/google/uuid"
 	"github.com/minor-industries/codelab/cmd/bike/database"
-	"github.com/minor-industries/codelab/cmd/bike/parser"
+	handler2 "github.com/minor-industries/codelab/cmd/bike/handler"
 	"github.com/pkg/errors"
 	"os"
 	"time"
@@ -25,9 +24,9 @@ func run() error {
 		return errors.Wrap(err, "get database")
 	}
 
-	allSeries, err := database.LoadSeries(db)
+	handler, err := handler2.NewBleHandler(db)
 	if err != nil {
-		return errors.Wrap(err, "load series")
+		return errors.Wrap(err, "newBleHandler")
 	}
 
 	fp, err := os.OpenFile(os.ExpandEnv("$HOME/raw.txt"), os.O_CREATE|os.O_WRONLY, 0o600)
@@ -37,28 +36,16 @@ func run() error {
 
 	cb := func(service *ble.Service, ch *ble.Characteristic, req []byte) {
 		t := time.Now()
-		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
-		datum := parser.ParseIndoorBikeData(req)
 		line := fmt.Sprintf("%d %s\n", t.UnixMilli(), hex.EncodeToString(req))
 		_, err := fp.WriteString(line)
 		if err != nil {
 			panic(errors.Wrap(err, "write line"))
 		}
-		datum.AllPresentFields(func(seriesName string, value float64) {
-			series, ok := allSeries[seriesName]
-			if !ok {
-				panic(fmt.Errorf("unknown database series: %s", seriesName))
-			}
-			tx := db.Create(&database.Value{
-				ID:        uuid.New(),
-				Timestamp: t,
-				Value:     value,
-				Series:    series,
-			})
-			if tx.Error != nil {
-				panic(errors.Wrap(tx.Error, "create value"))
-			}
-		})
+		fmt.Println(service.UUID, ch.UUID, hex.Dump(req))
+
+		if err := handler.Handle(t, req); err != nil {
+			panic(errors.Wrap(err, "handle"))
+		}
 	}
 
 	disconnectCh := make(chan error)
