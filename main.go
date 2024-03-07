@@ -54,15 +54,15 @@ func connectLoop(disconnectCh chan error) error {
 }
 
 func connectAndSubscribe(disconnectCh chan error) error {
-	fmt.Println("connecting")
+	fmt.Println("connecting...")
 	topCtx, topCancel := context.WithCancel(context.Background())
 	defer topCancel()
 
 	ctx, connectCancel := context.WithTimeout(topCtx, time.Minute)
 
 	conn, err := ble.Connect(ctx, func(a ble.Advertisement) bool {
-		fmt.Println(a.LocalName(), a.Addr(), a.RSSI(), a.Connectable())
 		if a.LocalName() == "IC Bike" {
+			fmt.Println(a.LocalName(), a.Addr(), a.RSSI(), a.Connectable())
 			return a.Connectable()
 		}
 		return false
@@ -72,18 +72,17 @@ func connectAndSubscribe(disconnectCh chan error) error {
 		return errors.Wrap(err, "connect")
 	}
 
-	fmt.Println(conn.Name(), conn.Addr())
-	time.Sleep(time.Second)
+	//fmt.Println(conn.Name(), conn.Addr())
 
 	p, err := conn.DiscoverProfile(false)
 	if err != nil {
 		return errors.Wrap(err, "discover profile")
 	}
 
-	for i, service := range p.Services {
-		fmt.Println(i, service.UUID.String())
-		for j, ch := range service.Characteristics {
-			fmt.Println(" ", j, ch.UUID.String())
+	for _, service := range p.Services {
+		//fmt.Println(i, service.UUID.String())
+		for _, ch := range service.Characteristics {
+			//fmt.Println(" ", j, ch.UUID.String())
 			if service.UUID.String() == "1826" && ch.UUID.String() == "2ad2" {
 				sub(conn, service, ch)
 			}
