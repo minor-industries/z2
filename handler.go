@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/minor-industries/codelab/cmd/bike/parser"
+	"github.com/minor-industries/codelab/cmd/bike/schema"
+	"github.com/minor-industries/platform/common/broker"
 	"time"
 )
 
@@ -12,12 +15,24 @@ type bikeHandler struct {
 	lastMsg time.Time
 	cancel  context.CancelFunc
 	ctx     context.Context
+	broker  *broker.Broker
 }
 
 func (h *bikeHandler) Handle(msg []byte) {
 	h.lastMsg = time.Now()
 	dt := time.Now().Sub(h.t0).Seconds()
+	now := time.Now()
 	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
+	data := parser.ParseIndoorBikeData(msg)
+
+	// perhaps we should send these in bulk to the broker
+	data.AllPresentFields(func(series string, value float64) {
+		h.broker.Publish(&schema.Series{
+			SeriesName: series,
+			Timestamp:  now,
+			Value:      value,
+		})
+	})
 }
 
 func (h *bikeHandler) Monitor() {
