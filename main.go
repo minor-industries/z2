@@ -34,6 +34,11 @@ func run() error {
 		return errors.Wrap(err, "open")
 	}
 
+	go func() {
+		err := serve(handler)
+		panic(errors.Wrap(err, "serve"))
+	}()
+
 	cb := func(service *ble.Service, ch *ble.Characteristic, req []byte) {
 		t := time.Now()
 		line := fmt.Sprintf("%d %s\n", t.UnixMilli(), hex.EncodeToString(req))
