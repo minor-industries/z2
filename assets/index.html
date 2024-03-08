@@ -16,11 +16,6 @@
 
     <script type="text/javascript">
         Dygraph.onDOMready(function onDOMready() {
-            // let data = "Date,Temperature\n" +
-            //     "2008-05-07,75\n" +
-            //     "2008-05-08,70\n" +
-            //     "2008-05-09,80\n";
-
             fetch('data.json' + window.location.search)
                 .then(response => response.json())
                 .then(response => {
@@ -42,15 +37,12 @@
                 })
                 .catch(error => console.error('Error:', error));
 
-
             // let data = "data.csv" + window.location.search;
             //
             // const t1 = new Date();
             // const t0 = new Date(t1);
             // t0.setMonth(t0.getMonth() - 3);
             // t1.setDate(t0.getDate() + 1); // maybe better to use some padding options here instead
-
-
         });
     </script>
 
