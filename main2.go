@@ -1,24 +1,10 @@
-// This example scans and then connects to a specific Bluetooth peripheral
-// and then displays all of the services and characteristics.
-//
-// To run this on a desktop system:
-//
-//	go run ./examples/discover EE:74:7D:C9:2A:68
-//
-// To run this on a microcontroller, change the constant value in the file
-// "mcu.go" to set the MAC address of the device you want to discover.
-// Then, flash to the microcontroller board like this:
-//
-//	tinygo flash -o circuitplay-bluefruit ./examples/discover
-//
-// Once the program is flashed to the board, connect to the USB port
-// via serial to view the output.
 package main
 
 import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
+	"time"
 
 	"tinygo.org/x/bluetooth"
 )
@@ -47,6 +33,12 @@ func main() {
 		}
 	})
 
+	adapter.SetConnectHandler(func(device bluetooth.Device, connected bool) {
+		if !connected {
+			panic("not connected")
+		}
+	})
+
 	var device bluetooth.Device
 	select {
 	case result := <-ch:
@@ -61,7 +53,9 @@ func main() {
 
 	// get services
 	fmt.Println("discovering services/characteristics")
-	srvcs, err := device.DiscoverServices(nil)
+	srvcs, err := device.DiscoverServices([]bluetooth.UUID{
+		bluetooth.ServiceUUIDFitnessMachine,
+	})
 	must("discover services", err)
 
 	// buffer to retrieve characteristic data
@@ -70,7 +64,9 @@ func main() {
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
-		chars, err := srvc.DiscoverCharacteristics(nil)
+		chars, err := srvc.DiscoverCharacteristics([]bluetooth.UUID{
+			bluetooth.CharacteristicUUIDIndoorBikeData,
+		})
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -85,10 +81,10 @@ func main() {
 				fmt.Println("    value =", string(buf[:n]))
 			}
 
-			if srvc.UUID().String() == "00001826-0000-1000-8000-00805f9b34fb" &&
-				char.UUID().String() == "00002ad2-0000-1000-8000-00805f9b34fb" {
+			if srvc.UUID() == bluetooth.ServiceUUIDFitnessMachine &&
+				char.UUID() == bluetooth.CharacteristicUUIDIndoorBikeData {
 				if err := char.EnableNotifications(func(buf []byte) {
-					fmt.Println("notify", hex.Dump(buf))
+					fmt.Println(time.Now().String(), "notify", hex.Dump(buf))
 				}); err != nil {
 					fmt.Println("error enabling notifications:", err.Error())
 				}
