@@ -14,11 +14,21 @@ Dygraph.onDOMready(function onDOMready() {
                 {
                     // dateWindow: [t0, t1],
                     title: "Title",
-                    ylabel: "ylabel"
+                    ylabel: "ylabel",
+                    labels: ["X", "Y"]
                 }
             );
         })
         .catch(error => console.error('Error:', error));
+
+
+    const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
+    const ws = new WebSocket(url);
+    ws.onopen = console.log;
+    ws.onmessage = message => {
+        const msg = JSON.parse(message.data);
+        console.log(msg);
+    };
 
     // let data = "data.csv" + window.location.search;
     //

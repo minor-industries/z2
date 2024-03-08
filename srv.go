@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
@@ -9,6 +10,8 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"nhooyr.io/websocket"
+	"nhooyr.io/websocket/wsjson"
 	"strconv"
 	"strings"
 	"time"
@@ -113,6 +116,42 @@ func serve(handler *handler2.BleHandler) error {
 		c.Writer.Header().Set("Content-Type", "text/plain")
 		c.Status(200)
 		_, _ = c.Writer.Write(content)
+	})
+
+	r.GET("/ws", func(c *gin.Context) {
+		conn, wsErr := websocket.Accept(c.Writer, c.Request, &websocket.AcceptOptions{
+			InsecureSkipVerify: true,
+		})
+		if wsErr != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, wsErr)
+			return
+		}
+
+		defer func() {
+			_ = conn.Close(websocket.StatusInternalError, "Closed unexpectedly")
+		}()
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Minute)
+		defer cancel()
+		ctx = conn.CloseRead(ctx)
+
+		tick := time.NewTicker(time.Second * 5)
+		defer tick.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				conn.Close(websocket.StatusNormalClosure, "")
+				return
+			case <-tick.C:
+				writeErr := wsjson.Write(ctx, conn, map[string]any{
+					"msg": "abc123",
+				})
+				if writeErr != nil {
+					return
+				}
+			}
+		}
 	})
 
 	if err := r.Run("0.0.0.0:8000"); err != nil {
