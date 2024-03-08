@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/hex"
+	"context"
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
@@ -18,6 +18,7 @@ type cbKey [2]bluetooth.UUID
 type Callbacks map[cbKey]func(msg []byte)
 
 func run2(
+	ctx context.Context,
 	adapter *bluetooth.Adapter,
 	callbacks Callbacks,
 ) error {
@@ -84,7 +85,7 @@ func run2(
 		}
 	}
 
-	<-time.After(10 * time.Second)
+	<-ctx.Done()
 
 	err = device.Disconnect()
 	if err != nil {
@@ -99,27 +100,27 @@ func main() {
 
 	fmt.Println("enabling")
 
-	adapter.SetConnectHandler(func(device bluetooth.Device, connected bool) {
-		fmt.Println("connect handler: connected:", connected)
-	})
-
 	// Enable BLE interface.
 	must("enable BLE stack", adapter.Enable())
 
 	t0 := time.Now()
-	for {
-		err := run2(adapter, map[cbKey]func([]byte){
-			cbKey{
-				bluetooth.ServiceUUIDFitnessMachine,
-				bluetooth.CharacteristicUUIDIndoorBikeData,
-			}: func(msg []byte) {
-				dt := time.Now().Sub(t0).Seconds()
-				fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
-			},
-		})
-		fmt.Println("run exited, error:", err)
-		time.Sleep(500 * time.Millisecond)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	handler := &bikeHandler{
+		t0:     t0,
+		cancel: cancel,
+		ctx:    ctx,
 	}
+	go handler.Monitor()
+
+	err := run2(ctx, adapter, map[cbKey]func([]byte){
+		cbKey{
+			bluetooth.ServiceUUIDFitnessMachine,
+			bluetooth.CharacteristicUUIDIndoorBikeData,
+		}: handler.Handle,
+	})
+
+	fmt.Println("run exited, error:", err)
 }
 
 func must(action string, err error) {
