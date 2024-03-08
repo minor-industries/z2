@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
 	handler2 "github.com/minor-industries/codelab/cmd/bike/handler"
@@ -8,6 +9,8 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"strings"
+	"time"
 )
 
 func serve(handler *handler2.BleHandler) error {
@@ -26,6 +29,52 @@ func serve(handler *handler2.BleHandler) error {
 		"dygraph.min.js", "application/javascript",
 		"dygraph.css", "text/css",
 	)
+
+	/*
+		SELECT
+			*
+		FROM
+			`values` AS v,
+			series AS s
+		WHERE
+			v.series_id = s.id
+			AND series_id = 3
+		ORDER BY
+			timestamp ASC
+	*/
+
+	r.GET("/data.csv", func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Type", "text/plain")
+		c.Status(200)
+
+		lines := []string{"date,weight"}
+		data, err := handler.GetSeries(1)
+		if err != nil {
+			_ = c.Error(err)
+			return
+		}
+
+		for i, d := range data {
+			if i > 0 {
+				d0 := data[i-1]
+				dt := d.Timestamp.Sub(d0.Timestamp)
+				if dt > time.Minute {
+					lines = append(lines, fmt.Sprintf("%s,NaN",
+						d0.Timestamp.Format("2006/01/02 15:04:05"),
+					))
+				}
+			}
+
+			lines = append(lines, fmt.Sprintf("%s,%f",
+				d.Timestamp.Format("2006/01/02 15:04:05"),
+				d.Value,
+			))
+		}
+
+		content := []byte(strings.Join(lines, "\n"))
+
+		_, _ = c.Writer.Write(content)
+	})
 
 	if err := r.Run("0.0.0.0:8000"); err != nil {
 		return errors.Wrap(err, "run")

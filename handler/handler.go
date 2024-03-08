@@ -39,6 +39,28 @@ func (h *BleHandler) Handle(t time.Time, req []byte) error {
 	return err
 }
 
+/*
+SELECT
+	*
+FROM
+	`values` AS v,
+	series AS s
+WHERE
+	v.series_id = s.id
+	AND series_id = 3
+ORDER BY
+	timestamp ASC
+*/
+
+func (h *BleHandler) GetSeries(series uint16) ([]database.Value, error) {
+	var result []database.Value
+	tx := h.db.Where("series_id = ?", series).Order("timestamp asc").Find(&result)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "find")
+	}
+	return result, nil
+}
+
 func NewBleHandler(db *gorm.DB) (*BleHandler, error) {
 	allSeries, err := database.LoadSeries(db)
 	if err != nil {
