@@ -1,23 +1,18 @@
+const mapDate = value => [new Date(value[0]), value[1]];
+
 Dygraph.onDOMready(function onDOMready() {
     fetch('data.json' + window.location.search)
         .then(response => response.json())
         .then(response => {
-            let data = response.rows.map(value => [
-                new Date(value[0]),
-                value[1]
-            ]);
-            window.g = new Dygraph(
-                // containing div
-                document.getElementById("graphdiv"),
-                // CSV or path to a CSV file.
-                data,
-                {
+            window.data = response.rows.map(mapDate);
+            window.g = new Dygraph(// containing div
+                document.getElementById("graphdiv"), // CSV or path to a CSV file.
+                window.data, {
                     // dateWindow: [t0, t1],
                     title: "Title",
                     ylabel: "ylabel",
                     labels: ["X", "Y"]
-                }
-            );
+                });
         })
         .catch(error => console.error('Error:', error));
 
@@ -27,7 +22,11 @@ Dygraph.onDOMready(function onDOMready() {
     ws.onopen = console.log;
     ws.onmessage = message => {
         const msg = JSON.parse(message.data);
-        console.log(msg);
+        const rows = msg.rows.map(mapDate);
+        window.data.push(...rows);
+        window.g.updateOptions({
+            file: window.data
+        });
     };
 
     // let data = "data.csv" + window.location.search;

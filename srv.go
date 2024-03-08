@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
+	"github.com/minor-industries/codelab/cmd/bike/database"
 	handler2 "github.com/minor-industries/codelab/cmd/bike/handler"
 	"github.com/pkg/errors"
 	"html/template"
 	"io/fs"
+	"math"
 	"net/http"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
@@ -118,6 +120,7 @@ func serve(handler *handler2.BleHandler) error {
 		_, _ = c.Writer.Write(content)
 	})
 
+	t0 := time.Now()
 	r.GET("/ws", func(c *gin.Context) {
 		conn, wsErr := websocket.Accept(c.Writer, c.Request, &websocket.AcceptOptions{
 			InsecureSkipVerify: true,
@@ -125,6 +128,12 @@ func serve(handler *handler2.BleHandler) error {
 		if wsErr != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, wsErr)
 			return
+		}
+
+		var v database.Value
+		tx := handler.Db.Order("timestamp desc").Limit(1).Find(&v)
+		if tx.Error != nil {
+			panic(errors.Wrap(tx.Error, "find")) // TODO
 		}
 
 		defer func() {
@@ -135,7 +144,7 @@ func serve(handler *handler2.BleHandler) error {
 		defer cancel()
 		ctx = conn.CloseRead(ctx)
 
-		tick := time.NewTicker(time.Second * 5)
+		tick := time.NewTicker(250 * time.Millisecond)
 		defer tick.Stop()
 
 		for {
@@ -144,8 +153,15 @@ func serve(handler *handler2.BleHandler) error {
 				conn.Close(websocket.StatusNormalClosure, "")
 				return
 			case <-tick.C:
+				dt := time.Now().Sub(t0)
+				t := v.Timestamp.Add(dt)
+
+				newRows := [][2]any{{
+					t.UnixMilli(),
+					5*math.Sin(dt.Seconds()/10.0) + 30,
+				}}
 				writeErr := wsjson.Write(ctx, conn, map[string]any{
-					"msg": "abc123",
+					"rows": newRows,
 				})
 				if writeErr != nil {
 					return

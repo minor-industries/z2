@@ -11,7 +11,7 @@ import (
 )
 
 type BleHandler struct {
-	db     *gorm.DB
+	Db     *gorm.DB
 	series map[string]*database.Series
 }
 
@@ -24,7 +24,7 @@ func (h *BleHandler) Handle(t time.Time, req []byte) error {
 		if !ok {
 			panic(fmt.Errorf("unknown database series: %s", seriesName))
 		}
-		tx := h.db.Create(&database.Value{
+		tx := h.Db.Create(&database.Value{
 			ID:        uuid.New(),
 			Timestamp: t,
 			Value:     value,
@@ -54,7 +54,7 @@ ORDER BY
 
 func (h *BleHandler) GetSeries(series uint16) ([]database.Value, error) {
 	var result []database.Value
-	tx := h.db.Where("series_id = ?", series).Order("timestamp asc").Find(&result)
+	tx := h.Db.Where("series_id = ?", series).Order("timestamp asc").Find(&result)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "find")
 	}
@@ -68,7 +68,7 @@ func NewBleHandler(db *gorm.DB) (*BleHandler, error) {
 	}
 
 	handler := &BleHandler{
-		db:     db,
+		Db:     db,
 		series: allSeries,
 	}
 
