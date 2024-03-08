@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
@@ -14,7 +13,6 @@ import (
 	"net/http"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
-	"time"
 )
 
 func serve(
@@ -69,6 +67,8 @@ func serve(
 	})
 
 	r.GET("/ws", func(c *gin.Context) {
+		ctx := c.Request.Context()
+
 		conn, wsErr := websocket.Accept(c.Writer, c.Request, &websocket.AcceptOptions{
 			InsecureSkipVerify: true,
 		})
@@ -81,35 +81,27 @@ func serve(
 			_ = conn.Close(websocket.StatusInternalError, "Closed unexpectedly")
 		}()
 
-		ctx, cancel := context.WithTimeout(c.Request.Context(), time.Minute)
-		defer cancel()
-		ctx = conn.CloseRead(ctx)
+		conn.CloseRead(ctx)
 
 		msgCh := br.Subscribe()
 		defer br.Unsubscribe(msgCh)
 
-		for {
-			select {
-			case <-ctx.Done():
-				conn.Close(websocket.StatusNormalClosure, "")
-				return
-			case msg := <-msgCh:
-				switch m := msg.(type) {
-				case *schema.Series:
-					switch m.SeriesName {
-					case "bike_instant_speed":
-						fmt.Println("tick", m.SeriesName, m.Timestamp, m.Value)
-						newRows := [][2]any{{
-							m.Timestamp.UnixMilli(),
-							m.Value,
-						}}
-						writeErr := wsjson.Write(ctx, conn, map[string]any{
-							"rows": newRows,
-						})
-						if writeErr != nil {
-							fmt.Println("error writing to websocket:", writeErr.Error())
-							return
-						}
+		for msg := range msgCh {
+			switch m := msg.(type) {
+			case *schema.Series:
+				switch m.SeriesName {
+				case "bike_instant_speed":
+					fmt.Println("tick", m.SeriesName, m.Timestamp, m.Value)
+					newRows := [][2]any{{
+						m.Timestamp.UnixMilli(),
+						m.Value,
+					}}
+					writeErr := wsjson.Write(ctx, conn, map[string]any{
+						"rows": newRows,
+					})
+					if writeErr != nil {
+						fmt.Println("error writing to websocket:", writeErr.Error())
+						return
 					}
 				}
 			}
