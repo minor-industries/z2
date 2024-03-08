@@ -33,12 +33,6 @@ func run2(
 		}
 	})
 
-	adapter.SetConnectHandler(func(device bluetooth.Device, connected bool) {
-		if !connected {
-			panic("not connected")
-		}
-	})
-
 	var device bluetooth.Device
 	select {
 	case result := <-ch:
@@ -90,22 +84,24 @@ func run2(
 		}
 	}
 
-	select {}
+	<-time.After(10 * time.Second)
 
 	err = device.Disconnect()
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("done")
-
-	return nil
+	return errors.New("exited")
 }
 
 func main() {
 	var adapter = bluetooth.DefaultAdapter
 
 	fmt.Println("enabling")
+
+	adapter.SetConnectHandler(func(device bluetooth.Device, connected bool) {
+		fmt.Println("connect handler: connected:", connected)
+	})
 
 	// Enable BLE interface.
 	must("enable BLE stack", adapter.Enable())
