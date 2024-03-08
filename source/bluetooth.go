@@ -13,13 +13,19 @@ type Callbacks map[CBKey]func(msg []byte)
 
 func Run(
 	ctx context.Context,
-	adapter *bluetooth.Adapter,
 	address string,
 	callbacks Callbacks,
 ) error {
+	var adapter = bluetooth.DefaultAdapter
+
+	fmt.Println("enabling")
+
+	if err := adapter.Enable(); err != nil {
+		return errors.Wrap(err, "enable adapter")
+	}
+
 	ch := make(chan bluetooth.ScanResult, 1)
 
-	// Start scanning.
 	fmt.Println("scanning...")
 	err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
 		fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
@@ -40,7 +46,6 @@ func Run(
 		fmt.Println("connected to ", result.Address.String())
 	}
 
-	// get services
 	fmt.Println("discovering services/characteristics")
 	srvcs, err := device.DiscoverServices([]bluetooth.UUID{
 		bluetooth.ServiceUUIDFitnessMachine,
@@ -49,9 +54,7 @@ func Run(
 		return errors.Wrap(err, "discover services")
 	}
 
-	// buffer to retrieve characteristic data
 	buf := make([]byte, 255)
-
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
