@@ -110,13 +110,15 @@ func main() {
 	// Enable BLE interface.
 	must("enable BLE stack", adapter.Enable())
 
+	t0 := time.Now()
 	for {
 		err := run2(adapter, map[cbKey]func([]byte){
 			cbKey{
 				bluetooth.ServiceUUIDFitnessMachine,
 				bluetooth.CharacteristicUUIDIndoorBikeData,
 			}: func(msg []byte) {
-				fmt.Println(time.Now().String(), "bikedata:", hex.EncodeToString(msg))
+				dt := time.Now().Sub(t0).Seconds()
+				fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
 			},
 		})
 		fmt.Println("run exited, error:", err)
