@@ -174,7 +174,7 @@ func scan() error {
 	return nil
 }
 
-func main() {
+func main2() {
 	err := run()
 	if err != nil {
 		panic(err)
