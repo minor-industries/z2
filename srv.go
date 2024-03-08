@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -47,8 +48,15 @@ func serve(handler *handler2.BleHandler) error {
 		c.Writer.Header().Set("Content-Type", "text/plain")
 		c.Status(200)
 
-		lines := []string{"date,weight"}
-		data, err := handler.GetSeries(1)
+		query := c.DefaultQuery("id", "1")
+		series, err := strconv.Atoi(query)
+		if err != nil {
+			_ = c.AbortWithError(400, errors.Wrap(err, "strconv"))
+			return
+		}
+
+		lines := []string{"timestamp,value"}
+		data, err := handler.GetSeries(uint16(series))
 		if err != nil {
 			_ = c.Error(err)
 			return
