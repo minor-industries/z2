@@ -26,9 +26,15 @@ func serve(handler *handler2.BleHandler) error {
 		c.HTML(http.StatusOK, "index.html", map[string]any{})
 	})
 
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(204)
+	})
+
 	files(r,
 		"dygraph.min.js", "application/javascript",
 		"dygraph.css", "text/css",
+
+		"graphs.js", "application/javascript",
 	)
 
 	/*
