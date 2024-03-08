@@ -7,6 +7,7 @@ import (
 	"github.com/minor-industries/codelab/cmd/bike/source"
 	"github.com/minor-industries/codelab/cmd/bike/source/replay"
 	"github.com/minor-industries/platform/common/broker"
+	"github.com/pkg/errors"
 	"time"
 
 	"tinygo.org/x/bluetooth"
@@ -28,11 +29,15 @@ func main() {
 	go func() {
 		ch := br.Subscribe()
 		for msg := range ch {
-			switch _ := msg.(type) {
+			switch msg.(type) {
 			case *schema.Series:
 				//fmt.Println(m.SeriesName, m.Timestamp, m.Value)
 			}
 		}
+	}()
+
+	go func() {
+		must("serve", serve(nil, br))
 	}()
 
 	var err error
@@ -48,4 +53,10 @@ func main() {
 	}
 
 	fmt.Println("run exited, error:", err)
+}
+
+func must(s string, err error) {
+	if err != nil {
+		panic(errors.Wrap(err, s))
+	}
 }

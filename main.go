@@ -35,7 +35,7 @@ func run() error {
 	}
 
 	go func() {
-		err := serve(handler)
+		err := serve(handler, nil)
 		panic(errors.Wrap(err, "serve"))
 	}()
 
