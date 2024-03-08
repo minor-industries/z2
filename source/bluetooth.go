@@ -1,0 +1,93 @@
+package source
+
+import (
+	"context"
+	"fmt"
+	"github.com/pkg/errors"
+	"strconv"
+	"tinygo.org/x/bluetooth"
+)
+
+type CBKey [2]bluetooth.UUID
+type Callbacks map[CBKey]func(msg []byte)
+
+func Run(
+	ctx context.Context,
+	adapter *bluetooth.Adapter,
+	address string,
+	callbacks Callbacks,
+) error {
+	ch := make(chan bluetooth.ScanResult, 1)
+
+	// Start scanning.
+	fmt.Println("scanning...")
+	err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
+		fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
+		if result.Address.String() == address {
+			adapter.StopScan()
+			ch <- result
+		}
+	})
+
+	var device bluetooth.Device
+	select {
+	case result := <-ch:
+		device, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{})
+		if err != nil {
+			return errors.Wrap(err, "connect")
+		}
+
+		fmt.Println("connected to ", result.Address.String())
+	}
+
+	// get services
+	fmt.Println("discovering services/characteristics")
+	srvcs, err := device.DiscoverServices([]bluetooth.UUID{
+		bluetooth.ServiceUUIDFitnessMachine,
+	})
+	if err != nil {
+		return errors.Wrap(err, "discover services")
+	}
+
+	// buffer to retrieve characteristic data
+	buf := make([]byte, 255)
+
+	for _, srvc := range srvcs {
+		fmt.Println("- service", srvc.UUID().String())
+
+		chars, err := srvc.DiscoverCharacteristics([]bluetooth.UUID{
+			bluetooth.CharacteristicUUIDIndoorBikeData,
+		})
+		if err != nil {
+			fmt.Println(err)
+		}
+		for _, char := range chars {
+			fmt.Println("-- 16 bit", srvc.Is16Bit())
+			fmt.Println("-- characteristic", char.UUID().String())
+			n, err := char.Read(buf)
+			if err != nil {
+				fmt.Println("    ", err.Error())
+			} else {
+				fmt.Println("    data bytes", strconv.Itoa(n))
+				fmt.Println("    value =", string(buf[:n]))
+			}
+
+			cb, ok := callbacks[CBKey{srvc.UUID(), char.UUID()}]
+			if ok {
+				fmt.Println("enabling notifications for", srvc.UUID().String(), char.UUID().String())
+				if err := char.EnableNotifications(cb); err != nil {
+					return errors.Wrap(err, "enable notifications")
+				}
+			}
+		}
+	}
+
+	<-ctx.Done()
+
+	err = device.Disconnect()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return errors.New("exited")
+}
