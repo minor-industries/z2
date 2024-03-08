@@ -44,10 +44,7 @@ func serve(handler *handler2.BleHandler) error {
 			timestamp ASC
 	*/
 
-	r.GET("/data.csv", func(c *gin.Context) {
-		c.Writer.Header().Set("Content-Type", "text/plain")
-		c.Status(200)
-
+	r.GET("/data.json", func(c *gin.Context) {
 		query := c.DefaultQuery("id", "1")
 		series, err := strconv.Atoi(query)
 		if err != nil {
@@ -55,12 +52,38 @@ func serve(handler *handler2.BleHandler) error {
 			return
 		}
 
-		lines := []string{"timestamp,value"}
 		data, err := handler.GetSeries(uint16(series))
 		if err != nil {
-			_ = c.Error(err)
+			_ = c.AbortWithError(400, err)
 			return
 		}
+
+		var rows [][2]any
+		for _, d := range data {
+			// TODO: NaNs for gaps
+			rows = append(rows, [2]any{d.Timestamp.UnixMilli(), d.Value})
+		}
+
+		c.JSON(200, map[string]any{
+			"rows": rows,
+		})
+	})
+
+	r.GET("/data.csv", func(c *gin.Context) {
+		query := c.DefaultQuery("id", "1")
+		series, err := strconv.Atoi(query)
+		if err != nil {
+			_ = c.AbortWithError(400, errors.Wrap(err, "strconv"))
+			return
+		}
+
+		data, err := handler.GetSeries(uint16(series))
+		if err != nil {
+			_ = c.AbortWithError(400, err)
+			return
+		}
+
+		lines := []string{"timestamp,value"}
 
 		for i, d := range data {
 			if i > 0 {
@@ -81,6 +104,8 @@ func serve(handler *handler2.BleHandler) error {
 
 		content := []byte(strings.Join(lines, "\n"))
 
+		c.Writer.Header().Set("Content-Type", "text/plain")
+		c.Status(200)
 		_, _ = c.Writer.Write(content)
 	})
 
