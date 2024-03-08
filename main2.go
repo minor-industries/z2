@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/pkg/errors"
 	"strconv"
 	"time"
 
@@ -13,14 +14,13 @@ func connectAddress() string {
 	return "FC:38:34:32:0D:69"
 }
 
-var adapter = bluetooth.DefaultAdapter
+type cbKey [2]bluetooth.UUID
+type Callbacks map[cbKey]func(msg []byte)
 
-func main() {
-	fmt.Println("enabling")
-
-	// Enable BLE interface.
-	must("enable BLE stack", adapter.Enable())
-
+func run2(
+	adapter *bluetooth.Adapter,
+	callbacks Callbacks,
+) error {
 	ch := make(chan bluetooth.ScanResult, 1)
 
 	// Start scanning.
@@ -44,8 +44,7 @@ func main() {
 	case result := <-ch:
 		device, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{})
 		if err != nil {
-			fmt.Println(err.Error())
-			return
+			return errors.Wrap(err, "connect")
 		}
 
 		fmt.Println("connected to ", result.Address.String())
@@ -81,12 +80,11 @@ func main() {
 				fmt.Println("    value =", string(buf[:n]))
 			}
 
-			if srvc.UUID() == bluetooth.ServiceUUIDFitnessMachine &&
-				char.UUID() == bluetooth.CharacteristicUUIDIndoorBikeData {
-				if err := char.EnableNotifications(func(buf []byte) {
-					fmt.Println(time.Now().String(), "notify", hex.Dump(buf))
-				}); err != nil {
-					fmt.Println("error enabling notifications:", err.Error())
+			cb, ok := callbacks[cbKey{srvc.UUID(), char.UUID()}]
+			if ok {
+				fmt.Println("enabling notifications for", srvc.UUID().String(), char.UUID().String())
+				if err := char.EnableNotifications(cb); err != nil {
+					return errors.Wrap(err, "enable notifications")
 				}
 			}
 		}
@@ -100,6 +98,30 @@ func main() {
 	}
 
 	fmt.Println("done")
+
+	return nil
+}
+
+func main() {
+	var adapter = bluetooth.DefaultAdapter
+
+	fmt.Println("enabling")
+
+	// Enable BLE interface.
+	must("enable BLE stack", adapter.Enable())
+
+	for {
+		err := run2(adapter, map[cbKey]func([]byte){
+			cbKey{
+				bluetooth.ServiceUUIDFitnessMachine,
+				bluetooth.CharacteristicUUIDIndoorBikeData,
+			}: func(msg []byte) {
+				fmt.Println(time.Now().String(), "bikedata:", hex.EncodeToString(msg))
+			},
+		})
+		fmt.Println("run exited, error:", err)
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func must(action string, err error) {
