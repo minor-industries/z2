@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"context"
@@ -40,10 +40,11 @@ func NewBikeHandler(
 
 	return &BikeHandler{
 		db:     db,
+		series: allSeries,
+		t0:     time.Now(),
 		cancel: cancel,
 		ctx:    ctx,
 		broker: broker,
-		series: allSeries,
 	}, nil
 }
 

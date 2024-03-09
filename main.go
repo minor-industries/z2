@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/minor-industries/codelab/cmd/bike/database"
+	handler2 "github.com/minor-industries/codelab/cmd/bike/handler"
 	"github.com/minor-industries/codelab/cmd/bike/source"
 	"github.com/minor-industries/codelab/cmd/bike/source/replay"
 	"github.com/minor-industries/platform/common/broker"
@@ -25,11 +26,10 @@ func run() error {
 	go br.Start()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	handler := &BikeHandler{
-		t0:     time.Now(),
-		cancel: cancel,
-		ctx:    ctx,
-		broker: br,
+
+	handler, err := handler2.NewBikeHandler(db, cancel, ctx, br)
+	if err != nil {
+		return errors.Wrap(err, "new handler")
 	}
 	go handler.Monitor()
 

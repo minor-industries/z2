@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
+	"github.com/minor-industries/codelab/cmd/bike/handler"
 	"github.com/minor-industries/codelab/cmd/bike/schema"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
@@ -15,7 +16,7 @@ import (
 )
 
 func serve(
-	handler_ *BikeHandler,
+	handler_ *handler.BikeHandler,
 	br *broker.Broker,
 ) error {
 	r := gin.Default()
