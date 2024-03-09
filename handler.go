@@ -4,13 +4,22 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/minor-industries/codelab/cmd/bike/database"
 	"github.com/minor-industries/codelab/cmd/bike/parser"
 	"github.com/minor-industries/codelab/cmd/bike/schema"
 	"github.com/minor-industries/platform/common/broker"
+	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"time"
 )
 
-type bikeHandler struct {
+// TODO: might be nice to split into separate handlers, one for DB and one for publishing to broker
+
+type BikeHandler struct {
+	db     *gorm.DB
+	series map[string]*database.Series
+
 	t0      time.Time
 	lastMsg time.Time
 	cancel  context.CancelFunc
@@ -18,24 +27,69 @@ type bikeHandler struct {
 	broker  *broker.Broker
 }
 
-func (h *bikeHandler) Handle(msg []byte) {
-	h.lastMsg = time.Now()
-	dt := time.Now().Sub(h.t0).Seconds()
-	now := time.Now()
+func NewBikeHandler(
+	db *gorm.DB,
+	cancel context.CancelFunc,
+	ctx context.Context,
+	broker *broker.Broker,
+) (*BikeHandler, error) {
+	allSeries, err := database.LoadSeries(db)
+	if err != nil {
+		return nil, errors.Wrap(err, "load series")
+	}
+
+	return &BikeHandler{
+		db:     db,
+		cancel: cancel,
+		ctx:    ctx,
+		broker: broker,
+		series: allSeries,
+	}, nil
+}
+
+func (h *BikeHandler) Handle(t time.Time, msg []byte) error {
+	h.lastMsg = t
+	dt := t.Sub(h.t0).Seconds()
+
 	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
 	data := parser.ParseIndoorBikeData(msg)
 
+	// store to database
+	var err error
+	data.AllPresentFields(func(seriesName string, value float64) {
+		series, ok := h.series[seriesName]
+		if !ok {
+			panic(fmt.Errorf("unknown database series: %s", seriesName))
+		}
+		tx := h.db.Create(&database.Value{
+			ID:        uuid.New(),
+			Timestamp: t,
+			Value:     value,
+			Series:    series,
+		})
+		if tx.Error != nil {
+			err = errors.Wrap(tx.Error, "create value")
+			return
+		}
+	})
+	if err != nil {
+		return errors.Wrap(err, "store db")
+	}
+
+	// publish to broker
 	// perhaps we should send these in bulk to the broker
 	data.AllPresentFields(func(series string, value float64) {
 		h.broker.Publish(&schema.Series{
 			SeriesName: series,
-			Timestamp:  now,
+			Timestamp:  t,
 			Value:      value,
 		})
 	})
+
+	return nil
 }
 
-func (h *bikeHandler) Monitor() {
+func (h *BikeHandler) Monitor() {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
 

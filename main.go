@@ -25,7 +25,7 @@ func run() error {
 	go br.Start()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	handler := &bikeHandler{
+	handler := &BikeHandler{
 		t0:     time.Now(),
 		cancel: cancel,
 		ctx:    ctx,
@@ -41,7 +41,7 @@ func run() error {
 
 	go func() {
 		if false {
-			err = source.Run(ctx, address, map[source.CBKey]func([]byte){
+			err = source.Run(ctx, address, map[source.CBKey]func(time.Time, []byte) error{
 				source.CBKey{
 					bluetooth.ServiceUUIDFitnessMachine,
 					bluetooth.CharacteristicUUIDIndoorBikeData,

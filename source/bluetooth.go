@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
+	"time"
 	"tinygo.org/x/bluetooth"
 )
 
 type CBKey [2]bluetooth.UUID
-type Callbacks map[CBKey]func(msg []byte)
+type Callbacks map[CBKey]func(t time.Time, msg []byte) error
 
 func Run(
 	ctx context.Context,
@@ -78,7 +79,9 @@ func Run(
 			cb, ok := callbacks[CBKey{srvc.UUID(), char.UUID()}]
 			if ok {
 				fmt.Println("enabling notifications for", srvc.UUID().String(), char.UUID().String())
-				if err := char.EnableNotifications(cb); err != nil {
+				if err := char.EnableNotifications(func(buf []byte) {
+					cb(time.Now(), buf)
+				}); err != nil {
 					return errors.Wrap(err, "enable notifications")
 				}
 			}

@@ -18,7 +18,11 @@ type line struct {
 	value     []byte
 }
 
-func Run(ctx context.Context, filename string, callback func([]byte)) error {
+func Run(
+	ctx context.Context,
+	filename string,
+	callback func(time.Time, []byte) error,
+) error {
 	content, err := fs.ReadFile(testdata.FS, filename)
 	if err != nil {
 		return errors.Wrap(err, "readfile")
@@ -56,7 +60,7 @@ func Run(ctx context.Context, filename string, callback func([]byte)) error {
 		if t.Before(line.timestamp) {
 			continue
 		}
-		callback(line.value)
+		callback(now, line.value)
 		lines = lines[1:]
 		if len(lines) == 0 {
 			ticker.Stop()
