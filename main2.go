@@ -3,17 +3,24 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/minor-industries/codelab/cmd/bike/schema"
+	"github.com/minor-industries/codelab/cmd/bike/database"
 	"github.com/minor-industries/codelab/cmd/bike/source"
 	"github.com/minor-industries/codelab/cmd/bike/source/replay"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
+	"os"
 	"time"
 
 	"tinygo.org/x/bluetooth"
 )
 
-func main() {
+func run() error {
+	db, err := database.Get(os.ExpandEnv("$HOME/bike.db"))
+	if err != nil {
+		return errors.Wrap(err, "get database")
+	}
+	_ = db
+
 	br := broker.NewBroker()
 	go br.Start()
 
@@ -26,37 +33,30 @@ func main() {
 	}
 	go handler.Monitor()
 
+	errCh := make(chan error)
+
 	go func() {
-		ch := br.Subscribe()
-		for msg := range ch {
-			switch msg.(type) {
-			case *schema.Series:
-				//fmt.Println(m.SeriesName, m.Timestamp, m.Value)
-			}
+		errCh <- serve(nil, br)
+	}()
+
+	go func() {
+		if false {
+			err = source.Run(ctx, address, map[source.CBKey]func([]byte){
+				source.CBKey{
+					bluetooth.ServiceUUIDFitnessMachine,
+					bluetooth.CharacteristicUUIDIndoorBikeData,
+				}: handler.Handle,
+			})
+		} else {
+			err = replay.Run(ctx, "raw.txt", handler.Handle)
 		}
+		errCh <- err
 	}()
 
-	go func() {
-		must("serve", serve(nil, br))
-	}()
-
-	var err error
-	if false {
-		err = source.Run(ctx, address, map[source.CBKey]func([]byte){
-			source.CBKey{
-				bluetooth.ServiceUUIDFitnessMachine,
-				bluetooth.CharacteristicUUIDIndoorBikeData,
-			}: handler.Handle,
-		})
-	} else {
-		err = replay.Run(ctx, "raw.txt", handler.Handle)
-	}
-
-	fmt.Println("run exited, error:", err)
+	return <-errCh
 }
 
-func must(s string, err error) {
-	if err != nil {
-		panic(errors.Wrap(err, s))
-	}
+func main() {
+	err := run()
+	fmt.Println("run exited, error:", err)
 }
