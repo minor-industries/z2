@@ -23,9 +23,16 @@ Dygraph.onDOMready(function onDOMready() {
     ws.onmessage = message => {
         const msg = JSON.parse(message.data);
         const rows = msg.rows.map(mapDate);
+
+        const last = rows[rows.length - 1];
+        const t1 = new Date(last[0]);
+        const t0 = new Date(t1);
+        t0.setMinutes(t0.getMinutes() - 5);
+
         window.data.push(...rows);
         window.g.updateOptions({
-            file: window.data
+            file: window.data,
+            dateWindow: [t0, t1],
         });
     };
 
