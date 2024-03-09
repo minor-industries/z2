@@ -36,7 +36,7 @@ func run() error {
 	errCh := make(chan error)
 
 	go func() {
-		errCh <- serve(nil, br)
+		errCh <- serve(db, br)
 	}()
 
 	go func() {

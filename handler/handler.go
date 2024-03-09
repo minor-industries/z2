@@ -33,7 +33,7 @@ func NewBikeHandler(
 	ctx context.Context,
 	broker *broker.Broker,
 ) (*BikeHandler, error) {
-	allSeries, err := database.LoadSeries(db)
+	allSeries, err := database.LoadAllSeries(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "load series")
 	}

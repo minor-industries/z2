@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
-	"github.com/minor-industries/codelab/cmd/bike/handler"
+	"github.com/minor-industries/codelab/cmd/bike/database"
 	"github.com/minor-industries/codelab/cmd/bike/schema"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
+	"gorm.io/gorm"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
+	"strconv"
 )
 
 func serve(
-	handler_ *handler.BikeHandler,
+	db *gorm.DB,
 	br *broker.Broker,
 ) error {
 	r := gin.Default()
@@ -42,24 +44,24 @@ func serve(
 	)
 
 	r.GET("/data.json", func(c *gin.Context) {
-		//query := c.DefaultQuery("id", "1")
-		//series, err := strconv.Atoi(query)
-		//if err != nil {
-		//	_ = c.AbortWithError(400, errors.Wrap(err, "strconv"))
-		//	return
-		//}
+		query := c.DefaultQuery("id", "1")
+		series, err := strconv.Atoi(query)
+		if err != nil {
+			_ = c.AbortWithError(400, errors.Wrap(err, "strconv"))
+			return
+		}
 
-		//data, err := handler.GetSeries(uint16(series))
-		//if err != nil {
-		//	_ = c.AbortWithError(400, err)
-		//	return
-		//}
+		data, err := database.LoadData(db, uint16(series))
+		if err != nil {
+			_ = c.AbortWithError(400, err)
+			return
+		}
 
 		rows := [][2]any{}
-		//for _, d := range data {
-		//	// TODO: NaNs for gaps
-		//	rows = append(rows, [2]any{d.Timestamp.UnixMilli(), d.Value})
-		//}
+		for _, d := range data {
+			// TODO: NaNs for gaps
+			rows = append(rows, [2]any{d.Timestamp.UnixMilli(), d.Value})
+		}
 
 		c.JSON(200, map[string]any{
 			"rows": rows,

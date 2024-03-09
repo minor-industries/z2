@@ -52,7 +52,7 @@ var seriesNames = []string{
 	"bike_heartrate",
 }
 
-func LoadSeries(db *gorm.DB) (map[string]*Series, error) {
+func LoadAllSeries(db *gorm.DB) (map[string]*Series, error) {
 	seriesMap, err := loadSeries(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "initial load")
@@ -86,4 +86,15 @@ func loadSeries(db *gorm.DB) (map[string]*Series, error) {
 	}
 
 	return typeMap, nil
+}
+
+func LoadData(db *gorm.DB, series uint16) ([]Value, error) {
+	var result []Value
+
+	tx := db.Where("series_id = ?", series).Order("timestamp asc").Find(&result)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "find")
+	}
+
+	return result, nil
 }
