@@ -22,32 +22,33 @@ function makeGraph(elem, opts) {
                     dateWindow: [t0, t1],
                 });
         })
-        .catch(error => console.error('Error:', error));
+        .then(() => {
+            const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
+            const ws = new WebSocket(url);
+            ws.onmessage = message => {
+                console.log("message");
+                const msg = JSON.parse(message.data);
+                const rows = msg.rows.map(mapDate);
 
-    const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
-    const ws = new WebSocket(url);
-    ws.onmessage = message => {
-        console.log("message");
-        const msg = JSON.parse(message.data);
-        const rows = msg.rows.map(mapDate);
+                const last = rows[rows.length - 1];
+                const t1 = new Date(last[0]);
+                const t0 = new Date(t1);
+                t0.setMinutes(t0.getMinutes() - 5);
 
-        const last = rows[rows.length - 1];
-        const t1 = new Date(last[0]);
-        const t0 = new Date(t1);
-        t0.setMinutes(t0.getMinutes() - 5);
-
-        data.push(...rows);
-        console.log(data.length);
-        g.updateOptions({
-            file: window.data,
-            dateWindow: [t0, t1],
-        });
-    };
-    ws.onopen = event => {
-        setTimeout(function () {
-            ws.send(JSON.stringify({series: opts.series}));
+                data.push(...rows);
+                console.log(data.length);
+                g.updateOptions({
+                    file: data,
+                    dateWindow: [t0, t1],
+                });
+            };
+            ws.onopen = event => {
+                setTimeout(function () {
+                    ws.send(JSON.stringify({series: opts.series}));
+                })
+            }
         })
-    }
+        .catch(error => console.error('Error:', error));
 
 
     // let data = "data.csv" + window.location.search;
