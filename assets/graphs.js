@@ -1,6 +1,6 @@
 const mapDate = value => [new Date(value[0]), value[1]];
 
-function makeGraph(elem) {
+function makeGraph(elem, opts) {
     let g;
     let data;
 
@@ -12,8 +12,8 @@ function makeGraph(elem) {
                 elem,
                 data, {
                     // dateWindow: [t0, t1],
-                    title: "Title",
-                    ylabel: "ylabel",
+                    title: opts.title,
+                    ylabel: opts.ylabel,
                     labels: ["X", "Y"],
                 });
         })
@@ -47,6 +47,12 @@ function makeGraph(elem) {
 }
 
 Dygraph.onDOMready(function onDOMready() {
-    makeGraph(document.getElementById("graphdiv0"));
-    makeGraph(document.getElementById("graphdiv1"));
+    makeGraph(document.getElementById("graphdiv0"), {
+        title: "Speed",
+        ylabel: "speed (km/h)"
+    });
+    makeGraph(document.getElementById("graphdiv1"), {
+        title: "Power",
+        ylabel: "power (watts)"
+    });
 });
