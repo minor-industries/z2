@@ -93,7 +93,7 @@ func serve(
 			return
 		}
 
-		conn.CloseRead(ctx)
+		//conn.CloseRead(ctx)
 
 		var req map[string]any
 		err = json.Unmarshal(reqBytes, &req)
@@ -101,6 +101,8 @@ func serve(
 			fmt.Println("ws error", errors.Wrap(err, "unmarshal json"))
 			return
 		}
+
+		subscribed := req["series"].(string)
 
 		fmt.Println(req)
 
@@ -110,8 +112,7 @@ func serve(
 		for msg := range msgCh {
 			switch m := msg.(type) {
 			case *schema.Series:
-				switch m.SeriesName {
-				case "bike_instant_speed":
+				if m.SeriesName == subscribed {
 					fmt.Println("tick", m.SeriesName, m.Timestamp, m.Value)
 					newRows := [][2]any{{
 						m.Timestamp.UnixMilli(),

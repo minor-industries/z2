@@ -26,10 +26,8 @@ function makeGraph(elem, opts) {
 
     const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
     const ws = new WebSocket(url);
-    ws.onopen = event => {
-        ws.send(JSON.stringify({series: opts.series}));
-    }
     ws.onmessage = message => {
+        console.log("message");
         const msg = JSON.parse(message.data);
         const rows = msg.rows.map(mapDate);
 
@@ -39,11 +37,17 @@ function makeGraph(elem, opts) {
         t0.setMinutes(t0.getMinutes() - 5);
 
         data.push(...rows);
+        console.log(data.length);
         g.updateOptions({
             file: window.data,
             dateWindow: [t0, t1],
         });
     };
+    ws.onopen = event => {
+        setTimeout(function () {
+            ws.send(JSON.stringify({series: opts.series}));
+        })
+    }
 
 
     // let data = "data.csv" + window.location.search;
