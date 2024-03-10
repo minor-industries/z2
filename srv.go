@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/bike/assets"
@@ -86,7 +87,22 @@ func serve(
 			_ = conn.Close(websocket.StatusInternalError, "Closed unexpectedly")
 		}()
 
+		_, reqBytes, err := conn.Read(ctx)
+		if wsErr != nil {
+			fmt.Println("ws read error", err.Error())
+			return
+		}
+
 		conn.CloseRead(ctx)
+
+		var req map[string]any
+		err = json.Unmarshal(reqBytes, &req)
+		if wsErr != nil {
+			fmt.Println("ws error", errors.Wrap(err, "unmarshal json"))
+			return
+		}
+
+		fmt.Println(req)
 
 		msgCh := br.Subscribe()
 		defer br.Unsubscribe(msgCh)

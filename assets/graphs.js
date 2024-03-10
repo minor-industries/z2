@@ -26,7 +26,9 @@ function makeGraph(elem, opts) {
 
     const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
     const ws = new WebSocket(url);
-    ws.onopen = console.log;
+    ws.onopen = event => {
+        ws.send(JSON.stringify({series: opts.series}));
+    }
     ws.onmessage = message => {
         const msg = JSON.parse(message.data);
         const rows = msg.rows.map(mapDate);
@@ -43,6 +45,7 @@ function makeGraph(elem, opts) {
         });
     };
 
+
     // let data = "data.csv" + window.location.search;
     //
     // const t1 = new Date();
@@ -53,10 +56,12 @@ function makeGraph(elem, opts) {
 
 Dygraph.onDOMready(function onDOMready() {
     makeGraph(document.getElementById("graphdiv0"), {
+        series: "bike_instant_speed",
         title: "Speed",
         ylabel: "speed (km/h)"
     });
     makeGraph(document.getElementById("graphdiv1"), {
+        series: "bike_instant_power",
         title: "Power",
         ylabel: "power (watts)"
     });
