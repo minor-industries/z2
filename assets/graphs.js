@@ -1,13 +1,16 @@
 const mapDate = value => [new Date(value[0]), value[1]];
 
-Dygraph.onDOMready(function onDOMready() {
+function makeGraph(elem) {
+    let g;
+    let data;
+
     fetch('data.json' + window.location.search)
         .then(response => response.json())
         .then(response => {
-            window.data = response.rows.map(mapDate);
-            window.g = new Dygraph(// containing div
-                document.getElementById("graphdiv"), // CSV or path to a CSV file.
-                window.data, {
+            data = response.rows.map(mapDate);
+            g = new Dygraph(// containing div
+                elem,
+                data, {
                     // dateWindow: [t0, t1],
                     title: "Title",
                     ylabel: "ylabel",
@@ -15,7 +18,6 @@ Dygraph.onDOMready(function onDOMready() {
                 });
         })
         .catch(error => console.error('Error:', error));
-
 
     const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
     const ws = new WebSocket(url);
@@ -29,8 +31,8 @@ Dygraph.onDOMready(function onDOMready() {
         const t0 = new Date(t1);
         t0.setMinutes(t0.getMinutes() - 5);
 
-        window.data.push(...rows);
-        window.g.updateOptions({
+        data.push(...rows);
+        g.updateOptions({
             file: window.data,
             dateWindow: [t0, t1],
         });
@@ -42,4 +44,9 @@ Dygraph.onDOMready(function onDOMready() {
     // const t0 = new Date(t1);
     // t0.setMonth(t0.getMonth() - 3);
     // t1.setDate(t0.getDate() + 1); // maybe better to use some padding options here instead
+}
+
+Dygraph.onDOMready(function onDOMready() {
+    makeGraph(document.getElementById("graphdiv0"));
+    makeGraph(document.getElementById("graphdiv1"));
 });
