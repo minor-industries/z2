@@ -87,7 +87,7 @@ func serve(
 			err := errors.Wrap(err, "send initial data")
 			fmt.Println("error", err.Error())
 			_ = wsjson.Write(ctx, conn, map[string]any{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
