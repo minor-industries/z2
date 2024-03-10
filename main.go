@@ -22,21 +22,30 @@ func run() error {
 	}
 	_ = db
 
+	allSeries, err := database.LoadAllSeries(db)
+	if err != nil {
+		return errors.Wrap(err, "load series")
+	}
+
 	br := broker.NewBroker()
 	go br.Start()
 
 	ctx, cancel := context.WithCancel(context.Background())
-
-	handler, err := handler2.NewBikeHandler(db, cancel, ctx, br)
+	handler, err := handler2.NewBikeHandler(
+		db,
+		cancel,
+		ctx,
+		allSeries,
+		br,
+	)
 	if err != nil {
 		return errors.Wrap(err, "new handler")
 	}
 	go handler.Monitor()
 
 	errCh := make(chan error)
-
 	go func() {
-		errCh <- serve(db, br)
+		errCh <- serve(db, br, allSeries)
 	}()
 
 	go func() {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -15,13 +16,13 @@ import (
 	"net/http"
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
-	"strconv"
 	"time"
 )
 
 func serve(
 	db *gorm.DB,
 	br *broker.Broker,
+	allSeries map[string]*database.Series,
 ) error {
 	r := gin.Default()
 
@@ -45,33 +46,6 @@ func serve(
 		"graphs.js", "application/javascript",
 	)
 
-	r.GET("/data.json", func(c *gin.Context) {
-		now := time.Now()
-		query := c.DefaultQuery("id", "1")
-		series, err := strconv.Atoi(query)
-		if err != nil {
-			_ = c.AbortWithError(400, errors.Wrap(err, "strconv"))
-			return
-		}
-
-		data, err := database.LoadData(db, uint16(series))
-		if err != nil {
-			_ = c.AbortWithError(400, err)
-			return
-		}
-
-		rows := [][2]any{}
-		for _, d := range data {
-			// TODO: NaNs for gaps
-			rows = append(rows, [2]any{d.Timestamp.UnixMilli(), d.Value})
-		}
-
-		c.JSON(200, map[string]any{
-			"rows": rows,
-			"now":  now.UnixMilli(),
-		})
-	})
-
 	r.GET("/ws", func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -92,8 +66,7 @@ func serve(
 			fmt.Println("ws read error", err.Error())
 			return
 		}
-
-		//conn.CloseRead(ctx)
+		conn.CloseRead(ctx)
 
 		var req map[string]any
 		err = json.Unmarshal(reqBytes, &req)
@@ -104,7 +77,20 @@ func serve(
 
 		subscribed := req["series"].(string)
 
-		fmt.Println(req)
+		if err := sendInitialData(
+			ctx,
+			db,
+			allSeries,
+			conn,
+			subscribed,
+		); err != nil {
+			err := errors.Wrap(err, "send initial data")
+			fmt.Println("error", err.Error())
+			_ = wsjson.Write(ctx, conn, map[string]any{
+				"error": err,
+			})
+			return
+		}
 
 		msgCh := br.Subscribe()
 		defer br.Unsubscribe(msgCh)
@@ -132,6 +118,42 @@ func serve(
 
 	if err := r.Run("0.0.0.0:8000"); err != nil {
 		return errors.Wrap(err, "run")
+	}
+
+	return nil
+}
+
+func sendInitialData(
+	ctx context.Context,
+	db *gorm.DB,
+	allSeries map[string]*database.Series,
+	conn *websocket.Conn,
+	subscribed string,
+) error {
+	s, ok := allSeries[subscribed]
+	if !ok {
+		return errors.New("unknown series")
+	}
+
+	data, err := database.LoadData(db, s.ID)
+	if err != nil {
+		return errors.Wrap(err, "load data")
+	}
+
+	rows := [][2]any{}
+	for _, d := range data {
+		// TODO: NaNs for gaps
+		rows = append(rows, [2]any{
+			d.Timestamp.UnixMilli(),
+			d.Value,
+		})
+	}
+
+	if err := wsjson.Write(ctx, conn, map[string]any{
+		"initial_data": rows,
+		"now":          time.Now().UnixMilli(),
+	}); err != nil {
+		return errors.Wrap(err, "write initial data")
 	}
 
 	return nil

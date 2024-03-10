@@ -31,13 +31,9 @@ func NewBikeHandler(
 	db *gorm.DB,
 	cancel context.CancelFunc,
 	ctx context.Context,
+	allSeries map[string]*database.Series,
 	broker *broker.Broker,
 ) (*BikeHandler, error) {
-	allSeries, err := database.LoadAllSeries(db)
-	if err != nil {
-		return nil, errors.Wrap(err, "load series")
-	}
-
 	return &BikeHandler{
 		db:     db,
 		series: allSeries,
