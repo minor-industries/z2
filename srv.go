@@ -15,6 +15,7 @@ import (
 	"nhooyr.io/websocket"
 	"nhooyr.io/websocket/wsjson"
 	"strconv"
+	"time"
 )
 
 func serve(
@@ -44,6 +45,7 @@ func serve(
 	)
 
 	r.GET("/data.json", func(c *gin.Context) {
+		now := time.Now()
 		query := c.DefaultQuery("id", "1")
 		series, err := strconv.Atoi(query)
 		if err != nil {
@@ -65,6 +67,7 @@ func serve(
 
 		c.JSON(200, map[string]any{
 			"rows": rows,
+			"now":  now.UnixMilli(),
 		})
 	})
 

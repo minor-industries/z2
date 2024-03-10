@@ -7,6 +7,10 @@ function makeGraph(elem, opts) {
     fetch('data.json' + window.location.search)
         .then(response => response.json())
         .then(response => {
+            const t1 = new Date(response.now);
+            const t0 = new Date(t1);
+            t0.setMinutes(t0.getMinutes() - 5);
+
             data = response.rows.map(mapDate);
             g = new Dygraph(// containing div
                 elem,
@@ -15,6 +19,7 @@ function makeGraph(elem, opts) {
                     title: opts.title,
                     ylabel: opts.ylabel,
                     labels: ["X", "Y"],
+                    dateWindow: [t0, t1],
                 });
         })
         .catch(error => console.error('Error:', error));
