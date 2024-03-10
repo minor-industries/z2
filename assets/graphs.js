@@ -12,7 +12,6 @@ Dygraph.onDOMready(function onDOMready() {
                     title: "Title",
                     ylabel: "ylabel",
                     labels: ["X", "Y"],
-                    xRangePad: 100,
                 });
         })
         .catch(error => console.error('Error:', error));
@@ -34,7 +33,6 @@ Dygraph.onDOMready(function onDOMready() {
         window.g.updateOptions({
             file: window.data,
             dateWindow: [t0, t1],
-            xRangePad: 100,
         });
     };
 
