@@ -6,6 +6,8 @@ import (
 )
 
 var (
+	sv1 = mustParseUUID("ce060030-43e5-11e4-916c-0800200c9a66")
+
 	ch1 = mustParseUUID("CE060031-43E5-11E4-916C-0800200C9A66")
 	ch2 = mustParseUUID("CE060032-43E5-11E4-916C-0800200C9A66")
 	ch3 = mustParseUUID("CE060036-43E5-11E4-916C-0800200C9A66")
@@ -22,7 +24,7 @@ func mustParseUUID(s string) bluetooth.UUID {
 type RowerSource struct{}
 
 func (r *RowerSource) Services() []bluetooth.UUID {
-	return nil
+	return []bluetooth.UUID{sv1}
 }
 
 func (r *RowerSource) Characteristics() []bluetooth.UUID {
