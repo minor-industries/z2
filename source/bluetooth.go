@@ -30,11 +30,11 @@ type Value struct {
 }
 
 type Source interface {
+	Convert(msg Message) []Value
 	SubscriptionFilter(
 		Service bluetooth.UUID,
 		Characteristic bluetooth.UUID,
 	) bool
-	Convert(msg Message) []Value
 }
 
 func Run(

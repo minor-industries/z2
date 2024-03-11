@@ -42,6 +42,7 @@ func run() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	src := &handler2.BikeSource{}
+
 	handler, err := handler2.NewBikeHandler(
 		db,
 		src,

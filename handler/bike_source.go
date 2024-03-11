@@ -17,7 +17,7 @@ func init() {
 
 type BikeSource struct{}
 
-func (b BikeSource) Convert(msg source.Message) []source.Value {
+func (b *BikeSource) Convert(msg source.Message) []source.Value {
 	dt := msg.Timestamp.Sub(t0).Seconds()
 
 	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg.Msg))
@@ -35,7 +35,7 @@ func (b BikeSource) Convert(msg source.Message) []source.Value {
 	return result
 }
 
-func (b BikeSource) SubscriptionFilter(
+func (b *BikeSource) SubscriptionFilter(
 	service bluetooth.UUID,
 	characteristic bluetooth.UUID,
 ) bool {
