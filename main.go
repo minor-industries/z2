@@ -30,6 +30,9 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
+	errCh := make(chan error)
+	go publishPrometheusMetrics(errCh, br)
+
 	ctx, cancel := context.WithCancel(context.Background())
 	handler, err := handler2.NewBikeHandler(
 		db,
@@ -43,7 +46,6 @@ func run() error {
 	}
 	go handler.Monitor()
 
-	errCh := make(chan error)
 	go func() {
 		errCh <- serve(db, br, allSeries)
 	}()

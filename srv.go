@@ -10,6 +10,7 @@ import (
 	"github.com/minor-industries/codelab/cmd/bike/schema"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"gorm.io/gorm"
 	"html/template"
 	"io/fs"
@@ -115,6 +116,8 @@ func serve(
 			}
 		}
 	})
+
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	if err := r.Run("0.0.0.0:8000"); err != nil {
 		return errors.Wrap(err, "run")
