@@ -98,13 +98,18 @@ func Run(
 			}
 
 			fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
-			if err := char.EnableNotifications(func(buf []byte) {
-				err := callback(time.Now(), srvc.UUID(), char.UUID(), buf)
-				if err != nil {
-					errCh <- errors.Wrap(err, "callback")
+			{
+				// capture loop variables for use in closure below
+				svUUID := srvc.UUID()
+				chUUID := char.UUID()
+				if err := char.EnableNotifications(func(buf []byte) {
+					err := callback(time.Now(), svUUID, chUUID, buf)
+					if err != nil {
+						errCh <- errors.Wrap(err, "callback")
+					}
+				}); err != nil {
+					return errors.Wrap(err, "enable notifications")
 				}
-			}); err != nil {
-				return errors.Wrap(err, "enable notifications")
 			}
 		}
 	}

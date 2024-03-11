@@ -79,7 +79,6 @@ func run() error {
 				src,
 				handler.Handle,
 			)
-
 		}
 		errCh <- err
 	}()

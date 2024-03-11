@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/hex"
+	"fmt"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"tinygo.org/x/bluetooth"
 )
@@ -32,6 +34,11 @@ func (r *RowerSource) Characteristics() []bluetooth.UUID {
 }
 
 func (r *RowerSource) Convert(msg source.Message) []source.Value {
-	//TODO implement me
-	panic("implement me")
+	fmt.Println(
+		msg.Timestamp,
+		msg.Service.String(),
+		msg.Characteristic.String(),
+		hex.EncodeToString(msg.Msg),
+	)
+	return nil
 }
