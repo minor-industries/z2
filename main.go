@@ -18,10 +18,11 @@ var opts struct {
 }
 
 func run() error {
-	_, err := flags.Parse(&opts)
+	args, err := flags.Parse(&opts)
 	if err != nil {
 		return errors.Wrap(err, "parse flags")
 	}
+	srcType := args[0]
 
 	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"))
 	if err != nil {
@@ -42,7 +43,8 @@ func run() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	//src := &handler2.BikeSource{}
-	src := &handler2.RowerSource{}
+	srcAddr, src := getSource(srcType)
+	fmt.Printf("looking for %s at address %s\n", srcType, srcAddr)
 
 	handler, err := handler2.NewBikeHandler(
 		db,
@@ -73,7 +75,7 @@ func run() error {
 			err = source.Run(
 				ctx,
 				errCh,
-				address,
+				srcAddr,
 				src,
 				handler.Handle,
 			)
