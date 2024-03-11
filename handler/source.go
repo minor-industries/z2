@@ -6,15 +6,16 @@ import (
 	"github.com/minor-industries/codelab/cmd/z2/parser"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"time"
+	"tinygo.org/x/bluetooth"
 )
-
-type BikeSource struct{}
 
 var t0 time.Time
 
 func init() {
 	t0 = time.Now()
 }
+
+type BikeSource struct{}
 
 func (b BikeSource) Convert(msg source.Message) []source.Value {
 	dt := msg.Timestamp.Sub(t0).Seconds()
@@ -32,4 +33,12 @@ func (b BikeSource) Convert(msg source.Message) []source.Value {
 	})
 
 	return result
+}
+
+func (b BikeSource) SubscriptionFilter(
+	service bluetooth.UUID,
+	characteristic bluetooth.UUID,
+) bool {
+	return service == bluetooth.ServiceUUIDFitnessMachine &&
+		characteristic == bluetooth.CharacteristicUUIDIndoorBikeData
 }

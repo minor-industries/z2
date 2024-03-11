@@ -9,11 +9,6 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-type SubscriptionFilter func(
-	service bluetooth.UUID,
-	characteristic bluetooth.UUID,
-) bool
-
 type MessageCallback func(
 	t time.Time,
 	service bluetooth.UUID,
@@ -35,6 +30,10 @@ type Value struct {
 }
 
 type Source interface {
+	SubscriptionFilter(
+		Service bluetooth.UUID,
+		Characteristic bluetooth.UUID,
+	) bool
 	Convert(msg Message) []Value
 }
 
@@ -42,7 +41,7 @@ func Run(
 	ctx context.Context,
 	errCh chan error,
 	address string,
-	filter SubscriptionFilter,
+	src Source,
 	callback MessageCallback,
 ) error {
 	var adapter = bluetooth.DefaultAdapter
@@ -104,7 +103,7 @@ func Run(
 				fmt.Println("    value =", string(buf[:n]))
 			}
 
-			if filter(srvc.UUID(), char.UUID()) {
+			if src.SubscriptionFilter(srvc.UUID(), char.UUID()) {
 				fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
 				if err := char.EnableNotifications(func(buf []byte) {
 					err := callback(time.Now(), srvc.UUID(), char.UUID(), buf)

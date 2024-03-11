@@ -11,7 +11,6 @@ import (
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
 	"os"
-	"tinygo.org/x/bluetooth"
 )
 
 var opts struct {
@@ -42,9 +41,10 @@ func run() error {
 	go publishPrometheusMetrics(errCh, br)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	src := &handler2.BikeSource{}
 	handler, err := handler2.NewBikeHandler(
 		db,
-		&handler2.BikeSource{},
+		src,
 		cancel,
 		ctx,
 		allSeries,
@@ -72,10 +72,7 @@ func run() error {
 				ctx,
 				errCh,
 				address,
-				func(s bluetooth.UUID, c bluetooth.UUID) bool {
-					return s == bluetooth.ServiceUUIDFitnessMachine &&
-						c == bluetooth.CharacteristicUUIDIndoorBikeData
-				},
+				src,
 				handler.Handle,
 			)
 
