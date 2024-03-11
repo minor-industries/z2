@@ -1,26 +1,12 @@
 package database
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
 	"github.com/glebarez/sqlite"
-	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"time"
 )
-
-type Value struct {
-	ID        uuid.UUID `gorm:"type:char(36);primary_key"`
-	Timestamp time.Time
-	Value     float64
-	SeriesID  uint16
-	Series    *Series `gorm:"foreignKey:SeriesID"`
-}
-
-type Series struct {
-	ID   uint16 `gorm:"primaryKey"`
-	Name string `gorm:"unique"`
-	Unit string
-}
 
 func Get(filename string) (*gorm.DB, error) {
 	db, err := gorm.Open(sqlite.Open(filename), &gorm.Config{})
@@ -31,6 +17,7 @@ func Get(filename string) (*gorm.DB, error) {
 	for _, table := range []any{
 		&Value{},
 		&Series{},
+		&RawValue{},
 	} {
 		err = db.AutoMigrate(table)
 		if err != nil {
@@ -52,6 +39,24 @@ var seriesNames = []string{
 	"bike_heartrate",
 }
 
+func RandomID() []byte {
+	var result [16]byte
+	_, err := rand.Read(result[:])
+	if err != nil {
+		panic(err)
+	}
+	return result[:]
+}
+
+func HashedID(s string) []byte {
+	var result [16]byte
+	h := sha256.New()
+	h.Write([]byte(s))
+	sum := h.Sum(nil)
+	copy(result[:], sum[:16])
+	return result[:]
+}
+
 func LoadAllSeries(db *gorm.DB) (map[string]*Series, error) {
 	seriesMap, err := loadSeries(db)
 	if err != nil {
@@ -63,6 +68,7 @@ func LoadAllSeries(db *gorm.DB) (map[string]*Series, error) {
 			continue
 		}
 		db.Create(&Series{
+			ID:   HashedID(name),
 			Name: name,
 			Unit: "",
 		})
@@ -88,7 +94,7 @@ func loadSeries(db *gorm.DB) (map[string]*Series, error) {
 	return typeMap, nil
 }
 
-func LoadData(db *gorm.DB, series uint16) ([]Value, error) {
+func LoadData(db *gorm.DB, series []byte) ([]Value, error) {
 	var result []Value
 
 	tx := db.Where("series_id = ?", series).Order("timestamp asc").Find(&result)

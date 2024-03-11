@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/minor-industries/codelab/cmd/z2/database"
 	"github.com/minor-industries/codelab/cmd/z2/parser"
 	"github.com/minor-industries/codelab/cmd/z2/schema"
@@ -59,7 +58,7 @@ func (h *BikeHandler) Handle(t time.Time, msg []byte) error {
 			panic(fmt.Errorf("unknown database series: %s", seriesName))
 		}
 		tx := h.db.Create(&database.Value{
-			ID:        uuid.New(),
+			ID:        database.RandomID(),
 			Timestamp: t,
 			Value:     value,
 			Series:    series,
