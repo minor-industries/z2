@@ -29,7 +29,7 @@ func Run(
 
 	fmt.Println("scanning...")
 	err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
-		fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
+		//fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
 		if result.Address.String() == address {
 			adapter.StopScan()
 			ch <- result

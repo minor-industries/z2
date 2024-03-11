@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/codelab/cmd/z2/database"
 	handler2 "github.com/minor-industries/codelab/cmd/z2/handler"
 	"github.com/minor-industries/codelab/cmd/z2/source"
@@ -15,8 +16,17 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
+var opts struct {
+	Replay bool `long:"replay"`
+}
+
 func run() error {
-	db, err := database.Get(os.ExpandEnv("$HOME/bike.db"))
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		return errors.Wrap(err, "parse flags")
+	}
+
+	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"))
 	if err != nil {
 		return errors.Wrap(err, "get database")
 	}
@@ -51,15 +61,15 @@ func run() error {
 	}()
 
 	go func() {
-		if false {
+		if opts.Replay {
+			err = replay.Run(ctx, "raw.txt", handler.Handle)
+		} else {
 			err = source.Run(ctx, address, map[source.CBKey]func(time.Time, []byte) error{
 				source.CBKey{
 					bluetooth.ServiceUUIDFitnessMachine,
 					bluetooth.CharacteristicUUIDIndoorBikeData,
 				}: handler.Handle,
 			})
-		} else {
-			err = replay.Run(ctx, "raw.txt", handler.Handle)
 		}
 		errCh <- err
 	}()
