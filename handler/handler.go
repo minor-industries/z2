@@ -50,7 +50,19 @@ func (h *BikeHandler) Handle(t time.Time, msg []byte) error {
 	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
 	data := parser.ParseIndoorBikeData(msg)
 
-	// store to database
+	// store raw messages to database
+	tx := h.db.Create(&database.RawValue{
+		ID:               database.RandomID(),
+		ServiceID:        "", // TODO
+		CharacteristicID: "",
+		Timestamp:        t,
+		Message:          msg,
+	})
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "create raw value")
+	}
+
+	// store series to database
 	var err error
 	data.AllPresentFields(func(seriesName string, value float64) {
 		series, ok := h.series[seriesName]
