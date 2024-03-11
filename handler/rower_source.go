@@ -21,20 +21,15 @@ func mustParseUUID(s string) bluetooth.UUID {
 
 type RowerSource struct{}
 
+func (r *RowerSource) Services() []bluetooth.UUID {
+	return nil
+}
+
+func (r *RowerSource) Characteristics() []bluetooth.UUID {
+	return []bluetooth.UUID{ch1, ch2, ch3}
+}
+
 func (r *RowerSource) Convert(msg source.Message) []source.Value {
 	//TODO implement me
 	panic("implement me")
-}
-
-func (r *RowerSource) SubscriptionFilter(
-	Service bluetooth.UUID,
-	Characteristic bluetooth.UUID,
-) bool {
-	// TODO: filter serice as well:
-	switch Characteristic {
-	case ch1, ch2, ch3:
-		return true
-	default:
-		return false
-	}
 }

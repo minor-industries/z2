@@ -17,6 +17,14 @@ func init() {
 
 type BikeSource struct{}
 
+func (b *BikeSource) Services() []bluetooth.UUID {
+	return []bluetooth.UUID{bluetooth.ServiceUUIDFitnessMachine}
+}
+
+func (b *BikeSource) Characteristics() []bluetooth.UUID {
+	return []bluetooth.UUID{bluetooth.CharacteristicUUIDIndoorBikeData}
+}
+
 func (b *BikeSource) Convert(msg source.Message) []source.Value {
 	dt := msg.Timestamp.Sub(t0).Seconds()
 
@@ -33,12 +41,4 @@ func (b *BikeSource) Convert(msg source.Message) []source.Value {
 	})
 
 	return result
-}
-
-func (b *BikeSource) SubscriptionFilter(
-	service bluetooth.UUID,
-	characteristic bluetooth.UUID,
-) bool {
-	return service == bluetooth.ServiceUUIDFitnessMachine &&
-		characteristic == bluetooth.CharacteristicUUIDIndoorBikeData
 }

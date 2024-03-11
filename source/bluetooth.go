@@ -31,10 +31,8 @@ type Value struct {
 
 type Source interface {
 	Convert(msg Message) []Value
-	SubscriptionFilter(
-		Service bluetooth.UUID,
-		Characteristic bluetooth.UUID,
-	) bool
+	Services() []bluetooth.UUID
+	Characteristics() []bluetooth.UUID
 }
 
 func Run(
@@ -75,7 +73,7 @@ func Run(
 	}
 
 	fmt.Println("discovering services/characteristics")
-	srvcs, err := device.DiscoverServices(nil)
+	srvcs, err := device.DiscoverServices(src.Services())
 	if err != nil {
 		return errors.Wrap(err, "discover services")
 	}
@@ -84,7 +82,7 @@ func Run(
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
-		chars, err := srvc.DiscoverCharacteristics(nil)
+		chars, err := srvc.DiscoverCharacteristics(src.Characteristics())
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -99,16 +97,14 @@ func Run(
 				fmt.Println("    value =", string(buf[:n]))
 			}
 
-			if src.SubscriptionFilter(srvc.UUID(), char.UUID()) {
-				fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
-				if err := char.EnableNotifications(func(buf []byte) {
-					err := callback(time.Now(), srvc.UUID(), char.UUID(), buf)
-					if err != nil {
-						errCh <- errors.Wrap(err, "callback")
-					}
-				}); err != nil {
-					return errors.Wrap(err, "enable notifications")
+			fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
+			if err := char.EnableNotifications(func(buf []byte) {
+				err := callback(time.Now(), srvc.UUID(), char.UUID(), buf)
+				if err != nil {
+					errCh <- errors.Wrap(err, "callback")
 				}
+			}); err != nil {
+				return errors.Wrap(err, "enable notifications")
 			}
 		}
 	}
