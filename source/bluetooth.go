@@ -9,13 +9,24 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-type CBKey [2]bluetooth.UUID
-type Callbacks map[CBKey]func(t time.Time, msg []byte) error
+type SubscriptionFilter func(
+	service bluetooth.UUID,
+	characteristic bluetooth.UUID,
+) bool
+
+type MessageCallback func(
+	t time.Time,
+	service bluetooth.UUID,
+	characteristic bluetooth.UUID,
+	msg []byte,
+) error
 
 func Run(
 	ctx context.Context,
+	errCh chan error,
 	address string,
-	callbacks Callbacks,
+	filter SubscriptionFilter,
+	callback MessageCallback,
 ) error {
 	var adapter = bluetooth.DefaultAdapter
 
@@ -76,11 +87,13 @@ func Run(
 				fmt.Println("    value =", string(buf[:n]))
 			}
 
-			cb, ok := callbacks[CBKey{srvc.UUID(), char.UUID()}]
-			if ok {
-				fmt.Println("enabling notifications for", srvc.UUID().String(), char.UUID().String())
+			if filter(srvc.UUID(), char.UUID()) {
+				fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
 				if err := char.EnableNotifications(func(buf []byte) {
-					cb(time.Now(), buf)
+					err := callback(time.Now(), srvc.UUID(), char.UUID(), buf)
+					if err != nil {
+						errCh <- errors.Wrap(err, "callback")
+					}
 				}); err != nil {
 					return errors.Wrap(err, "enable notifications")
 				}

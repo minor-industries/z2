@@ -5,12 +5,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
+	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/codelab/cmd/z2/testdata"
 	"github.com/pkg/errors"
 	"io/fs"
 	"strconv"
 	"strings"
 	"time"
+	"tinygo.org/x/bluetooth"
 )
 
 type line struct {
@@ -20,8 +22,9 @@ type line struct {
 
 func Run(
 	ctx context.Context,
+	errCh chan error,
 	filename string,
-	callback func(time.Time, []byte) error,
+	callback source.MessageCallback,
 ) error {
 	content, err := fs.ReadFile(testdata.FS, filename)
 	if err != nil {
@@ -53,21 +56,33 @@ func Run(
 	ticker := time.NewTicker(10 * time.Millisecond)
 
 	tFirst := lines[0].timestamp
-	for now := range ticker.C {
-		dt := now.Sub(t0)
-		t := tFirst.Add(dt)
-		line := lines[0]
-		if t.Before(line.timestamp) {
-			continue
-		}
-		callback(now, line.value)
-		lines = lines[1:]
-		if len(lines) == 0 {
-			ticker.Stop()
-			break
+
+	for {
+		select {
+		case now := <-ticker.C:
+			dt := now.Sub(t0)
+			t := tFirst.Add(dt)
+			line := lines[0]
+			if t.Before(line.timestamp) {
+				continue
+			}
+			if err := callback(
+				now,
+				bluetooth.ServiceUUIDFitnessMachine,
+				bluetooth.CharacteristicUUIDIndoorBikeData,
+				line.value,
+			); err != nil {
+				// something seems "off" here
+				errCh <- errors.Wrap(err, "callback")
+				return nil
+			}
+			lines = lines[1:]
+			if len(lines) == 0 {
+				ticker.Stop()
+				break
+			}
+		case <-ctx.Done():
+			return nil
 		}
 	}
-
-	<-ctx.Done()
-	return nil
 }

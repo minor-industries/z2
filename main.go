@@ -11,8 +11,6 @@ import (
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
 	"os"
-	"time"
-
 	"tinygo.org/x/bluetooth"
 )
 
@@ -62,14 +60,24 @@ func run() error {
 
 	go func() {
 		if opts.Replay {
-			err = replay.Run(ctx, "raw.txt", handler.Handle)
+			err = replay.Run(
+				ctx,
+				errCh,
+				"raw.txt",
+				handler.Handle,
+			)
 		} else {
-			err = source.Run(ctx, address, map[source.CBKey]func(time.Time, []byte) error{
-				source.CBKey{
-					bluetooth.ServiceUUIDFitnessMachine,
-					bluetooth.CharacteristicUUIDIndoorBikeData,
-				}: handler.Handle,
-			})
+			err = source.Run(
+				ctx,
+				errCh,
+				address,
+				func(s bluetooth.UUID, c bluetooth.UUID) bool {
+					return s == bluetooth.ServiceUUIDFitnessMachine &&
+						c == bluetooth.CharacteristicUUIDIndoorBikeData
+				},
+				handler.Handle,
+			)
+
 		}
 		errCh <- err
 	}()

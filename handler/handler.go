@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"time"
+	"tinygo.org/x/bluetooth"
 )
 
 // TODO: might be nice to split into separate handlers, one for DB and one for publishing to broker
@@ -43,7 +44,12 @@ func NewBikeHandler(
 	}, nil
 }
 
-func (h *BikeHandler) Handle(t time.Time, msg []byte) error {
+func (h *BikeHandler) Handle(
+	t time.Time,
+	service bluetooth.UUID,
+	characteristic bluetooth.UUID,
+	msg []byte,
+) error {
 	h.lastMsg = t
 	dt := t.Sub(h.t0).Seconds()
 
@@ -53,8 +59,8 @@ func (h *BikeHandler) Handle(t time.Time, msg []byte) error {
 	// store raw messages to database
 	tx := h.db.Create(&database.RawValue{
 		ID:               database.RandomID(),
-		ServiceID:        "", // TODO
-		CharacteristicID: "",
+		ServiceID:        service.String(),
+		CharacteristicID: characteristic.String(),
 		Timestamp:        t,
 		Message:          msg,
 	})
