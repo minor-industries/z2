@@ -150,6 +150,12 @@ func sendInitialData(
 	}
 
 	if err := wsjson.Write(ctx, conn, map[string]any{
+		"now": time.Now().UnixMilli(),
+	}); err != nil {
+		return errors.Wrap(err, "write timestamp")
+	}
+
+	if err := wsjson.Write(ctx, conn, map[string]any{
 		"initial_data": rows,
 		"now":          time.Now().UnixMilli(),
 	}); err != nil {

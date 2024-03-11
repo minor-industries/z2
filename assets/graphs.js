@@ -3,6 +3,17 @@ const mapDate = value => [new Date(value[0]), value[1]];
 function makeGraph(elem, opts) {
     let g;
     let data;
+    let t0Server;
+    let t0Client;
+
+    const computeDateWindow = () => {
+        const t1Client = new Date();
+        const dt = t1Client.getTime() - t0Client.getTime()
+        const t1 = new Date(t0Server.getTime() + dt);
+        const t0 = new Date(t1);
+        t0.setMinutes(t0.getMinutes() - 5);
+        return [t0, t1]
+    };
 
     const url = `ws://${window.location.hostname}:${window.location.port}/ws`;
     const ws = new WebSocket(url);
@@ -14,6 +25,20 @@ function makeGraph(elem, opts) {
         if (msg.error !== undefined) {
             alert(msg.error);
             return;
+        }
+
+        if (msg.now !== undefined) {
+            // handle case when client and server times don't match
+            t0Server = new Date(msg.now);
+            t0Client = new Date();
+            setInterval(function () {
+                if (g === undefined) {
+                    return;
+                }
+                g.updateOptions({
+                    dateWindow: computeDateWindow(),
+                })
+            }, 250);
         }
 
         if (msg.initial_data !== undefined) {
@@ -30,23 +55,15 @@ function makeGraph(elem, opts) {
                     title: opts.title,
                     ylabel: opts.ylabel,
                     labels: ["X", "Y"],
-                    dateWindow: [t0, t1],
+                    dateWindow: computeDateWindow(),
                 });
         }
 
         if (msg.rows !== undefined) {
             const rows = msg.rows.map(mapDate);
-
-            const last = rows[rows.length - 1];
-            const t1 = new Date(last[0]);
-            const t0 = new Date(t1);
-            t0.setMinutes(t0.getMinutes() - 5);
-
             data.push(...rows);
-            console.log(data.length);
             g.updateOptions({
                 file: data,
-                dateWindow: [t0, t1],
             });
         }
     };
