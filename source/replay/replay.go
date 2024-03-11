@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
-	"github.com/minor-industries/codelab/cmd/bike/testdata"
+	"github.com/minor-industries/codelab/cmd/z2/testdata"
 	"github.com/pkg/errors"
 	"io/fs"
 	"strconv"

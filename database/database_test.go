@@ -3,7 +3,7 @@ package database_test
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/minor-industries/codelab/cmd/bike/database"
+	"github.com/minor-industries/codelab/cmd/z2/database"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"

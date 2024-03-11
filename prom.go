@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/minor-industries/codelab/cmd/bike/schema"
+	"github.com/minor-industries/codelab/cmd/z2/schema"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/minor-industries/platform/common/metrics"
 	"github.com/pkg/errors"

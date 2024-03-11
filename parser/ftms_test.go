@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/minor-industries/codelab/cmd/bike/parser"
+	"github.com/minor-industries/codelab/cmd/z2/parser"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
