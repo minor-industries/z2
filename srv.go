@@ -119,7 +119,7 @@ func serve(
 
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	if err := r.Run("0.0.0.0:8000"); err != nil {
+	if err := r.Run("0.0.0.0:8077"); err != nil {
 		return errors.Wrap(err, "run")
 	}
 
