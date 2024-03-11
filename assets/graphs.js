@@ -55,6 +55,7 @@ function makeGraph(elem, opts) {
                     title: opts.title,
                     ylabel: opts.ylabel,
                     labels: ["X", "Y"],
+                    includeZero: true,
                     dateWindow: computeDateWindow(),
                 });
         }
