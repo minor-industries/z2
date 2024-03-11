@@ -75,9 +75,7 @@ func Run(
 	}
 
 	fmt.Println("discovering services/characteristics")
-	srvcs, err := device.DiscoverServices([]bluetooth.UUID{
-		bluetooth.ServiceUUIDFitnessMachine,
-	})
+	srvcs, err := device.DiscoverServices(nil)
 	if err != nil {
 		return errors.Wrap(err, "discover services")
 	}
@@ -86,9 +84,7 @@ func Run(
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
-		chars, err := srvc.DiscoverCharacteristics([]bluetooth.UUID{
-			bluetooth.CharacteristicUUIDIndoorBikeData,
-		})
+		chars, err := srvc.DiscoverCharacteristics(nil)
 		if err != nil {
 			fmt.Println(err)
 		}

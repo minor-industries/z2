@@ -41,7 +41,8 @@ func run() error {
 	go publishPrometheusMetrics(errCh, br)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	src := &handler2.BikeSource{}
+	//src := &handler2.BikeSource{}
+	src := &handler2.RowerSource{}
 
 	handler, err := handler2.NewBikeHandler(
 		db,
