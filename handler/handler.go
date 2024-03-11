@@ -2,11 +2,10 @@ package handler
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/minor-industries/codelab/cmd/z2/database"
-	"github.com/minor-industries/codelab/cmd/z2/parser"
 	"github.com/minor-industries/codelab/cmd/z2/schema"
+	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -19,6 +18,7 @@ import (
 type BikeHandler struct {
 	db     *gorm.DB
 	series map[string]*database.Series
+	source source.Source
 
 	t0      time.Time
 	lastMsg time.Time
@@ -29,6 +29,7 @@ type BikeHandler struct {
 
 func NewBikeHandler(
 	db *gorm.DB,
+	source source.Source,
 	cancel context.CancelFunc,
 	ctx context.Context,
 	allSeries map[string]*database.Series,
@@ -36,6 +37,7 @@ func NewBikeHandler(
 ) (*BikeHandler, error) {
 	return &BikeHandler{
 		db:     db,
+		source: source,
 		series: allSeries,
 		t0:     time.Now(),
 		cancel: cancel,
@@ -51,10 +53,6 @@ func (h *BikeHandler) Handle(
 	msg []byte,
 ) error {
 	h.lastMsg = t
-	dt := t.Sub(h.t0).Seconds()
-
-	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg))
-	data := parser.ParseIndoorBikeData(msg)
 
 	// store raw messages to database
 	tx := h.db.Create(&database.RawValue{
@@ -68,37 +66,36 @@ func (h *BikeHandler) Handle(
 		return errors.Wrap(tx.Error, "create raw value")
 	}
 
-	// store series to database
-	var err error
-	data.AllPresentFields(func(seriesName string, value float64) {
-		series, ok := h.series[seriesName]
+	srs := h.source.Convert(source.Message{
+		Timestamp:      t,
+		Service:        service,
+		Characteristic: characteristic,
+		Msg:            msg,
+	})
+
+	for _, s := range srs {
+		series, ok := h.series[s.Name]
 		if !ok {
-			panic(fmt.Errorf("unknown database series: %s", seriesName))
+			return fmt.Errorf("unknown database series: %s", s.Name)
 		}
 		tx := h.db.Create(&database.Value{
 			ID:        database.RandomID(),
 			Timestamp: t,
-			Value:     value,
+			Value:     s.Value,
 			Series:    series,
 		})
 		if tx.Error != nil {
-			err = errors.Wrap(tx.Error, "create value")
-			return
+			return errors.Wrap(tx.Error, "create value")
 		}
-	})
-	if err != nil {
-		return errors.Wrap(err, "store db")
 	}
 
-	// publish to broker
-	// perhaps we should send these in bulk to the broker
-	data.AllPresentFields(func(series string, value float64) {
+	for _, s := range srs {
 		h.broker.Publish(&schema.Series{
-			SeriesName: series,
+			SeriesName: s.Name,
 			Timestamp:  t,
-			Value:      value,
+			Value:      s.Value,
 		})
-	})
+	}
 
 	return nil
 }

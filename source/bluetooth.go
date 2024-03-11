@@ -21,6 +21,23 @@ type MessageCallback func(
 	msg []byte,
 ) error
 
+type Message struct {
+	Timestamp      time.Time
+	Service        bluetooth.UUID
+	Characteristic bluetooth.UUID
+	Msg            []byte
+}
+
+type Value struct {
+	Name      string
+	Timestamp time.Time
+	Value     float64
+}
+
+type Source interface {
+	Convert(msg Message) []Value
+}
+
 func Run(
 	ctx context.Context,
 	errCh chan error,
