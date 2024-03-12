@@ -75,16 +75,3 @@ function makeGraph(elem, opts) {
         })
     }
 }
-
-Dygraph.onDOMready(function onDOMready() {
-    makeGraph(document.getElementById("graphdiv0"), {
-        series: "bike_instant_speed",
-        title: "Speed",
-        ylabel: "speed (km/h)"
-    });
-    makeGraph(document.getElementById("graphdiv1"), {
-        series: "bike_instant_power",
-        title: "Power",
-        ylabel: "power (watts)"
-    });
-});

@@ -36,6 +36,10 @@ func serve(
 		c.HTML(http.StatusOK, "index.html", map[string]any{})
 	})
 
+	r.GET("/rower.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "rower.html", map[string]any{})
+	})
+
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.Status(204)
 	})

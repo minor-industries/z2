@@ -37,6 +37,11 @@ var seriesNames = []string{
 	"bike_energy_per_hour",
 	"bike_energy_per_minute",
 	"bike_heartrate",
+
+	"rower_stroke_count",
+	"rower_power",
+	"rower_speed",
+	"rower_spm",
 }
 
 func RandomID() []byte {
