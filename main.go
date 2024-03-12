@@ -14,15 +14,15 @@ import (
 )
 
 var opts struct {
-	Replay bool `long:"replay"`
+	Replay bool   `long:"replay"`
+	Source string `long:"source" required:"true" env:"SOURCE"`
 }
 
 func run() error {
-	args, err := flags.Parse(&opts)
+	_, err := flags.Parse(&opts)
 	if err != nil {
 		return errors.Wrap(err, "parse flags")
 	}
-	srcType := args[0]
 
 	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"))
 	if err != nil {
@@ -43,8 +43,8 @@ func run() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	//src := &handler2.BikeSource{}
-	srcAddr, src := getSource(srcType)
-	fmt.Printf("looking for %s at address %s\n", srcType, srcAddr)
+	srcAddr, src := getSource(opts.Source)
+	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
 	handler, err := handler2.NewBikeHandler(
 		db,
