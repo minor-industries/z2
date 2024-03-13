@@ -1,10 +1,10 @@
-package handler
+package bike
 
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/minor-industries/codelab/cmd/z2/parser"
 	"github.com/minor-industries/codelab/cmd/z2/source"
+	"github.com/minor-industries/codelab/cmd/z2/source/bike/parser"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
