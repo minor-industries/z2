@@ -8,7 +8,6 @@ import (
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph/assets"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"html/template"
 	"io/fs"
 	"net/http"
 	"nhooyr.io/websocket"
@@ -19,24 +18,15 @@ import (
 func (g *Graph) setupServer() error {
 	r := g.server
 
-	funcs := map[string]any{}
-
-	templ := template.Must(template.New("").Funcs(funcs).ParseFS(assets.FS, "*.html"))
-	r.SetHTMLTemplate(templ)
-
 	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", map[string]any{})
-	})
-
-	r.GET("/rower.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "rower.html", map[string]any{})
+		c.Redirect(http.StatusMovedPermanently, "/index.html")
 	})
 
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.Status(204)
 	})
 
-	files(r,
+	g.StaticFiles(assets.FS,
 		"dygraph.min.js", "application/javascript",
 		"dygraph.css", "text/css",
 
@@ -136,14 +126,14 @@ func sendInitialData(
 	return nil
 }
 
-func files(r *gin.Engine, files ...string) {
+func (g *Graph) StaticFiles(fsys fs.FS, files ...string) {
 	for i := 0; i < len(files); i += 2 {
 		name := files[i]
 		ct := files[i+1]
-		r.GET("/"+name, func(c *gin.Context) {
+		g.server.GET("/"+name, func(c *gin.Context) {
 			header := c.Writer.Header()
 			header["Content-Type"] = []string{ct}
-			content, err := fs.ReadFile(assets.FS, name)
+			content, err := fs.ReadFile(fsys, name)
 			if err != nil {
 				c.Status(404)
 				return

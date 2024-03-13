@@ -57,6 +57,10 @@ func (g *Graph) DB() *gorm.DB {
 	return g.db
 }
 
+func (g *Graph) GetEngine() *gin.Engine {
+	return g.server
+}
+
 func (g *Graph) CreateValue(
 	seriesName string,
 	timestamp time.Time,

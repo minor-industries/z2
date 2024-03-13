@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	handler2 "github.com/minor-industries/codelab/cmd/z2/handler"
+	"github.com/minor-industries/codelab/cmd/z2/html"
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/codelab/cmd/z2/source/replay"
@@ -32,6 +33,11 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new graph")
 	}
+
+	graph.StaticFiles(html.FS,
+		"index.html", "text/html",
+		"rower.html", "text/html",
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	//src := &handler2.BikeSource{}
