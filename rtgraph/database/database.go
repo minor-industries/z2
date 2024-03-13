@@ -27,23 +27,6 @@ func Get(filename string) (*gorm.DB, error) {
 	return db, nil
 }
 
-var seriesNames = []string{
-	"bike_instant_speed",
-	"bike_instant_cadence",
-	"bike_total_distance",
-	"bike_resistance_level",
-	"bike_instant_power",
-	"bike_total_energy",
-	"bike_energy_per_hour",
-	"bike_energy_per_minute",
-	"bike_heartrate",
-
-	"rower_stroke_count",
-	"rower_power",
-	"rower_speed",
-	"rower_spm",
-}
-
 func RandomID() []byte {
 	var result [16]byte
 	_, err := rand.Read(result[:])
@@ -62,7 +45,10 @@ func HashedID(s string) []byte {
 	return result[:]
 }
 
-func LoadAllSeries(db *gorm.DB) (map[string]*Series, error) {
+func LoadAllSeries(
+	db *gorm.DB,
+	seriesNames []string,
+) (map[string]*Series, error) {
 	seriesMap, err := loadSeries(db)
 	if err != nil {
 		return nil, errors.Wrap(err, "initial load")

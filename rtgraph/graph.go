@@ -12,23 +12,26 @@ import (
 )
 
 type Graph struct {
-	db        *gorm.DB
+	db          *gorm.DB
+	seriesNames []string
+	errCh       chan error
+
 	broker    *broker.Broker
 	allSeries map[string]*database.Series
-	errCh     chan error
 	server    *gin.Engine
 }
 
 func New(
 	dbPath string,
 	errCh chan error,
+	seriesNames []string,
 ) (*Graph, error) {
 	db, err := database.Get(dbPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "get database")
 	}
 
-	allSeries, err := database.LoadAllSeries(db)
+	allSeries, err := database.LoadAllSeries(db, seriesNames)
 	if err != nil {
 		return nil, errors.Wrap(err, "load series")
 	}

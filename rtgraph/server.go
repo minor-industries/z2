@@ -79,7 +79,6 @@ func (g *Graph) setupServer() error {
 		}
 
 		g.Subscribe(subscribed, func(obj any) error {
-			fmt.Println("hello")
 			if err := wsjson.Write(ctx, conn, obj); err != nil {
 				return errors.Wrap(err, "write websocket")
 			}

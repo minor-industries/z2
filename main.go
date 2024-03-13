@@ -29,6 +29,22 @@ func run() error {
 	graph, err := rtgraph.New(
 		os.ExpandEnv("$HOME/z2.db"),
 		errCh,
+		[]string{
+			"bike_instant_speed",
+			"bike_instant_cadence",
+			"bike_total_distance",
+			"bike_resistance_level",
+			"bike_instant_power",
+			"bike_total_energy",
+			"bike_energy_per_hour",
+			"bike_energy_per_minute",
+			"bike_heartrate",
+
+			"rower_stroke_count",
+			"rower_power",
+			"rower_speed",
+			"rower_spm",
+		},
 	)
 	if err != nil {
 		return errors.Wrap(err, "new graph")
