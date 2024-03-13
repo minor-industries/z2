@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/minor-industries/codelab/cmd/z2/database"
-	"github.com/minor-industries/codelab/cmd/z2/schema"
+	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
+	"github.com/minor-industries/codelab/cmd/z2/rtgraph/schema"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
@@ -17,7 +17,7 @@ import (
 
 type BikeHandler struct {
 	db     *gorm.DB
-	series map[string]*database.Series
+	series map[string]*database2.Series
 	source source.Source
 
 	t0      time.Time
@@ -32,7 +32,7 @@ func NewBikeHandler(
 	source source.Source,
 	cancel context.CancelFunc,
 	ctx context.Context,
-	allSeries map[string]*database.Series,
+	allSeries map[string]*database2.Series,
 	broker *broker.Broker,
 ) (*BikeHandler, error) {
 	return &BikeHandler{
@@ -55,8 +55,8 @@ func (h *BikeHandler) Handle(
 	h.lastMsg = t
 
 	// store raw messages to database
-	tx := h.db.Create(&database.RawValue{
-		ID:               database.RandomID(),
+	tx := h.db.Create(&database2.RawValue{
+		ID:               database2.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
 		Timestamp:        t,
@@ -78,8 +78,8 @@ func (h *BikeHandler) Handle(
 		if !ok {
 			return fmt.Errorf("unknown database series: %s", s.Name)
 		}
-		tx := h.db.Create(&database.Value{
-			ID:        database.RandomID(),
+		tx := h.db.Create(&database2.Value{
+			ID:        database2.RandomID(),
 			Timestamp: t,
 			Value:     s.Value,
 			Series:    series,

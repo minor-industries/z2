@@ -3,7 +3,7 @@ package database_test
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/minor-industries/codelab/cmd/z2/database"
+	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
@@ -47,10 +47,10 @@ remaining_time: (float64) 0
 func TestGet(t *testing.T) {
 	dbname := os.ExpandEnv("$HOME/bike.db")
 	fmt.Println(dbname)
-	db, err := database.Get(dbname)
+	db, err := database2.Get(dbname)
 	require.NoError(t, err)
 
-	seriesMap, err := database.loadSeries(db)
+	seriesMap, err := database2.loadSeries(db)
 	require.NoError(t, err)
 
 	t.Run("create types", func(t *testing.T) {
@@ -70,18 +70,18 @@ func TestGet(t *testing.T) {
 			if _, found := seriesMap[name]; found {
 				continue
 			}
-			db.Create(&database.Series{
+			db.Create(&database2.Series{
 				Name: name,
 				Unit: "",
 			})
 		}
 	})
 
-	seriesMap, err = database.loadSeries(db)
+	seriesMap, err = database2.loadSeries(db)
 	require.NoError(t, err)
 
 	t.Run("measurement", func(t *testing.T) {
-		m := &database.Value{
+		m := &database2.Value{
 			ID:        uuid.New(),
 			Timestamp: time.Now(),
 			Value:     55,

@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/minor-industries/codelab/cmd/z2/assets"
-	"github.com/minor-industries/codelab/cmd/z2/database"
-	"github.com/minor-industries/codelab/cmd/z2/schema"
+	"github.com/minor-industries/codelab/cmd/z2/rtgraph/assets"
+	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
+	"github.com/minor-industries/codelab/cmd/z2/rtgraph/schema"
 	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -23,7 +23,7 @@ import (
 func serve(
 	db *gorm.DB,
 	br *broker.Broker,
-	allSeries map[string]*database.Series,
+	allSeries map[string]*database2.Series,
 ) error {
 	r := gin.Default()
 
@@ -133,7 +133,7 @@ func serve(
 func sendInitialData(
 	ctx context.Context,
 	db *gorm.DB,
-	allSeries map[string]*database.Series,
+	allSeries map[string]*database2.Series,
 	conn *websocket.Conn,
 	subscribed string,
 ) error {
@@ -142,7 +142,7 @@ func sendInitialData(
 		return errors.New("unknown series")
 	}
 
-	data, err := database.LoadData(db, s.ID)
+	data, err := database2.LoadData(db, s.ID)
 	if err != nil {
 		return errors.Wrap(err, "load data")
 	}
