@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph/assets"
-	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
-	"github.com/minor-industries/codelab/cmd/z2/rtgraph/schema"
-	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gorm.io/gorm"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -21,9 +18,7 @@ import (
 )
 
 func serve(
-	db *gorm.DB,
-	br *broker.Broker,
-	allSeries map[string]*database2.Series,
+	graph *rtgraph.Graph,
 ) error {
 	r := gin.Default()
 
@@ -84,8 +79,7 @@ func serve(
 
 		if err := sendInitialData(
 			ctx,
-			db,
-			allSeries,
+			graph,
 			conn,
 			subscribed,
 		); err != nil {
@@ -97,28 +91,13 @@ func serve(
 			return
 		}
 
-		msgCh := br.Subscribe()
-		defer br.Unsubscribe(msgCh)
-
-		for msg := range msgCh {
-			switch m := msg.(type) {
-			case *schema.Series:
-				if m.SeriesName == subscribed {
-					fmt.Println("tick", m.SeriesName, m.Timestamp, m.Value)
-					newRows := [][2]any{{
-						m.Timestamp.UnixMilli(),
-						m.Value,
-					}}
-					writeErr := wsjson.Write(ctx, conn, map[string]any{
-						"rows": newRows,
-					})
-					if writeErr != nil {
-						fmt.Println("error writing to websocket:", writeErr.Error())
-						return
-					}
-				}
+		graph.Subscribe(subscribed, func(obj any) error {
+			fmt.Println("hello")
+			if err := wsjson.Write(ctx, conn, obj); err != nil {
+				return errors.Wrap(err, "write websocket")
 			}
-		}
+			return nil
+		})
 	})
 
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
@@ -132,28 +111,13 @@ func serve(
 
 func sendInitialData(
 	ctx context.Context,
-	db *gorm.DB,
-	allSeries map[string]*database2.Series,
+	graph *rtgraph.Graph,
 	conn *websocket.Conn,
 	subscribed string,
 ) error {
-	s, ok := allSeries[subscribed]
-	if !ok {
-		return errors.New("unknown series")
-	}
-
-	data, err := database2.LoadData(db, s.ID)
+	rows, err := graph.GetInitialData(subscribed)
 	if err != nil {
-		return errors.Wrap(err, "load data")
-	}
-
-	rows := [][2]any{}
-	for _, d := range data {
-		// TODO: NaNs for gaps
-		rows = append(rows, [2]any{
-			d.Timestamp.UnixMilli(),
-			d.Value,
-		})
+		return errors.Wrap(err, "get initial data")
 	}
 
 	if err := wsjson.Write(ctx, conn, map[string]any{

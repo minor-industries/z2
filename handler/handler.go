@@ -3,12 +3,10 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
 	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
-	"github.com/minor-industries/codelab/cmd/z2/rtgraph/schema"
 	"github.com/minor-industries/codelab/cmd/z2/source"
-	"github.com/minor-industries/platform/common/broker"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
@@ -16,33 +14,28 @@ import (
 // TODO: might be nice to split into separate handlers, one for DB and one for publishing to broker
 
 type BikeHandler struct {
-	db     *gorm.DB
-	series map[string]*database2.Series
+	graph  *rtgraph.Graph
 	source source.Source
+	cancel context.CancelFunc
+	ctx    context.Context
 
 	t0      time.Time
 	lastMsg time.Time
-	cancel  context.CancelFunc
-	ctx     context.Context
-	broker  *broker.Broker
 }
 
 func NewBikeHandler(
-	db *gorm.DB,
+	graph *rtgraph.Graph,
 	source source.Source,
 	cancel context.CancelFunc,
 	ctx context.Context,
-	allSeries map[string]*database2.Series,
-	broker *broker.Broker,
 ) (*BikeHandler, error) {
 	return &BikeHandler{
-		db:     db,
-		source: source,
-		series: allSeries,
-		t0:     time.Now(),
-		cancel: cancel,
-		ctx:    ctx,
-		broker: broker,
+		graph:   graph,
+		source:  source,
+		cancel:  cancel,
+		ctx:     ctx,
+		t0:      time.Now(),
+		lastMsg: time.Time{},
 	}, nil
 }
 
@@ -55,7 +48,7 @@ func (h *BikeHandler) Handle(
 	h.lastMsg = t
 
 	// store raw messages to database
-	tx := h.db.Create(&database2.RawValue{
+	tx := h.graph.DB().Create(&database2.RawValue{
 		ID:               database2.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
@@ -74,27 +67,10 @@ func (h *BikeHandler) Handle(
 	})
 
 	for _, s := range srs {
-		series, ok := h.series[s.Name]
-		if !ok {
-			return fmt.Errorf("unknown database series: %s", s.Name)
+		err := h.graph.CreateValue(s.Name, s.Timestamp, s.Value)
+		if err != nil {
+			return errors.Wrap(err, "create value")
 		}
-		tx := h.db.Create(&database2.Value{
-			ID:        database2.RandomID(),
-			Timestamp: t,
-			Value:     s.Value,
-			Series:    series,
-		})
-		if tx.Error != nil {
-			return errors.Wrap(tx.Error, "create value")
-		}
-	}
-
-	for _, s := range srs {
-		h.broker.Publish(&schema.Series{
-			SeriesName: s.Name,
-			Timestamp:  t,
-			Value:      s.Value,
-		})
 	}
 
 	return nil
