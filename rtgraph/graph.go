@@ -2,6 +2,7 @@ package rtgraph
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph/schema"
 	"github.com/minor-industries/platform/common/broker"
@@ -15,6 +16,7 @@ type Graph struct {
 	broker    *broker.Broker
 	allSeries map[string]*database.Series
 	errCh     chan error
+	server    *gin.Engine
 }
 
 func New(
@@ -32,15 +34,19 @@ func New(
 	}
 
 	br := broker.NewBroker()
-	go br.Start()
-
 	g := &Graph{
 		broker:    br,
 		db:        db,
 		allSeries: allSeries,
 		errCh:     errCh,
+		server:    gin.Default(),
 	}
 
+	if err := g.setupServer(); err != nil {
+		return nil, errors.Wrap(err, "setup server")
+	}
+
+	go br.Start()
 	go g.publishPrometheusMetrics()
 
 	return g, nil

@@ -50,7 +50,7 @@ func run() error {
 	go handler.Monitor()
 
 	go func() {
-		errCh <- serve(graph)
+		errCh <- graph.RunServer("0.0.0.0:8077")
 	}()
 
 	go func() {

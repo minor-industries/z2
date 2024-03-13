@@ -1,11 +1,10 @@
-package main
+package rtgraph
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
 	"github.com/minor-industries/codelab/cmd/z2/rtgraph/assets"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -17,10 +16,8 @@ import (
 	"time"
 )
 
-func serve(
-	graph *rtgraph.Graph,
-) error {
-	r := gin.Default()
+func (g *Graph) setupServer() error {
+	r := g.server
 
 	funcs := map[string]any{}
 
@@ -79,7 +76,7 @@ func serve(
 
 		if err := sendInitialData(
 			ctx,
-			graph,
+			g,
 			conn,
 			subscribed,
 		); err != nil {
@@ -91,7 +88,7 @@ func serve(
 			return
 		}
 
-		graph.Subscribe(subscribed, func(obj any) error {
+		g.Subscribe(subscribed, func(obj any) error {
 			fmt.Println("hello")
 			if err := wsjson.Write(ctx, conn, obj); err != nil {
 				return errors.Wrap(err, "write websocket")
@@ -102,16 +99,19 @@ func serve(
 
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	if err := r.Run("0.0.0.0:8077"); err != nil {
+	return nil
+}
+
+func (g *Graph) RunServer(address string) error {
+	if err := g.server.Run(address); err != nil {
 		return errors.Wrap(err, "run")
 	}
-
 	return nil
 }
 
 func sendInitialData(
 	ctx context.Context,
-	graph *rtgraph.Graph,
+	graph *Graph,
 	conn *websocket.Conn,
 	subscribed string,
 ) error {
