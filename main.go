@@ -14,8 +14,10 @@ import (
 )
 
 var opts struct {
-	Replay bool   `long:"replay"`
 	Source string `long:"source" required:"true" env:"SOURCE"`
+
+	Replay   bool   `long:"replay"`
+	ReplayDB string `long:"replay-db"`
 }
 
 func run() error {
@@ -76,7 +78,14 @@ func run() error {
 	}()
 
 	go func() {
-		if opts.Replay {
+		if opts.ReplayDB != "" {
+			err = replay.RunDB(
+				ctx,
+				errCh,
+				os.ExpandEnv(opts.ReplayDB),
+				handler.Handle,
+			)
+		} else if opts.Replay {
 			err = replay.Run(
 				ctx,
 				errCh,
