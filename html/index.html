@@ -20,11 +20,11 @@
 
         Dygraph.onDOMready(function onDOMready() {
             makeGraph(document.getElementById("graphdiv0"), {
-                series: ["bike_instant_speed"],
+                series: ["bike_instant_speed", "bike_instant_speed_avg_30s"],
                 title: "Speed",
                 ylabel: "speed (km/h)",
                 windowSize: minute,
-                labels: ["x", "y"]
+                labels: ["x", "y0", "y1"]
             });
             makeGraph(document.getElementById("graphdiv1"), {
                 series: ["bike_instant_speed_avg_30s"],
