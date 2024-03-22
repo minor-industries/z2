@@ -7,7 +7,6 @@
     <style>
         .wide {
             width: 97.5%;
-            height: 400px;
             margin-bottom: 10px;
         }
     </style>
@@ -38,22 +37,35 @@
                 title: "Speed",
                 ylabel: "speed (km/h)",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"]
+                labels: ["x", "y0", "y1"],
+                height: 300,
             });
             makeGraph(document.getElementById("graphdiv1"), {
-                series: ["bike_instant_speed_avg_30s"],
-                title: "Avg Speed",
-                ylabel: "speed (km/h)",
+                series: ["bike_instant_cadence", "bike_instant_cadence_avg_30s"],
+                title: "Cadence",
+                ylabel: "cadence (rpm)",
                 windowSize: minute,
-                labels: ["x", "y"]
+                labels: ["x", "y0", "y1"],
+                height: 300,
             });
-            // makeGraph(document.getElementById("graphdiv1"), {
-            //     series: ["bike_instant_power"],
-            //     title: "Power",
-            //     ylabel: "power (watts)",
-            //     windowSize: minute,
-            //     labels: ["x", "y"]
-            // });
+            makeGraph(document.getElementById("graphdiv2"), {
+                series: ["bike_instant_power", "bike_instant_power_avg_30s"],
+                title: "Power",
+                ylabel: "power (watts)",
+                windowSize: minute,
+                labels: ["x", "y0", "y1"],
+                height: 300,
+            });
+            makeGraph(document.getElementById("graphdiv3"), {
+                series: ["bike_instant_speed_avg_30s"],
+                title: "Speed",
+                ylabel: "speed (km/h)",
+                windowSize: 60 * minute,
+                labels: ["x", "y0"],
+                height: 300,
+                valueRange: [35.0, 45.0],
+            });
+
         });
     </script>
 </head>
@@ -61,6 +73,10 @@
 <div class="container">
     <div id="graphdiv0" class="column"></div>
     <div id="graphdiv1" class="column"></div>
+    <div id="graphdiv2" class="column"></div>
 </div>
+
+<div class="wide" id="graphdiv3"></div>
+
 </body>
 </html>

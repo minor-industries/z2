@@ -28,6 +28,14 @@ func run() error {
 		return errors.Wrap(err, "parse flags")
 	}
 
+	avg := func(name string, seconds int) rtgraph.Computed {
+		return rtgraph.Computed{
+			SeriesName: name,
+			Function:   "avg",
+			Seconds:    seconds,
+		}
+	}
+
 	graph, err := rtgraph.New(
 		os.ExpandEnv("$HOME/z2.db"),
 		errCh,
@@ -47,11 +55,11 @@ func run() error {
 			"rower_speed",
 			"rower_spm",
 		},
-		[]rtgraph.Computed{{
-			SeriesName: "bike_instant_speed",
-			Function:   "avg",
-			Seconds:    30,
-		}},
+		[]rtgraph.Computed{
+			avg("bike_instant_speed", 30),
+			avg("bike_instant_cadence", 30),
+			avg("bike_instant_power", 30),
+		},
 	)
 	if err != nil {
 		return errors.Wrap(err, "new graph")
