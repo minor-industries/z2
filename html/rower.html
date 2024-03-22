@@ -13,18 +13,21 @@
 
     <script type="text/javascript" src="dygraph.min.js"></script>
     <link rel="stylesheet" type="text/css" href="dygraph.css"/>
+    <script type="text/javascript" src="msgpack.min.js"></script>
     <script type="text/javascript" src="graphs.js"></script>
     <script type="text/javascript">
         Dygraph.onDOMready(function onDOMready() {
             makeGraph(document.getElementById("graphdiv0"), {
-                series: "rower_power",
+                series: ["rower_power"],
                 title: "Power",
-                ylabel: "power (watts)"
+                ylabel: "power (watts)",
+                labels: ["x", "y"],
             });
             makeGraph(document.getElementById("graphdiv1"), {
-                series: "rower_spm",
+                series: ["rower_spm"],
                 title: "SPM",
-                ylabel: "spm"
+                ylabel: "spm",
+                labels: ["x", "y"],
             });
         });
     </script>
