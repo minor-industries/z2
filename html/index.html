@@ -27,12 +27,19 @@
                 labels: ["x", "y"]
             });
             makeGraph(document.getElementById("graphdiv1"), {
-                series: ["bike_instant_power"],
-                title: "Power",
-                ylabel: "power (watts)",
+                series: ["bike_instant_speed_avg_30s"],
+                title: "Avg Speed",
+                ylabel: "speed (km/h)",
                 windowSize: minute,
                 labels: ["x", "y"]
             });
+            // makeGraph(document.getElementById("graphdiv1"), {
+            //     series: ["bike_instant_power"],
+            //     title: "Power",
+            //     ylabel: "power (watts)",
+            //     windowSize: minute,
+            //     labels: ["x", "y"]
+            // });
         });
     </script>
 </head>

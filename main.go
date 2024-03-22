@@ -47,6 +47,11 @@ func run() error {
 			"rower_speed",
 			"rower_spm",
 		},
+		[]rtgraph.Computed{{
+			SeriesName: "bike_instant_speed",
+			Function:   "avg",
+			Seconds:    30,
+		}},
 	)
 	if err != nil {
 		return errors.Wrap(err, "new graph")
