@@ -1,8 +1,6 @@
 package bike
 
 import (
-	"encoding/hex"
-	"fmt"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/codelab/cmd/z2/source/bike/parser"
 	"time"
@@ -26,9 +24,8 @@ func (b *BikeSource) Characteristics() []bluetooth.UUID {
 }
 
 func (b *BikeSource) Convert(msg source.Message) []source.Value {
-	dt := msg.Timestamp.Sub(t0).Seconds()
-
-	fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg.Msg))
+	//dt := msg.Timestamp.Sub(t0).Seconds()
+	//fmt.Printf("%7.2f bikedata: %s\n", dt, hex.EncodeToString(msg.Msg))
 	data := parser.ParseIndoorBikeData(msg.Msg)
 
 	var result []source.Value
