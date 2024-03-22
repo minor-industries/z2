@@ -6,9 +6,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	handler2 "github.com/minor-industries/codelab/cmd/z2/handler"
 	"github.com/minor-industries/codelab/cmd/z2/html"
-	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/codelab/cmd/z2/source/replay"
+	"github.com/minor-industries/rtgraph"
 	"github.com/pkg/errors"
 	"os"
 )

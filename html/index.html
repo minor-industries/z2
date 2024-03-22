@@ -13,16 +13,17 @@
 
     <script type="text/javascript" src="dygraph.min.js"></script>
     <link rel="stylesheet" type="text/css" href="dygraph.css"/>
+    <script type="text/javascript" src="msgpack.min.js"></script>
     <script type="text/javascript" src="graphs.js"></script>
     <script type="text/javascript">
         Dygraph.onDOMready(function onDOMready() {
             makeGraph(document.getElementById("graphdiv0"), {
-                series: "bike_instant_speed",
+                series: ["bike_instant_speed"],
                 title: "Speed",
                 ylabel: "speed (km/h)"
             });
             makeGraph(document.getElementById("graphdiv1"), {
-                series: "bike_instant_power",
+                series: ["bike_instant_power"],
                 title: "Power",
                 ylabel: "power (watts)"
             });

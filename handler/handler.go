@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"fmt"
-	"github.com/minor-industries/codelab/cmd/z2/rtgraph"
-	database2 "github.com/minor-industries/codelab/cmd/z2/rtgraph/database"
 	"github.com/minor-industries/codelab/cmd/z2/source"
+	"github.com/minor-industries/rtgraph"
+	database2 "github.com/minor-industries/rtgraph/database"
 	"github.com/pkg/errors"
 	"time"
 	"tinygo.org/x/bluetooth"
