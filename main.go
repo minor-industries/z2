@@ -59,6 +59,7 @@ func run() error {
 			avg("bike_instant_speed", 30),
 			avg("bike_instant_cadence", 30),
 			avg("bike_instant_power", 30),
+			avg("bike_instant_speed", 3600),
 		},
 	)
 	if err != nil {
