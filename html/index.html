@@ -31,33 +31,40 @@
     <script type="text/javascript">
         const minute = 1000 * 60;
 
+        const seriesOpts = {
+            y1: {
+                strokeWidth: 1.0
+            }
+        }
+
         Dygraph.onDOMready(function onDOMready() {
             makeGraph(document.getElementById("graphdiv0"), {
-                series: ["bike_instant_speed", "bike_instant_speed_avg_30s"],
-                title: "Speed",
+                seriesNames: ["bike_instant_speed_avg_30s", "bike_instant_speed"],
+                title: "Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
                 height: 300,
+                series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv1"), {
-                series: ["bike_instant_cadence", "bike_instant_cadence_avg_30s"],
-                title: "Cadence",
+                seriesNames: ["bike_instant_cadence_avg_30s", "bike_instant_cadence"],
+                title: "Cadence: {value}",
                 ylabel: "cadence (rpm)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
-                height: 300,
+                series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv2"), {
-                series: ["bike_instant_power", "bike_instant_power_avg_30s"],
-                title: "Power",
+                seriesNames: ["bike_instant_power_avg_30s", "bike_instant_power"],
+                title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
-                height: 300,
+                series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv3"), {
-                series: ["bike_instant_speed_avg_900s"],
+                seriesNames: ["bike_instant_speed_avg_900s"],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: 60 * minute,
@@ -65,7 +72,6 @@
                 height: 300,
                 valueRange: [35.0, 45.0],
             });
-
         });
     </script>
 </head>
