@@ -44,7 +44,7 @@
                 ylabel: "speed (km/h)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
-                height: 300,
+                height: 250,
                 series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv1"), {
@@ -53,6 +53,7 @@
                 ylabel: "cadence (rpm)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
+                height: 250,
                 series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv2"), {
@@ -61,6 +62,7 @@
                 ylabel: "power (watts)",
                 windowSize: minute,
                 labels: ["x", "y0", "y1"],
+                height: 250,
                 series: seriesOpts,
             });
             makeGraph(document.getElementById("graphdiv3"), {
@@ -69,7 +71,7 @@
                 ylabel: "speed (km/h)",
                 windowSize: 60 * minute,
                 labels: ["x", "y0"],
-                height: 300,
+                height: 200,
                 valueRange: [35.0, 45.0],
             });
         });
