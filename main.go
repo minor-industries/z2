@@ -60,6 +60,10 @@ func run() error {
 			avg("bike_instant_cadence", 30),
 			avg("bike_instant_power", 30),
 			avg("bike_instant_speed", 900),
+
+			avg("rower_power", 30),
+			avg("rower_spm", 30),
+			avg("rower_power", 900),
 		},
 	)
 	if err != nil {
@@ -68,6 +72,7 @@ func run() error {
 
 	graph.StaticFiles(html.FS,
 		"index.html", "text/html",
+		"bike.html", "text/html",
 		"rower.html", "text/html",
 	)
 

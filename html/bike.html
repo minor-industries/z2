@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Graphs</title>
+
     <style>
         .wide {
             width: 97.5%;
-            height: 400px;
             margin-bottom: 10px;
         }
     </style>
@@ -39,7 +39,25 @@
 
         Dygraph.onDOMready(function onDOMready() {
             makeGraph(document.getElementById("graphdiv0"), {
-                seriesNames: ["rower_power_avg_30s", "rower_power"],
+                seriesNames: ["bike_instant_speed_avg_30s", "bike_instant_speed"],
+                title: "Speed: {value}",
+                ylabel: "speed (km/h)",
+                windowSize: minute,
+                labels: ["x", "y0", "y1"],
+                height: 250,
+                series: seriesOpts,
+            });
+            makeGraph(document.getElementById("graphdiv1"), {
+                seriesNames: ["bike_instant_cadence_avg_30s", "bike_instant_cadence"],
+                title: "Cadence: {value}",
+                ylabel: "cadence (rpm)",
+                windowSize: minute,
+                labels: ["x", "y0", "y1"],
+                height: 250,
+                series: seriesOpts,
+            });
+            makeGraph(document.getElementById("graphdiv2"), {
+                seriesNames: ["bike_instant_power_avg_30s", "bike_instant_power"],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
@@ -47,35 +65,15 @@
                 height: 250,
                 series: seriesOpts,
             });
-
-            makeGraph(document.getElementById("graphdiv1"), {
-                seriesNames: ["rower_spm_avg_30s", "rower_spm"],
-                title: "SPM: {value}",
-                ylabel: "spm",
-                windowSize: minute,
-                labels: ["x", "y0", "y1"],
-                height: 250,
-                series: seriesOpts,
-            });
-
-            makeGraph(document.getElementById("graphdiv2"), {
-                seriesNames: ["rower_stroke_count"],
-                title: "Stroke Count: {value}",
-                windowSize: minute,
-                labels: ["x", "y0"],
-                height: 250,
-            });
-
             makeGraph(document.getElementById("graphdiv3"), {
-                seriesNames: ["rower_power_avg_900s"],
-                title: "Avg Power: {value}",
-                ylabel: "power (watts)",
+                seriesNames: ["bike_instant_speed_avg_900s"],
+                title: "Avg Speed: {value}",
+                ylabel: "speed (km/h)",
                 windowSize: 60 * minute,
                 labels: ["x", "y0"],
                 height: 200,
-                valueRange: [110.0, 140.0],
+                valueRange: [35.0, 45.0],
             });
-
         });
     </script>
 </head>
