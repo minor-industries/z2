@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Graphs</title>
+    <title>Rower</title>
     <style>
         .wide {
             width: 97.5%;
@@ -38,7 +38,7 @@
         }
 
         Dygraph.onDOMready(function onDOMready() {
-            makeGraph(document.getElementById("graphdiv0"), {
+            new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: ["rower_power_avg_30s", "rower_power"],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
@@ -48,7 +48,7 @@
                 series: seriesOpts,
             });
 
-            makeGraph(document.getElementById("graphdiv1"), {
+            new Graph(document.getElementById("graphdiv1"), {
                 seriesNames: ["rower_spm_avg_30s", "rower_spm"],
                 title: "SPM: {value}",
                 ylabel: "spm",
@@ -58,7 +58,7 @@
                 series: seriesOpts,
             });
 
-            makeGraph(document.getElementById("graphdiv2"), {
+            new Graph(document.getElementById("graphdiv2"), {
                 seriesNames: ["rower_stroke_count"],
                 title: "Stroke Count: {value}",
                 windowSize: minute,
@@ -66,7 +66,7 @@
                 height: 250,
             });
 
-            makeGraph(document.getElementById("graphdiv3"), {
+            new Graph(document.getElementById("graphdiv3"), {
                 seriesNames: ["rower_power_avg_900s"],
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
