@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/rtgraph"
-	database2 "github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database"
 	"github.com/pkg/errors"
 	"time"
 	"tinygo.org/x/bluetooth"
@@ -21,6 +21,8 @@ type BikeHandler struct {
 
 	t0      time.Time
 	lastMsg time.Time
+
+	dbCh chan *database.RawValue
 }
 
 func NewBikeHandler(
@@ -29,14 +31,40 @@ func NewBikeHandler(
 	cancel context.CancelFunc,
 	ctx context.Context,
 ) (*BikeHandler, error) {
-	return &BikeHandler{
+	h := &BikeHandler{
 		graph:   graph,
 		source:  source,
 		cancel:  cancel,
 		ctx:     ctx,
 		t0:      time.Now(),
 		lastMsg: time.Time{},
-	}, nil
+		dbCh:    make(chan *database.RawValue, 256),
+	}
+
+	go h.dbWriter()
+
+	return h, nil
+}
+
+func (h *BikeHandler) dbWriter() {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	var values []*database.RawValue
+
+	for {
+		select {
+		case <-ticker.C:
+			if len(values) == 0 {
+				continue
+			}
+			tx := h.graph.DB().Create(values)
+			if tx.Error != nil {
+				fmt.Println("error:", errors.Wrap(tx.Error, "writing raw values"))
+			}
+			values = nil
+		case value := <-h.dbCh:
+			values = append(values, value)
+		}
+	}
 }
 
 func (h *BikeHandler) Handle(
@@ -48,15 +76,12 @@ func (h *BikeHandler) Handle(
 	h.lastMsg = t
 
 	// store raw messages to database
-	tx := h.graph.DB().Create(&database2.RawValue{
-		ID:               database2.RandomID(),
+	h.dbCh <- &database.RawValue{
+		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
 		Timestamp:        t,
 		Message:          msg,
-	})
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "create raw value")
 	}
 
 	srs := h.source.Convert(source.Message{
