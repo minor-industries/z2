@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jessevdk/go-flags"
 	handler2 "github.com/minor-industries/codelab/cmd/z2/handler"
 	"github.com/minor-industries/codelab/cmd/z2/html"
@@ -21,6 +22,8 @@ var opts struct {
 }
 
 func run() error {
+	gin.SetMode(gin.ReleaseMode)
+
 	errCh := make(chan error)
 
 	_, err := flags.Parse(&opts)
