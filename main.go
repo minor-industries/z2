@@ -31,8 +31,8 @@ func run() error {
 		return errors.Wrap(err, "parse flags")
 	}
 
-	avg := func(name string, seconds int) rtgraph.Computed {
-		return rtgraph.Computed{
+	avg := func(name string, seconds uint) rtgraph.ComputedReq {
+		return rtgraph.ComputedReq{
 			SeriesName: name,
 			Function:   "avg",
 			Seconds:    seconds,
@@ -58,7 +58,7 @@ func run() error {
 			"rower_speed",
 			"rower_spm",
 		},
-		[]rtgraph.Computed{
+		[]rtgraph.ComputedReq{
 			avg("bike_instant_speed", 30),
 			avg("bike_instant_cadence", 30),
 			avg("bike_instant_power", 30),

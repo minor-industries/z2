@@ -29,7 +29,8 @@
     <script type="text/javascript" src="msgpack.min.js"></script>
     <script type="text/javascript" src="graphs.js"></script>
     <script type="text/javascript">
-        const minute = 1000 * 60;
+        const second = 1000;
+        const minute = second * 60;
 
         const seriesOpts = {
             y1: {
@@ -46,6 +47,7 @@
                 labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
+                maxGapMs: 5 * second
             });
 
             new Graph(document.getElementById("graphdiv1"), {
@@ -56,6 +58,7 @@
                 labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
+                maxGapMs: 5 * second
             });
 
             new Graph(document.getElementById("graphdiv2"), {
@@ -64,6 +67,7 @@
                 windowSize: minute,
                 labels: ["x", "y0"],
                 height: 250,
+                maxGapMs: 5 * second
             });
 
             new Graph(document.getElementById("graphdiv3"), {
@@ -74,6 +78,7 @@
                 labels: ["x", "y0"],
                 height: 200,
                 valueRange: [110.0, 140.0],
+                maxGapMs: 5 * second
             });
 
         });
