@@ -21,8 +21,6 @@ type BikeHandler struct {
 
 	t0      time.Time
 	lastMsg time.Time
-
-	dbCh chan *database.RawValue
 }
 
 func NewBikeHandler(
@@ -38,33 +36,9 @@ func NewBikeHandler(
 		ctx:     ctx,
 		t0:      time.Now(),
 		lastMsg: time.Time{},
-		dbCh:    make(chan *database.RawValue, 256),
 	}
-
-	go h.dbWriter()
 
 	return h, nil
-}
-
-func (h *BikeHandler) dbWriter() {
-	ticker := time.NewTicker(100 * time.Millisecond)
-	var values []*database.RawValue
-
-	for {
-		select {
-		case <-ticker.C:
-			if len(values) == 0 {
-				continue
-			}
-			tx := h.graph.DB().Create(values)
-			if tx.Error != nil {
-				fmt.Println("error:", errors.Wrap(tx.Error, "writing raw values"))
-			}
-			values = nil
-		case value := <-h.dbCh:
-			values = append(values, value)
-		}
-	}
 }
 
 func (h *BikeHandler) Handle(
@@ -75,14 +49,13 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	// store raw messages to database
-	h.dbCh <- &database.RawValue{
+	h.graph.DBWriter().Insert(&database.RawValue{
 		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
 		Timestamp:        t,
 		Message:          msg,
-	}
+	})
 
 	srs := h.source.Convert(source.Message{
 		Timestamp:      t,
