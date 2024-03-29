@@ -4,32 +4,16 @@
     <meta charset="UTF-8">
     <title>Bike</title>
 
-    <style>
-        .wide {
-            width: 97.5%;
-            margin-bottom: 10px;
-        }
-    </style>
-
-    <style>
-        .container {
-            display: flex;
-        }
-
-        .column {
-            flex: 1;
-            /*padding: 10px;*/
-            margin-bottom: 10px;
-            margin-right: 20px;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="rtgraph.css"/>
 
     <script type="text/javascript" src="dygraph.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="dygraph.css"/>
     <script type="text/javascript" src="msgpack.min.js"></script>
-    <script type="text/javascript" src="graphs.js"></script>
+    <script type="text/javascript" src="rtgraph.js"></script>
+    
     <script type="text/javascript">
-        const minute = 1000 * 60;
+        const second = 1000;
+        const minute = second * 60;
 
         const seriesOpts = {
             y1: {
@@ -38,7 +22,7 @@
         }
 
         Dygraph.onDOMready(function onDOMready() {
-            makeGraph(document.getElementById("graphdiv0"), {
+            new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: ["bike_instant_speed_avg_30s", "bike_instant_speed"],
                 title: "Speed: {value}",
                 ylabel: "speed (km/h)",
@@ -46,8 +30,9 @@
                 labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
+                maxGapMs: 5 * second
             });
-            makeGraph(document.getElementById("graphdiv1"), {
+            new Graph(document.getElementById("graphdiv1"), {
                 seriesNames: ["bike_instant_cadence_avg_30s", "bike_instant_cadence"],
                 title: "Cadence: {value}",
                 ylabel: "cadence (rpm)",
@@ -55,8 +40,9 @@
                 labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
+                maxGapMs: 5 * second
             });
-            makeGraph(document.getElementById("graphdiv2"), {
+            new Graph(document.getElementById("graphdiv2"), {
                 seriesNames: ["bike_instant_power_avg_30s", "bike_instant_power"],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
@@ -64,8 +50,9 @@
                 labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
+                maxGapMs: 5 * second
             });
-            makeGraph(document.getElementById("graphdiv3"), {
+            new Graph(document.getElementById("graphdiv3"), {
                 seriesNames: ["bike_instant_speed_avg_900s"],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
@@ -73,6 +60,7 @@
                 labels: ["x", "y0"],
                 height: 200,
                 valueRange: [35.0, 45.0],
+                maxGapMs: 5 * second
             });
         });
     </script>
