@@ -2,7 +2,7 @@ package rower
 
 import (
 	"encoding/binary"
-	"github.com/minor-industries/codelab/cmd/z2/source"
+	"github.com/minor-industries/z2/source"
 	"time"
 )
 

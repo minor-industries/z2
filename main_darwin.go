@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/minor-industries/codelab/cmd/z2/source"
-	"github.com/minor-industries/codelab/cmd/z2/source/bike"
-	"github.com/minor-industries/codelab/cmd/z2/source/rower"
+	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/source/bike"
+	"github.com/minor-industries/z2/source/rower"
 )
 
 func getSource(name string) (string, source.Source) {

@@ -2,8 +2,8 @@ package replay
 
 import (
 	"context"
-	"github.com/minor-industries/codelab/cmd/z2/source"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
 	"time"
 	"tinygo.org/x/bluetooth"

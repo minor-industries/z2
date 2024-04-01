@@ -1,8 +1,8 @@
 package bike
 
 import (
-	"github.com/minor-industries/codelab/cmd/z2/source"
-	"github.com/minor-industries/codelab/cmd/z2/source/bike/parser"
+	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/source/bike/parser"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
