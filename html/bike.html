@@ -10,7 +10,7 @@
     <script type="text/javascript" src="dygraph.min.js"></script>
     <script type="text/javascript" src="msgpack.min.js"></script>
     <script type="text/javascript" src="rtgraph.js"></script>
-    
+
     <script type="text/javascript">
         const second = 1000;
         const minute = second * 60;
@@ -23,7 +23,10 @@
 
         Dygraph.onDOMready(function onDOMready() {
             new Graph(document.getElementById("graphdiv0"), {
-                seriesNames: ["bike_instant_speed_avg_30s", "bike_instant_speed"],
+                seriesNames: [
+                    "bike_instant_speed | gt 20 | avg 30s",
+                    "bike_instant_speed"
+                ],
                 title: "Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: minute,
@@ -33,7 +36,10 @@
                 maxGapMs: 5 * second
             });
             new Graph(document.getElementById("graphdiv1"), {
-                seriesNames: ["bike_instant_cadence_avg_30s", "bike_instant_cadence"],
+                seriesNames: [
+                    "bike_instant_cadence | gt 30 | avg 30s",
+                    "bike_instant_cadence"
+                ],
                 title: "Cadence: {value}",
                 ylabel: "cadence (rpm)",
                 windowSize: minute,
@@ -43,7 +49,10 @@
                 maxGapMs: 5 * second
             });
             new Graph(document.getElementById("graphdiv2"), {
-                seriesNames: ["bike_instant_power_avg_30s", "bike_instant_power"],
+                seriesNames: [
+                    "bike_instant_power | gt 150 | avg 30s",
+                    "bike_instant_power"
+                ],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
@@ -53,13 +62,14 @@
                 maxGapMs: 5 * second
             });
             new Graph(document.getElementById("graphdiv3"), {
-                seriesNames: ["bike_instant_speed_avg_900s"],
+                seriesNames: [
+                    "bike_instant_speed | gt 20 | avg 15m"
+                ],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
-                windowSize: 60 * minute,
+                windowSize: 15 * minute,
                 labels: ["x", "y0"],
                 height: 200,
-                valueRange: [35.0, 45.0],
                 maxGapMs: 5 * second
             });
         });

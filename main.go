@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/database"
 	handler2 "github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/html"
 	"github.com/minor-industries/z2/source"
@@ -31,16 +32,13 @@ func run() error {
 		return errors.Wrap(err, "parse flags")
 	}
 
-	avg := func(name string, seconds uint) rtgraph.ComputedReq {
-		return rtgraph.ComputedReq{
-			SeriesName: name,
-			Function:   "avg",
-			Seconds:    seconds,
-		}
+	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"))
+	if err != nil {
+		return errors.Wrap(err, "get database")
 	}
 
 	graph, err := rtgraph.New(
-		os.ExpandEnv("$HOME/z2.db"),
+		&database.Backend{DB: db},
 		errCh,
 		[]string{
 			"bike_instant_speed",
@@ -57,16 +55,6 @@ func run() error {
 			"rower_power",
 			"rower_speed",
 			"rower_spm",
-		},
-		[]rtgraph.ComputedReq{
-			avg("bike_instant_speed", 30),
-			avg("bike_instant_cadence", 30),
-			avg("bike_instant_power", 30),
-			avg("bike_instant_speed", 900),
-
-			avg("rower_power", 30),
-			avg("rower_spm", 30),
-			avg("rower_power", 900),
 		},
 	)
 	if err != nil {

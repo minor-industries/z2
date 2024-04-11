@@ -23,7 +23,10 @@
 
         Dygraph.onDOMready(function onDOMready() {
             new Graph(document.getElementById("graphdiv0"), {
-                seriesNames: ["rower_power_avg_30s", "rower_power"],
+                seriesNames: [
+                    "rower_power | gt 70 | avg 30s",
+                    "rower_power"
+                ],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
@@ -34,7 +37,10 @@
             });
 
             new Graph(document.getElementById("graphdiv1"), {
-                seriesNames: ["rower_spm_avg_30s", "rower_spm"],
+                seriesNames: [
+                    "rower_spm | gt 5 | avg 30s",
+                    "rower_spm"
+                ],
                 title: "SPM: {value}",
                 ylabel: "spm",
                 windowSize: minute,
@@ -45,7 +51,9 @@
             });
 
             new Graph(document.getElementById("graphdiv2"), {
-                seriesNames: ["rower_stroke_count"],
+                seriesNames: [
+                    "rower_stroke_count"
+                ],
                 title: "Stroke Count: {value}",
                 windowSize: minute,
                 labels: ["x", "y0"],
@@ -54,13 +62,15 @@
             });
 
             new Graph(document.getElementById("graphdiv3"), {
-                seriesNames: ["rower_power_avg_900s"],
+                seriesNames: [
+                    "rower_power | gt 70 | avg 15m"
+                ],
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
-                windowSize: 60 * minute,
+                windowSize: 15 * minute,
                 labels: ["x", "y0"],
                 height: 200,
-                valueRange: [110.0, 140.0],
+                // valueRange: [110.0, 140.0],
                 maxGapMs: 5 * second
             });
         });
