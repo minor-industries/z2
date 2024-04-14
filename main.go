@@ -40,6 +40,7 @@ func run() error {
 	graph, err := rtgraph.New(
 		&database.Backend{DB: db},
 		errCh,
+		rtgraph.Opts{},
 		[]string{
 			"bike_instant_speed",
 			"bike_instant_cadence",
