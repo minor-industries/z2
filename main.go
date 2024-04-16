@@ -20,6 +20,8 @@ var opts struct {
 
 	Replay   bool   `long:"replay"`
 	ReplayDB string `long:"replay-db"`
+
+	Port int `long:"port" default:"8077" env:"PORT"`
 }
 
 func run() error {
@@ -85,7 +87,7 @@ func run() error {
 	go handler.Monitor()
 
 	go func() {
-		errCh <- graph.RunServer("0.0.0.0:8077")
+		errCh <- graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
 	go func() {
