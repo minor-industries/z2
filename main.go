@@ -34,13 +34,13 @@ func run() error {
 		return errors.Wrap(err, "parse flags")
 	}
 
-	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"))
+	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"), errCh)
 	if err != nil {
 		return errors.Wrap(err, "get database")
 	}
 
 	graph, err := rtgraph.New(
-		&database.Backend{DB: db},
+		db,
 		errCh,
 		rtgraph.Opts{},
 		[]string{
@@ -77,6 +77,7 @@ func run() error {
 
 	handler, err := handler2.NewBikeHandler(
 		graph,
+		db,
 		src,
 		cancel,
 		ctx,

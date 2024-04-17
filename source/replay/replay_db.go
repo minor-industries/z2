@@ -23,13 +23,13 @@ func RunDB(
 	filename string,
 	callback source.MessageCallback,
 ) error {
-	db, err := database.Get(filename)
+	db, err := database.Get(filename, errCh)
 	if err != nil {
 		return errors.Wrap(err, "get replay database")
 	}
 
 	var rows []database.RawValue
-	tx := db.Find(&rows)
+	tx := db.GetORM().Find(&rows)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "load rows")
 	}

@@ -14,10 +14,11 @@ import (
 // TODO: might be nice to split into separate handlers, one for DB and one for publishing to broker
 
 type BikeHandler struct {
-	graph  *rtgraph.Graph
-	source source.Source
-	cancel context.CancelFunc
-	ctx    context.Context
+	graph   *rtgraph.Graph
+	backend *database.Backend
+	source  source.Source
+	cancel  context.CancelFunc
+	ctx     context.Context
 
 	t0      time.Time
 	lastMsg time.Time
@@ -25,12 +26,14 @@ type BikeHandler struct {
 
 func NewBikeHandler(
 	graph *rtgraph.Graph,
+	backend *database.Backend,
 	source source.Source,
 	cancel context.CancelFunc,
 	ctx context.Context,
 ) (*BikeHandler, error) {
 	h := &BikeHandler{
 		graph:   graph,
+		backend: backend,
 		source:  source,
 		cancel:  cancel,
 		ctx:     ctx,
@@ -49,7 +52,7 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	h.graph.DBWriter().Insert(&database.RawValue{
+	h.backend.Insert(&database.RawValue{
 		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
