@@ -30,7 +30,7 @@
         Dygraph.onDOMready(function onDOMready() {
             new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: [
-                    "rower_power | gt 70 | avg 30s",
+                    "rower_power | gt 70 | avg 30s triangle",
                     "rower_power"
                 ],
                 title: "Power: {value}",
@@ -44,7 +44,7 @@
 
             new Graph(document.getElementById("graphdiv1"), {
                 seriesNames: [
-                    "rower_spm | gt 5 | avg 30s",
+                    "rower_spm | gt 5 | avg 30s triangle",
                     "rower_spm"
                 ],
                 title: "SPM: {value}",
@@ -69,7 +69,7 @@
 
             new Graph(document.getElementById("graphdiv3"), {
                 seriesNames: [
-                    "rower_power | gt 70 | avg 15m"
+                    "rower_power | gt 70 | avg 10m triangle"
                 ],
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
