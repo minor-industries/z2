@@ -2,4 +2,4 @@
 
 Bike screenshot
 
-![app screenshot](https://minor-industries.sfo2.digitaloceanspaces.com/sw/z2_screenshot_01.png)
+![app screenshot](https://minor-industries.sfo2.digitaloceanspaces.com/sw/z2_screenshot_02.png)
