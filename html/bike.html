@@ -30,7 +30,7 @@
         Dygraph.onDOMready(function onDOMready() {
             new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: [
-                    "bike_instant_speed | gt 20 | avg 30s",
+                    "bike_instant_speed | gt 20 | avg 30s triangle",
                     "bike_instant_speed"
                 ],
                 title: "Speed: {value}",
@@ -41,9 +41,10 @@
                 series: seriesOpts,
                 maxGapMs: 5 * second
             });
+
             new Graph(document.getElementById("graphdiv1"), {
                 seriesNames: [
-                    "bike_instant_cadence | gt 30 | avg 30s",
+                    "bike_instant_cadence | gt 30 | avg 30s triangle",
                     "bike_instant_cadence"
                 ],
                 title: "Cadence: {value}",
@@ -54,9 +55,10 @@
                 series: seriesOpts,
                 maxGapMs: 5 * second
             });
+
             new Graph(document.getElementById("graphdiv2"), {
                 seriesNames: [
-                    "bike_instant_power | gt 150 | avg 30s",
+                    "bike_instant_power | gt 150 | avg 30s triangle",
                     "bike_instant_power"
                 ],
                 title: "Power: {value}",
@@ -67,9 +69,10 @@
                 series: seriesOpts,
                 maxGapMs: 5 * second
             });
-            new Graph(document.getElementById("graphdiv3"), {
+
+            new Graph(document.getElementById("graphdiv5"), {
                 seriesNames: [
-                    "bike_instant_speed | gt 20 | avg 15m"
+                    "bike_instant_speed | gt 20 | avg 10m triangle"
                 ],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
@@ -78,13 +81,14 @@
                 height: 250,
                 maxGapMs: 5 * second
             });
+
             new Graph(document.getElementById("graphdiv4"), {
                 seriesNames: [
                     "bike_heartrate"
                 ],
                 title: "Heartrate: {value}",
                 ylabel: "bpm",
-                windowSize: minute,
+                windowSize: 15 * minute,
                 labels: ["x", "y0"],
                 height: 250,
                 maxGapMs: 5 * second
@@ -108,19 +112,19 @@
     </div>
 
     <div class="pure-u-1 pure-u-sm-2-3">
-        <div id="graphdiv3" class="rtgraph-graph"></div>
-    </div>
-
-    <div class="pure-u-1 pure-u-sm-1-3">
-        <div id="graphdiv1" class="rtgraph-graph"></div>
+        <div id="graphdiv5" class="rtgraph-graph"></div>
     </div>
 
     <div class="pure-u-1 pure-u-sm-1-3">
         <div id="graphdiv2" class="rtgraph-graph"></div>
     </div>
 
-    <div class="pure-u-1 pure-u-sm-1-3">
+    <div class="pure-u-1 pure-u-sm-2-3">
         <div id="graphdiv4" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1 pure-u-sm-1-3">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
     </div>
 </div>
 
