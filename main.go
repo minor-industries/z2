@@ -24,7 +24,7 @@ var opts struct {
 
 	Port int `long:"port" default:"8077" env:"PORT"`
 
-	HeartrateMonitors []string `long:"hrm"`
+	HeartrateMonitors []string `long:"hrm" env:"HRM"`
 }
 
 func run() error {
