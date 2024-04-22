@@ -2,7 +2,6 @@ package source
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
@@ -41,7 +40,8 @@ func Run(
 	errCh chan error,
 	address string,
 	src Source,
-	callback MessageCallback,
+	connectCallback func(),
+	messageCallback MessageCallback,
 ) error {
 	var adapter = bluetooth.DefaultAdapter
 
@@ -71,6 +71,9 @@ func Run(
 		}
 
 		fmt.Println("connected to", result.Address.String())
+		if connectCallback != nil {
+			connectCallback()
+		}
 	}
 
 	fmt.Println("discovering services/characteristics")
@@ -104,8 +107,7 @@ func Run(
 				svUUID := srvc.UUID()
 				chUUID := char.UUID()
 				if err := char.EnableNotifications(func(buf []byte) {
-					fmt.Println(svUUID, chUUID, hex.EncodeToString(buf))
-					err := callback(time.Now(), svUUID, chUUID, buf)
+					err := messageCallback(time.Now(), svUUID, chUUID, buf)
 					if err != nil {
 						errCh <- errors.Wrap(err, "callback")
 					}

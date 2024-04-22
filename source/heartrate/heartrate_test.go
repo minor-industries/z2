@@ -31,6 +31,7 @@ func TestHeartrate(t *testing.T) {
 			errCh,
 			address,
 			src,
+			nil,
 			func(
 				t time.Time,
 				service bluetooth.UUID,

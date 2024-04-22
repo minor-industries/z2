@@ -7,7 +7,6 @@ import (
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
-	"reflect"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
@@ -51,7 +50,6 @@ func (h *BikeHandler) Handle(
 	characteristic bluetooth.UUID,
 	msg []byte,
 ) error {
-	fmt.Println("here", reflect.TypeOf(h.source).String())
 	h.lastMsg = t
 
 	h.backend.Insert(&database.RawValue{

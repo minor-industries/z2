@@ -61,6 +61,8 @@ func run() error {
 			"rower_power",
 			"rower_speed",
 			"rower_spm",
+
+			"heartrate",
 		},
 	)
 	if err != nil {
@@ -90,29 +92,34 @@ func run() error {
 	}
 	go mainHandler.Monitor()
 
-	for _, addr := range opts.HeartrateMonitors {
-		addr := addr
-		hrmSrc := &heartrate.Source{}
-		h, err := handler.NewBikeHandler(
-			graph,
-			db,
-			hrmSrc,
-			cancel,
-			ctx,
-		)
-		if err != nil {
-			return errors.Wrap(err, "new handler")
-		}
-
-		go func() {
-			errCh <- source.Run(
-				ctx,
-				errCh,
-				addr,
+	setupHRMs := func() {
+		// TODO: this needs a lot of reorganization/cleanup
+		for _, addr := range opts.HeartrateMonitors {
+			addr := addr
+			hrmSrc := &heartrate.Source{}
+			h, err := handler.NewBikeHandler(
+				graph,
+				db,
 				hrmSrc,
-				h.Handle,
+				cancel,
+				ctx,
 			)
-		}()
+			if err != nil {
+				errCh <- errors.Wrap(err, "new handler")
+				return
+			}
+
+			go func() {
+				errCh <- source.Run(
+					ctx,
+					errCh,
+					addr,
+					hrmSrc,
+					nil,
+					h.Handle,
+				)
+			}()
+		}
 	}
 
 	go func() {
@@ -121,6 +128,7 @@ func run() error {
 
 	go func() {
 		if opts.ReplayDB != "" {
+			go setupHRMs()
 			err = replay.RunDB(
 				ctx,
 				errCh,
@@ -140,6 +148,9 @@ func run() error {
 				errCh,
 				srcAddr,
 				src,
+				func() {
+					go setupHRMs()
+				},
 				mainHandler.Handle,
 			)
 		}
