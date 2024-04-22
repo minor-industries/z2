@@ -7,9 +7,10 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database"
-	handler2 "github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/html"
 	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/pkg/errors"
 	"os"
@@ -22,6 +23,8 @@ var opts struct {
 	ReplayDB string `long:"replay-db"`
 
 	Port int `long:"port" default:"8077" env:"PORT"`
+
+	HeartrateMonitors []string `long:"hrm"`
 }
 
 func run() error {
@@ -71,11 +74,11 @@ func run() error {
 	)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	//src := &handler2.BikeSource{}
+	//src := &mainHandler.BikeSource{}
 	srcAddr, src := getSource(opts.Source)
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
-	handler, err := handler2.NewBikeHandler(
+	mainHandler, err := handler.NewBikeHandler(
 		graph,
 		db,
 		src,
@@ -85,7 +88,31 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new handler")
 	}
-	go handler.Monitor()
+	go mainHandler.Monitor()
+
+	for _, addr := range opts.HeartrateMonitors {
+		addr := addr
+		h, err := handler.NewBikeHandler(
+			graph,
+			db,
+			src,
+			cancel,
+			ctx,
+		)
+		if err != nil {
+			return errors.Wrap(err, "new handler")
+		}
+
+		go func() {
+			errCh <- source.Run(
+				ctx,
+				errCh,
+				addr,
+				&heartrate.Source{},
+				h.Handle,
+			)
+		}()
+	}
 
 	go func() {
 		errCh <- graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
@@ -97,14 +124,14 @@ func run() error {
 				ctx,
 				errCh,
 				os.ExpandEnv(opts.ReplayDB),
-				handler.Handle,
+				mainHandler.Handle,
 			)
 		} else if opts.Replay {
 			err = replay.Run(
 				ctx,
 				errCh,
 				"raw.txt",
-				handler.Handle,
+				mainHandler.Handle,
 			)
 		} else {
 			err = source.Run(
@@ -112,7 +139,7 @@ func run() error {
 				errCh,
 				srcAddr,
 				src,
-				handler.Handle,
+				mainHandler.Handle,
 			)
 		}
 		errCh <- err

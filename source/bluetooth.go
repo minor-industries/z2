@@ -69,7 +69,7 @@ func Run(
 			return errors.Wrap(err, "connect")
 		}
 
-		fmt.Println("connected to ", result.Address.String())
+		fmt.Println("connected to", result.Address.String())
 	}
 
 	fmt.Println("discovering services/characteristics")

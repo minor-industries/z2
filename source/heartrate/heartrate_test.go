@@ -11,29 +11,6 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-const (
-	address = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-)
-
-type Source struct{}
-
-func (s *Source) Convert(msg source.Message) []source.Value {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Source) Services() []bluetooth.UUID {
-	return []bluetooth.UUID{
-		bluetooth.ServiceUUIDHeartRate,
-	}
-}
-
-func (s *Source) Characteristics() []bluetooth.UUID {
-	return []bluetooth.UUID{
-		bluetooth.CharacteristicUUIDHeartRateMeasurement,
-	}
-}
-
 func TestHeartrate(t *testing.T) {
 	errCh := make(chan error)
 	src := &Source{}
