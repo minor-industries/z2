@@ -11,6 +11,10 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
+const (
+	address = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+)
+
 func TestHeartrate(t *testing.T) {
 	errCh := make(chan error)
 	src := &Source{}

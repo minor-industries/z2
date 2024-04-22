@@ -5,10 +5,6 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-const (
-	address = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-)
-
 type Source struct{}
 
 func (s *Source) Convert(msg source.Message) []source.Value {
