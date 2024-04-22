@@ -92,10 +92,11 @@ func run() error {
 
 	for _, addr := range opts.HeartrateMonitors {
 		addr := addr
+		hrmSrc := &heartrate.Source{}
 		h, err := handler.NewBikeHandler(
 			graph,
 			db,
-			src,
+			hrmSrc,
 			cancel,
 			ctx,
 		)
@@ -108,7 +109,7 @@ func run() error {
 				ctx,
 				errCh,
 				addr,
-				&heartrate.Source{},
+				hrmSrc,
 				h.Handle,
 			)
 		}()

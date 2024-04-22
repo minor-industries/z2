@@ -2,6 +2,7 @@ package source
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
@@ -103,6 +104,7 @@ func Run(
 				svUUID := srvc.UUID()
 				chUUID := char.UUID()
 				if err := char.EnableNotifications(func(buf []byte) {
+					fmt.Println(svUUID, chUUID, hex.EncodeToString(buf))
 					err := callback(time.Now(), svUUID, chUUID, buf)
 					if err != nil {
 						errCh <- errors.Wrap(err, "callback")

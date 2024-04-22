@@ -8,8 +8,20 @@ import (
 type Source struct{}
 
 func (s *Source) Convert(msg source.Message) []source.Value {
-	//TODO implement me
-	panic("implement me")
+	// TODO: perhaps this filtering should be in the caller
+	if msg.Service != s.Services()[0] {
+		return nil
+	}
+
+	if msg.Characteristic != s.Characteristics()[0] {
+		return nil
+	}
+
+	return []source.Value{{
+		Name:      "heartrate",
+		Timestamp: msg.Timestamp,
+		Value:     float64(msg.Msg[1]),
+	}}
 }
 
 func (s *Source) Services() []bluetooth.UUID {
