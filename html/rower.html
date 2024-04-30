@@ -17,7 +17,7 @@
     <script type="text/javascript" src="rtgraph/msgpack.min.js"></script>
 
     <script type="module">
-        import {Graph} from './rtgraph/dist/rtgraph.js';
+        import {Graph} from './rtgraph/rtgraph.js';
 
         document.addEventListener("DOMContentLoaded", () => {
             const second = 1000;
@@ -33,7 +33,6 @@
                 title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
                 maxGapMs: 5 * second
@@ -47,7 +46,6 @@
                 title: "SPM: {value}",
                 ylabel: "spm",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
                 maxGapMs: 5 * second
@@ -59,7 +57,6 @@
                 ],
                 title: "Stroke Count: {value}",
                 windowSize: minute,
-                labels: ["x", "y0"],
                 height: 250,
                 maxGapMs: 5 * second
             });
@@ -71,7 +68,6 @@
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: 15 * minute,
-                labels: ["x", "y0"],
                 height: 250,
                 // valueRange: [110.0, 140.0],
                 maxGapMs: 5 * second
@@ -84,7 +80,6 @@
                 title: "Heartrate: {value}",
                 ylabel: "bpm",
                 windowSize: 15 * minute,
-                labels: ["x", "y0"],
                 height: 250,
                 maxGapMs: 5 * second
             });

@@ -17,7 +17,7 @@
     <script type="text/javascript" src="rtgraph/msgpack.min.js"></script>
 
     <script type="module">
-        import {Graph} from './rtgraph/dist/rtgraph.js';
+        import {Graph} from './rtgraph/rtgraph.js';
 
         document.addEventListener("DOMContentLoaded", () => {
             const second = 1000;
@@ -32,7 +32,6 @@
                 title: "Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
                 maxGapMs: 5 * second
@@ -46,7 +45,6 @@
                 title: "Cadence: {value}",
                 ylabel: "cadence (rpm)",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
                 maxGapMs: 5 * second
@@ -60,7 +58,6 @@
                 title: "Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: minute,
-                labels: ["x", "y0", "y1"],
                 height: 250,
                 series: seriesOpts,
                 maxGapMs: 5 * second
@@ -73,7 +70,6 @@
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: 15 * minute,
-                labels: ["x", "y0"],
                 height: 250,
                 maxGapMs: 5 * second
             });
@@ -85,7 +81,6 @@
                 title: "Heartrate: {value}",
                 ylabel: "bpm",
                 windowSize: 15 * minute,
-                labels: ["x", "y0"],
                 height: 250,
                 maxGapMs: 5 * second
             });
