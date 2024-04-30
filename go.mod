@@ -6,7 +6,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/minor-industries/rtgraph v0.0.10
+	github.com/minor-industries/rtgraph v0.0.12-0.20240430142748-1b779554a1cf
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	tinygo.org/x/bluetooth v0.9.0
