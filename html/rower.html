@@ -74,12 +74,14 @@
 
             new Graph(document.getElementById("graphdiv4"), {
                 seriesNames: [
+                    "heartrate | gt 0 | avg 2m triangle",
                     "heartrate | gt 0"
                 ],
                 title: "Heartrate: {value}",
                 ylabel: "bpm",
                 windowSize: 15 * minute,
                 height: 250,
+                series: seriesOpts,
                 maxGapMs: 5 * second
             });
         });
