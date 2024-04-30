@@ -113,6 +113,8 @@ github.com/minor-industries/rtgraph v0.0.10 h1:aFXtl6Cve3b/BFeWzOXf/pIlpgMeoOSFw
 github.com/minor-industries/rtgraph v0.0.10/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
 github.com/minor-industries/rtgraph v0.0.12-0.20240430142748-1b779554a1cf h1:wbvHgHhqoZ0joMeh9A5Wc+uIC4wlkl0yaxVjeslK7Sk=
 github.com/minor-industries/rtgraph v0.0.12-0.20240430142748-1b779554a1cf/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
+github.com/minor-industries/rtgraph v0.0.12 h1:vRCs0mUBtU9w/ES0dscFG8SA+9yWlIQAXMX86dMFOEY=
+github.com/minor-industries/rtgraph v0.0.12/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
