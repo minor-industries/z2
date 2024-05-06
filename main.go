@@ -7,6 +7,7 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/html"
 	"github.com/minor-industries/z2/source"
@@ -74,6 +75,11 @@ func run() error {
 		"bike.html", "text/html",
 		"rower.html", "text/html",
 	)
+
+	router := graph.GetEngine()
+
+	apiServer := api.NewCalendarServer(&ApiServer{}, nil)
+	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(apiServer))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	//src := &mainHandler.BikeSource{}

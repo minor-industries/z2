@@ -9,6 +9,8 @@ require (
 	github.com/minor-industries/rtgraph v0.0.12
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
+	github.com/twitchtv/twirp v8.1.3+incompatible
+	google.golang.org/protobuf v1.33.0
 	tinygo.org/x/bluetooth v0.9.0
 )
 
@@ -18,7 +20,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
-	github.com/chrispappas/golang-generics-set v1.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gammazero/deque v0.2.1 // indirect
@@ -62,7 +63,6 @@ require (
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/gorm v1.25.9 // indirect
 	modernc.org/libc v1.49.3 // indirect
