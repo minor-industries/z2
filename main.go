@@ -75,7 +75,8 @@ func run() error {
 		"bike.html", "text/html",
 		"rower.html", "text/html",
 		"handlebars.js", "application/javascript",
-		"index.js", "application/javascript",
+		"data.js", "application/javascript",
+		"data.html", "text/html",
 	)
 
 	router := graph.GetEngine()
