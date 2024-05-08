@@ -4,8 +4,7 @@
     <title>z2 data</title>
     <style>
         body {
-            background-color: #222;
-            color: #BBB;
+            background-color: #606060;
         }
     </style>
 
@@ -24,22 +23,25 @@
     </div>
 </div>
 
-<template id="users-template">
+<template id="dates-template">
     {{#each dates}}
     <div>{{datestr}} {{count}}</div>
     {{/each}}
 </template>
 
-<div id="output"></div>
+<div class="pure-g">
+    <div class="pure-u-1" id="output"></div>
+</div>
+
 
 <script type="module">
     import {GetDates} from "./data.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
         const resp = await GetDates({});
-        console.log(resp);
+        console.log(JSON.stringify(resp));
 
-        const template = document.getElementById('users-template').innerHTML;
+        const template = document.getElementById('dates-template').innerHTML;
         const output = document.getElementById('output');
 
         const rendered = Handlebars.compile(template)(resp);
