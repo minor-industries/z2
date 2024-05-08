@@ -9,10 +9,10 @@ import (
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
-	"github.com/minor-industries/z2/html"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/replay"
+	"github.com/minor-industries/z2/static"
 	"github.com/pkg/errors"
 	"os"
 )
@@ -70,7 +70,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	graph.StaticFiles(html.FS,
+	graph.StaticFiles(static.FS,
 		"index.html", "text/html",
 		"bike.html", "text/html",
 		"rower.html", "text/html",

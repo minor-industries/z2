@@ -1,4 +1,4 @@
-package html
+package static
 
 import (
 	"embed"
