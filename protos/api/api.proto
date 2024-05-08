@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "gen/go/api";
+
+package api;
+
+import "google/protobuf/timestamp.proto";
+
+message GetDatesReq {
+}
+
+message DateInfo {
+  string datestr = 1;
+  int32 count = 2;
+}
+
+message GetDatesResp {
+  repeated DateInfo dates = 1;
+}
+
+service Calendar {
+  rpc GetDates (GetDatesReq) returns (GetDatesResp);
+}

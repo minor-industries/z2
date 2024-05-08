@@ -8,14 +8,17 @@ export interface GetDatesReq {
 }
 
 export interface GetDatesResp {
-
+    dates: {
+        datestr: string
+        count: number
+    }[]
 }
 
-export function GetDates(req: GetDatesReq): GetDatesResp {
+export function GetDates(req: GetDatesReq): Promise<GetDatesResp> {
     return rpc("GetDates", req)
 }
 
-function rpc(
+export function rpc(
     method: string,
     req: any,
 ) {
