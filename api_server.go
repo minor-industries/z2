@@ -13,5 +13,9 @@ func (a *ApiServer) GetDates(ctx context.Context, req *api.GetDatesReq) (*api.Ge
 			Datestr: "2024-05-07",
 			Count:   2,
 		},
+		{
+			Datestr: "2024-05-08",
+			Count:   3,
+		},
 	}}, nil
 }
