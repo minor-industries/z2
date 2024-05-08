@@ -14,6 +14,7 @@ import (
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/static"
 	"github.com/pkg/errors"
+	"net/http"
 	"os"
 )
 
@@ -26,6 +27,8 @@ var opts struct {
 	Port int `long:"port" default:"8077" env:"PORT"`
 
 	HeartrateMonitors []string `long:"hrm" env:"HRM"`
+
+	StaticPath string `long:"static-path" required:"false"`
 }
 
 func run() error {
@@ -70,16 +73,21 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	graph.StaticFiles(static.FS,
-		"index.html", "text/html",
-		"bike.html", "text/html",
-		"rower.html", "text/html",
-		"handlebars.js", "application/javascript",
-		"data.js", "application/javascript",
-		"data.html", "text/html",
-	)
-
 	router := graph.GetEngine()
+
+	if opts.StaticPath != "" {
+		router.Static("/static", opts.StaticPath)
+	} else {
+		router.StaticFS("/static", http.FS(static.FS))
+	}
+
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/static/index.html")
+	})
+
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(204)
+	})
 
 	apiServer := api.NewCalendarServer(&ApiServer{}, nil)
 	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(apiServer))
