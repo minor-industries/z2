@@ -1,11 +1,12 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>z2 data</title>
     <style>
-        body {
-            background-color: #606060;
-        }
+        /*body {*/
+        /*    background-color: #606060;*/
+        /*}*/
     </style>
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,26 +18,29 @@
     <script type="text/javascript" src="handlebars.js"></script>
 </head>
 <body>
-<div class="pure-g">
-    <div class="pure-u-1">
-        div
-    </div>
-</div>
 
 <script id="dates-template" type="text/template">
-    <table>
+    <table class="pure-table pure-table-horizontal">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Count</th>
+        </tr>
+        </thead>
+        <tbody>
         {{#each dates}}
         <tr>
-            <td>{{datestr}} {{count}}</td>
+            <td>{{datestr}}</td>
+            <td>{{count}}</td>
         </tr>
         {{/each}}
+        </tbody>
     </table>
 </script>
 
 <div class="pure-g">
     <div class="pure-u-1" id="output"></div>
 </div>
-
 
 <script type="module">
     import {GetDates} from "./data.js";
