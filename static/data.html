@@ -23,11 +23,15 @@
     </div>
 </div>
 
-<template id="dates-template">
-    {{#each dates}}
-    <div>{{datestr}} {{count}}</div>
-    {{/each}}
-</template>
+<script id="dates-template" type="text/template">
+    <table>
+        {{#each dates}}
+        <tr>
+            <td>{{datestr}} {{count}}</td>
+        </tr>
+        {{/each}}
+    </table>
+</script>
 
 <div class="pure-g">
     <div class="pure-u-1" id="output"></div>
