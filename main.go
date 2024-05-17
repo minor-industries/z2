@@ -89,7 +89,7 @@ func run() error {
 		c.Status(204)
 	})
 
-	apiServer := api.NewCalendarServer(&ApiServer{}, nil)
+	apiServer := api.NewCalendarServer(&ApiServer{db: db}, nil)
 	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(apiServer))
 
 	ctx, cancel := context.WithCancel(context.Background())
