@@ -96,17 +96,34 @@
                 disableScroll: true,
             });
 
-            const sync = Dygraph.synchronize([
+            const graphs = [
                 g1.dygraph,
                 g2.dygraph,
                 g3.dygraph,
                 g4.dygraph,
                 g5.dygraph,
-            ], {
+            ];
+
+            const sync = Dygraph.synchronize(graphs, {
                 selection: true,
                 zoom: true,
                 range: false,
             });
+
+            document.addEventListener("keydown", ev => {
+                switch (ev.code) {
+                    case "KeyD":
+                        const range = graphs[0].xAxisRange();
+                        const dateRange = [new Date(range[0]), new Date(range[1])];
+                        console.log(range);
+                        const prompt = `are you sure you want to delete the currently visible range? \n${dateRange[0]}\n${dateRange[1]}`;
+                        const ok = confirm(prompt)
+                        if (ok) {
+                            alert(`deleting ${dateRange}`)
+                        }
+                        return;
+                }
+            })
         });
     </script>
 </head>
