@@ -12,10 +12,30 @@ type ApiServer struct {
 	db *database.Backend
 }
 
+func showTime(description string, t time.Time) {
+	// Load location for GMT (UTC)
+	locGMT := time.UTC
+
+	// Load location for GMT-7
+	locGMTMinus7 := time.FixedZone("GMT-7", -7*3600)
+
+	// Load location for GMT+9
+	locGMTPlus9 := time.FixedZone("GMT+9", 9*3600)
+
+	// Format the time in each time zone
+	fmt.Println(description, "GMT:     ", t.In(locGMT).Format(time.RFC3339Nano))
+	fmt.Println(description, "GMT-7:   ", t.In(locGMTMinus7).Format(time.RFC3339Nano))
+	fmt.Println(description, "GMT+9:   ", t.In(locGMTPlus9).Format(time.RFC3339Nano))
+}
+
 func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*api.Empty, error) {
-	start := time.UnixMicro(req.Start)
-	end := time.UnixMicro(req.End)
-	fmt.Println(start, end)
+	// TODO: operate in UTC
+	locGMTMinus7 := time.FixedZone("GMT-7", -7*3600)
+	start := time.UnixMicro(req.Start).In(locGMTMinus7)
+	end := time.UnixMicro(req.End).In(locGMTMinus7)
+
+	showTime("bgn", start)
+	showTime("end", end)
 
 	db_ := a.db.GetORM()
 
