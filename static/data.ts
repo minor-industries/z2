@@ -14,15 +14,27 @@ export interface GetDatesResp {
     }[]
 }
 
+export type Empty = {};
+
+export type DeleteRangeReq = {
+    start: bigint
+    end: bigint
+}
+
 export function GetDates(req: GetDatesReq): Promise<GetDatesResp> {
-    return rpc("GetDates", req)
+    return rpc("api.Calendar", "GetDates", req)
+}
+
+export function DeleteRange(req: DeleteRangeReq): Promise<Empty> {
+    return rpc("api.Api", "DeleteRange", req)
 }
 
 export function rpc(
+    service: string,
     method: string,
     req: any,
 ) {
-    return fetch(`/twirp/api.Calendar/${method}`, {
+    return fetch(`/twirp/${service}/${method}`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',

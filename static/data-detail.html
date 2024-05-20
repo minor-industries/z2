@@ -20,6 +20,7 @@
 
     <script type="module">
         import {Graph} from '/rtgraph/rtgraph.js';
+        import {DeleteRange} from "./data.js";
 
         document.addEventListener("DOMContentLoaded", () => {
 
@@ -110,19 +111,34 @@
                 range: false,
             });
 
-            document.addEventListener("keydown", ev => {
+            const keyDown = ev => {
                 switch (ev.code) {
                     case "KeyD":
                         const range = graphs[0].xAxisRange();
                         const dateRange = [new Date(range[0]), new Date(range[1])];
                         console.log(range);
+
+                        const startNano = BigInt(Math.round(range[0] * 1e3));
+                        const endNano = BigInt(Math.round(range[1] * 1e3));
+                        console.log(startNano, endNano);
+
                         const prompt = `are you sure you want to delete the currently visible range? \n${dateRange[0]}\n${dateRange[1]}`;
                         const ok = confirm(prompt)
                         if (ok) {
                             alert(`deleting ${dateRange}`)
+                            return DeleteRange({
+                                start: startNano.toString(),
+                                end: endNano.toString()
+                            });
                         }
                         return;
+                    default:
+                        return Promise.resolve();
                 }
+            };
+
+            document.addEventListener("keydown", ev => {
+                keyDown(ev);
             })
         });
     </script>

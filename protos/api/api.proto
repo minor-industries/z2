@@ -18,6 +18,17 @@ message GetDatesResp {
   repeated DateInfo dates = 1;
 }
 
+message DeleteRangeReq {
+  int64 start = 1;
+  int64 end = 2;
+}
+
+message Empty{}
+
+service Api {
+  rpc DeleteRange (DeleteRangeReq) returns (Empty);
+}
+
 service Calendar {
   rpc GetDates (GetDatesReq) returns (GetDatesResp);
 }

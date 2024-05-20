@@ -89,8 +89,9 @@ func run() error {
 		c.Status(204)
 	})
 
-	apiServer := api.NewCalendarServer(&ApiServer{db: db}, nil)
-	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(apiServer))
+	apiHandler := &ApiServer{db: db}
+	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(api.NewCalendarServer(apiHandler, nil)))
+	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	//src := &mainHandler.BikeSource{}

@@ -2,12 +2,34 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/gen/go/api"
+	"time"
 )
 
 type ApiServer struct {
 	db *database.Backend
+}
+
+func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*api.Empty, error) {
+	start := time.UnixMicro(req.Start)
+	end := time.UnixMicro(req.End)
+	fmt.Println(start, end)
+
+	db_ := a.db.GetORM()
+
+	res := db_.Where("Timestamp >= ? and Timestamp <= ?", start, end).Delete(&database.RawValue{})
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	res = db_.Where("Timestamp >= ? and Timestamp <= ?", start, end).Delete(&database.Value{})
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &api.Empty{}, nil
 }
 
 type Result struct {
