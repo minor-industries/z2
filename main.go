@@ -16,6 +16,7 @@ import (
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/static"
 	"github.com/pkg/errors"
+	"math"
 	"net/http"
 	"os"
 	"time"
@@ -182,8 +183,10 @@ func run() error {
 	go func() {
 		const (
 			target       = 41.5
-			allowedDelta = 0.1
-			deltaSteps   = 5
+			allowedError = 0.1
+			errorSteps   = 5
+			stepSize     = allowedError / errorSteps
+
 			minMaxWindow = 1.0
 		)
 
@@ -199,9 +202,16 @@ func run() error {
 		}, now, msgCh)
 
 		for m := range msgCh {
-			for i, s := range m.Series {
-				fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
+			for _, s := range m.Series {
+				//fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
 				ts := time.UnixMilli(s.Timestamps[0])
+				value := s.Values[0]
+
+				e := value - target
+				steps := int(math.Round(math.Abs(e) / stepSize))
+				steps = min(steps, errorSteps)
+				fmt.Println(value, e, e/stepSize, steps)
+
 				if err := graph.CreateValue("bike_instant_speed_min", ts, target-minMaxWindow/2.0); err != nil {
 					panic(err)
 				}
