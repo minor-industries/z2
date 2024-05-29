@@ -21,14 +21,16 @@ import (
 var opts struct {
 	Source string `long:"source" required:"true" env:"SOURCE"`
 
-	Replay   bool   `long:"replay"`
-	ReplayDB string `long:"replay-db"`
+	ReplayDB   string `long:"replay-db"`
+	NoReplayDB string `long:"no-replay-db"`
 
 	Port int `long:"port" default:"8077" env:"PORT"`
 
 	HeartrateMonitors []string `long:"hrm" env:"HRM"`
 
 	StaticPath string `long:"static-path" required:"false"`
+
+	RemoveDB bool `long:"remove-db" required:"false"`
 }
 
 func run() error {
@@ -41,7 +43,13 @@ func run() error {
 		return errors.Wrap(err, "parse flags")
 	}
 
-	db, err := database.Get(os.ExpandEnv("$HOME/z2.db"), errCh)
+	dbPath := os.ExpandEnv("$HOME/z2.db")
+
+	if opts.RemoveDB {
+		_ = os.Remove(dbPath)
+	}
+
+	db, err := database.Get(dbPath, errCh)
 	if err != nil {
 		return errors.Wrap(err, "get database")
 	}
@@ -151,13 +159,6 @@ func run() error {
 				ctx,
 				errCh,
 				os.ExpandEnv(opts.ReplayDB),
-				mainHandler.Handle,
-			)
-		} else if opts.Replay {
-			err = replay.Run(
-				ctx,
-				errCh,
-				"raw.txt",
 				mainHandler.Handle,
 			)
 		} else {
