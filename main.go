@@ -7,6 +7,8 @@ import (
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/messages"
+	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
@@ -16,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	"net/http"
 	"os"
+	"time"
 )
 
 var opts struct {
@@ -174,6 +177,39 @@ func run() error {
 			)
 		}
 		errCh <- err
+	}()
+
+	go func() {
+		const (
+			target       = 41.5
+			allowedDelta = 0.1
+			deltaSteps   = 5
+			minMaxWindow = 1.0
+		)
+
+		now := time.Now()
+		msgCh := make(chan *messages.Data)
+		go graph.Subscribe(&subscription.Request{
+			Series: []string{
+				"bike_instant_speed | gt 0 | avg 10m triangle",
+			},
+			WindowSize:  uint64((10 * time.Minute).Milliseconds()),
+			LastPointMs: 0,
+			MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
+		}, now, msgCh)
+
+		for m := range msgCh {
+			for i, s := range m.Series {
+				fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
+				ts := time.UnixMilli(s.Timestamps[0])
+				if err := graph.CreateValue("bike_instant_speed_min", ts, target-minMaxWindow/2.0); err != nil {
+					panic(err)
+				}
+				if err := graph.CreateValue("bike_instant_speed_max", ts, target+minMaxWindow/2.0); err != nil {
+					panic(err)
+				}
+			}
+		}
 	}()
 
 	return <-errCh

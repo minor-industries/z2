@@ -22,12 +22,18 @@
         document.addEventListener("DOMContentLoaded", () => {
             const second = 1000;
             const minute = second * 60;
-            const seriesOpts = {y2: {strokeWidth: 1.0}}
+            const seriesOpts = {
+                y2: {strokeWidth: 1.0},
+                y3: {strokeWidth: 1.0, color: "red"},
+                y4: {strokeWidth: 1.0, color: "red"},
+            }
 
             new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: [
                     "bike_instant_speed | avg 30s triangle",
-                    "bike_instant_speed"
+                    "bike_instant_speed",
+                    "bike_instant_speed_min",
+                    "bike_instant_speed_max",
                 ],
                 title: "Speed: {value}",
                 ylabel: "speed (km/h)",
