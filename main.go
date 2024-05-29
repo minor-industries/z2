@@ -210,6 +210,7 @@ func run() error {
 				e := value - target
 				steps := int(math.Round(math.Abs(e) / stepSize))
 				steps = min(steps, errorSteps)
+				steps = -sign(e) * steps
 				fmt.Println(value, e, e/stepSize, steps)
 
 				if err := graph.CreateValue("bike_instant_speed_min", ts, target-minMaxWindow/2.0); err != nil {
@@ -223,6 +224,13 @@ func run() error {
 	}()
 
 	return <-errCh
+}
+
+func sign(x float64) int {
+	if x < 0 {
+		return -1
+	}
+	return 1
 }
 
 func main() {
