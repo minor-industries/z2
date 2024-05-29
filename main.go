@@ -183,11 +183,12 @@ func run() error {
 	go func() {
 		const (
 			target       = 41.5
-			allowedError = 0.1
+			allowedError = 0.5
 			errorSteps   = 5
 			stepSize     = allowedError / errorSteps
 
 			minMaxWindow = 1.0
+			outStepSize  = minMaxWindow / 2 / errorSteps
 		)
 
 		now := time.Now()
@@ -213,10 +214,20 @@ func run() error {
 				steps = -sign(e) * steps
 				fmt.Println(value, e, e/stepSize, steps)
 
-				if err := graph.CreateValue("bike_instant_speed_min", ts, target-minMaxWindow/2.0); err != nil {
+				outAdjust := float64(steps) * outStepSize
+
+				if err := graph.CreateValue(
+					"bike_instant_speed_min",
+					ts,
+					target-minMaxWindow/2.0+outAdjust,
+				); err != nil {
 					panic(err)
 				}
-				if err := graph.CreateValue("bike_instant_speed_max", ts, target+minMaxWindow/2.0); err != nil {
+				if err := graph.CreateValue(
+					"bike_instant_speed_max",
+					ts,
+					target+minMaxWindow/2.0+outAdjust,
+				); err != nil {
 					panic(err)
 				}
 			}
