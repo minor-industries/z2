@@ -25,8 +25,28 @@ message DeleteRangeReq {
 
 message Empty{}
 
+message Variable {
+  string name = 1;
+  double value = 2;
+  bool present = 3;
+}
+
+message UpdateVariablesReq {
+  repeated Variable variables = 1;
+}
+
+message ReadVariablesReq {
+  repeated string variables = 1;
+}
+
+message ReadVariablesResp {
+  repeated Variable variables = 1;
+}
+
 service Api {
   rpc DeleteRange (DeleteRangeReq) returns (Empty);
+  rpc UpdateVariables (UpdateVariablesReq) returns (Empty);
+  rpc ReadVariables (ReadVariablesReq) returns (ReadVariablesResp);
 }
 
 service Calendar {

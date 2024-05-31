@@ -5,11 +5,20 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/gen/go/api"
+	"github.com/pkg/errors"
 	"time"
 )
 
 type ApiServer struct {
 	db *database.Backend
+}
+
+func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (a *ApiServer) ReadVariables(ctx context.Context, req *api.ReadVariablesReq) (*api.ReadVariablesResp, error) {
+	return nil, errors.New("not implemented")
 }
 
 func showTime(description string, t time.Time) {

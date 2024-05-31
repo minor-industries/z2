@@ -16,6 +16,36 @@
     <script type="text/javascript" src="/rtgraph/dygraph.min.js"></script>
     <script type="text/javascript" src="/rtgraph/msgpack.min.js"></script>
 
+    <style>
+        .speed-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .speed-display {
+            width: 100px;
+            text-align: center;
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .speed-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .speed-button {
+            margin: 5px;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+
     <script type="module">
         import {Graph} from '/rtgraph/rtgraph.js';
 
@@ -71,7 +101,7 @@
 
             new Graph(document.getElementById("graphdiv5"), {
                 seriesNames: [
-                    "bike_instant_speed | avg 10m triangle"
+                    "bike_instant_speed | gt 0 | avg 10m triangle"
                 ],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
@@ -116,6 +146,59 @@
     <div class="pure-u-1 pure-u-sm-1-3">
         <div id="graphdiv1" class="rtgraph-graph"></div>
     </div>
+
+    <div class="pure-u-1">
+        <div class="speed-container">
+            <label for="speed-display" style="margin-right: 10px;">Target Speed:</label>
+            <input type="text" id="speed-display" class="pure-input-1 speed-display" readonly>
+            <div class="speed-buttons">
+                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(1)">▲</button>
+                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(-1)">▼</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            fetchInitialSpeed();
+        });
+
+        function fetchInitialSpeed() {
+            return;
+            fetch('https://api.example.com/get-initial-speed')
+                .then(response => response.json())
+                .then(data => {
+                    const display = document.getElementById('speed-display');
+                    display.value = data.speed;
+                })
+                .catch(error => console.error('Error fetching initial speed:', error));
+        }
+
+        function changeSpeed(delta) {
+            const display = document.getElementById('speed-display');
+            let currentSpeed = parseInt(display.value, 10);
+            currentSpeed += delta;
+            display.value = currentSpeed;
+            updateSpeedBackend(currentSpeed);
+        }
+
+        function updateSpeedBackend(newSpeed) {
+            return;
+            fetch('https://api.example.com/update-speed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({speed: newSpeed})
+            })
+                .then(response => response.json())
+                .then(data => console.log('Speed updated:', data))
+                .catch(error => console.error('Error updating speed:', error));
+        }
+    </script>
+
 </div>
+
+
 </body>
 </html>
