@@ -159,22 +159,25 @@
     </div>
 
     <script type="module">
-        import {ReadVariables} from "./api.js"
+        import {ReadVariables, UpdateVariables} from "./api.js"
+
+        const bikeTargetSpeed = "bike_target_speed";
 
         document.addEventListener('DOMContentLoaded', (event) => {
             fetchInitialSpeed();
         });
 
         async function fetchInitialSpeed() {
+
             const resp = await ReadVariables({
-                variables: ["bike_target_speed"]
+                variables: [bikeTargetSpeed]
             })
 
             console.log(resp);
 
             resp.variables.forEach(v => {
                 switch (v.name) {
-                    case "bike_target_speed":
+                    case bikeTargetSpeed:
                         console.log(v.value);
                         updateSpeed(v.value);
                         return;
@@ -198,18 +201,16 @@
         window.changeSpeed = changeSpeed;
 
         function updateSpeedBackend(newSpeed) {
-            return;
-            fetch('https://api.example.com/update-speed', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({speed: newSpeed})
+            UpdateVariables({
+                variables: [
+                    {
+                        name: bikeTargetSpeed,
+                        value: newSpeed,
+                    },
+                ]
             })
-                .then(response => response.json())
-                .then(data => console.log('Speed updated:', data))
-                .catch(error => console.error('Error updating speed:', error));
         }
+
     </script>
 
 </div>
