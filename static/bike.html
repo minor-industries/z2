@@ -152,35 +152,50 @@
             <label for="speed-display" style="margin-right: 10px;">Target Speed:</label>
             <input type="text" id="speed-display" class="pure-input-1 speed-display" readonly>
             <div class="speed-buttons">
-                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(1)">▲</button>
-                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(-1)">▼</button>
+                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(0.5)">▲</button>
+                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(-0.5)">▼</button>
             </div>
         </div>
     </div>
 
-    <script>
+    <script type="module">
+        import {ReadVariables} from "./api.js"
+
         document.addEventListener('DOMContentLoaded', (event) => {
             fetchInitialSpeed();
         });
 
-        function fetchInitialSpeed() {
-            return;
-            fetch('https://api.example.com/get-initial-speed')
-                .then(response => response.json())
-                .then(data => {
-                    const display = document.getElementById('speed-display');
-                    display.value = data.speed;
-                })
-                .catch(error => console.error('Error fetching initial speed:', error));
+        async function fetchInitialSpeed() {
+            const resp = await ReadVariables({
+                variables: ["bike_target_speed"]
+            })
+
+            console.log(resp);
+
+            resp.variables.forEach(v => {
+                switch (v.name) {
+                    case "bike_target_speed":
+                        console.log(v.value);
+                        updateSpeed(v.value);
+                        return;
+                }
+            })
+        }
+
+        function updateSpeed(value) {
+            const display = document.getElementById('speed-display');
+            display.value = value;
         }
 
         function changeSpeed(delta) {
             const display = document.getElementById('speed-display');
-            let currentSpeed = parseInt(display.value, 10);
+            let currentSpeed = parseFloat(display.value);
             currentSpeed += delta;
             display.value = currentSpeed;
             updateSpeedBackend(currentSpeed);
         }
+
+        window.changeSpeed = changeSpeed;
 
         function updateSpeedBackend(newSpeed) {
             return;

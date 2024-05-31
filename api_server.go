@@ -18,7 +18,13 @@ func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariable
 }
 
 func (a *ApiServer) ReadVariables(ctx context.Context, req *api.ReadVariablesReq) (*api.ReadVariablesResp, error) {
-	return nil, errors.New("not implemented")
+	return &api.ReadVariablesResp{Variables: []*api.Variable{
+		{
+			Name:    "bike_target_speed",
+			Value:   41.5,
+			Present: true,
+		},
+	}}, nil
 }
 
 func showTime(description string, t time.Time) {
