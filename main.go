@@ -185,7 +185,6 @@ func run() error {
 
 	go func() {
 		const (
-			target       = 41.5
 			allowedError = 0.5
 			errorSteps   = 5
 			stepSize     = allowedError / errorSteps
@@ -210,6 +209,8 @@ func run() error {
 				//fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
 				ts := time.UnixMilli(s.Timestamps[0])
 				value := s.Values[0]
+
+				target, _ := vars.GetOne("bike_target_speed")
 
 				e := value - target
 				steps := int(math.Round(math.Abs(e) / stepSize))

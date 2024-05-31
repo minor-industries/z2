@@ -50,3 +50,8 @@ func (c *Cache) Update(vars []Variable) {
 		}
 	}
 }
+
+func (c *Cache) GetOne(key string) (float64, bool) {
+	get := c.Get([]string{key})
+	return get[0].Value, get[0].Present
+}

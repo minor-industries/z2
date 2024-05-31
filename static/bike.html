@@ -173,12 +173,9 @@
                 variables: [bikeTargetSpeed]
             })
 
-            console.log(resp);
-
             resp.variables.forEach(v => {
                 switch (v.name) {
                     case bikeTargetSpeed:
-                        console.log(v.value);
                         updateSpeed(v.value);
                         return;
                 }
