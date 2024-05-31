@@ -15,6 +15,7 @@ import (
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/static"
+	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
 	"math"
 	"net/http"
@@ -101,7 +102,9 @@ func run() error {
 		c.Status(204)
 	})
 
-	apiHandler := &ApiServer{db: db}
+	vars := variables.NewCache()
+
+	apiHandler := &ApiServer{db: db, vars: vars}
 	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(api.NewCalendarServer(apiHandler, nil)))
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 

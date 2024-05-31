@@ -5,26 +5,43 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/gen/go/api"
-	"github.com/pkg/errors"
+	"github.com/minor-industries/z2/variables"
 	"time"
 )
 
 type ApiServer struct {
-	db *database.Backend
+	db   *database.Backend
+	vars *variables.Cache
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
-	return nil, errors.New("not implemented")
+	vars := make([]variables.Variable, len(req.Variables))
+
+	for i, v := range req.Variables {
+		vars[i] = variables.Variable{
+			Name:    v.Name,
+			Value:   v.Value,
+			Present: v.Present,
+		}
+	}
+
+	a.vars.Update(vars)
+	return &api.Empty{}, nil
 }
 
 func (a *ApiServer) ReadVariables(ctx context.Context, req *api.ReadVariablesReq) (*api.ReadVariablesResp, error) {
-	return &api.ReadVariablesResp{Variables: []*api.Variable{
-		{
-			Name:    "bike_target_speed",
-			Value:   41.5,
-			Present: true,
-		},
-	}}, nil
+	result := make([]*api.Variable, len(req.Variables))
+	vars := a.vars.Get(req.Variables)
+
+	for i, v := range vars {
+		result[i] = &api.Variable{
+			Name:    v.Name,
+			Value:   v.Value,
+			Present: v.Present,
+		}
+	}
+
+	return &api.ReadVariablesResp{Variables: result}, nil
 }
 
 func showTime(description string, t time.Time) {
