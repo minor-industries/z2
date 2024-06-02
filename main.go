@@ -38,8 +38,15 @@ var opts struct {
 	RemoveDB bool `long:"remove-db" required:"false"`
 }
 
+type App struct {
+	Graph *rtgraph.Graph
+	Vars  *variables.Cache
+}
+
 func run() error {
 	gin.SetMode(gin.ReleaseMode)
+
+	app := &App{}
 
 	errCh := make(chan error)
 
@@ -59,7 +66,7 @@ func run() error {
 		return errors.Wrap(err, "get database")
 	}
 
-	graph, err := rtgraph.New(
+	app.Graph, err = rtgraph.New(
 		db,
 		errCh,
 		rtgraph.Opts{},
@@ -86,7 +93,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	router := graph.GetEngine()
+	router := app.Graph.GetEngine()
 
 	if opts.StaticPath != "" {
 		router.Static("/static", opts.StaticPath)
@@ -102,9 +109,9 @@ func run() error {
 		c.Status(204)
 	})
 
-	vars := variables.NewCache()
+	app.Vars = variables.NewCache()
 
-	apiHandler := &ApiServer{db: db, vars: vars}
+	apiHandler := &ApiServer{db: db, vars: app.Vars}
 	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(api.NewCalendarServer(apiHandler, nil)))
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
@@ -114,7 +121,7 @@ func run() error {
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
 	mainHandler, err := handler.NewBikeHandler(
-		graph,
+		app.Graph,
 		db,
 		src,
 		cancel,
@@ -131,7 +138,7 @@ func run() error {
 			addr := addr
 			hrmSrc := &heartrate.Source{}
 			h, err := handler.NewBikeHandler(
-				graph,
+				app.Graph,
 				db,
 				hrmSrc,
 				cancel,
@@ -156,7 +163,7 @@ func run() error {
 	}
 
 	go func() {
-		errCh <- graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
+		errCh <- app.Graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
 	go func() {
@@ -183,120 +190,123 @@ func run() error {
 		errCh <- err
 	}()
 
-	go func() {
-		const (
-			allowedError = 0.5
-			errorSteps   = 5
-			stepSize     = allowedError / errorSteps
-
-			minMaxWindow = 1.0
-			outStepSize  = minMaxWindow / 2 / errorSteps
-		)
-
-		now := time.Now()
-		msgCh := make(chan *messages.Data)
-		go graph.Subscribe(&subscription.Request{
-			Series: []string{
-				"bike_instant_speed | gt 0 | avg 10m triangle",
-			},
-			WindowSize:  uint64((10 * time.Minute).Milliseconds()),
-			LastPointMs: 0,
-			MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
-		}, now, msgCh)
-
-		for m := range msgCh {
-			for _, s := range m.Series {
-				//fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
-				ts := time.UnixMilli(s.Timestamps[0])
-				value := s.Values[0]
-
-				target, _ := vars.GetOne("bike_target_speed")
-
-				e := value - target
-				steps := int(math.Round(math.Abs(e) / stepSize))
-				steps = min(steps, errorSteps)
-				steps = -sign(e) * steps
-
-				outAdjust := float64(steps) * outStepSize
-
-				minTarget := target + outAdjust - minMaxWindow/2.0
-				maxTarget := target + minMaxWindow/2.0 + outAdjust
-
-				fmt.Println(value, e, e/stepSize, steps)
-
-				if err := graph.CreateValue(
-					"bike_instant_speed_min",
-					ts,
-					minTarget,
-				); err != nil {
-					panic(err)
-				}
-
-				if err := graph.CreateValue(
-					"bike_instant_speed_max",
-					ts,
-					maxTarget,
-				); err != nil {
-					panic(err)
-				}
-			}
-		}
-	}()
-
-	go func() {
-		now := time.Now()
-		msgCh := make(chan *messages.Data)
-		go graph.Subscribe(&subscription.Request{
-			Series: []string{
-				"bike_instant_speed | avg 30s triangle",
-				"bike_instant_speed_min",
-				"bike_instant_speed_max",
-			},
-			WindowSize:  uint64((30 * time.Second).Milliseconds()),
-			LastPointMs: 0,
-			MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
-		}, now, msgCh)
-
-		var value, minTarget, maxTarget float64
-
-		for m := range msgCh {
-			if len(m.Series) == 0 {
-				continue
-			}
-
-			for _, s := range m.Series {
-				switch s.Pos {
-				case 0:
-					value = s.Values[0]
-					fmt.Println("value", value)
-				case 1:
-					minTarget = s.Values[0]
-					fmt.Println("minTarget", minTarget)
-				case 2:
-					maxTarget = s.Values[0]
-					fmt.Println("maxTarget", maxTarget)
-				}
-			}
-
-			if value == 0 || minTarget == 0 || maxTarget == 0 {
-				continue
-			}
-
-			var state string
-			switch {
-			case value > maxTarget:
-				state = "too-fast"
-			case value < minTarget:
-				state = "too-slow"
-			default:
-				state = "fairway"
-			}
-
-			fmt.Println(state)
-		}
-	}()
+	go app.ComputeBounds()
+	go app.ComputePace()
 
 	return <-errCh
+}
+
+func (app *App) ComputeBounds() {
+	const (
+		allowedError = 0.5
+		errorSteps   = 5
+		stepSize     = allowedError / errorSteps
+
+		minMaxWindow = 1.0
+		outStepSize  = minMaxWindow / 2 / errorSteps
+	)
+
+	now := time.Now()
+	msgCh := make(chan *messages.Data)
+	go app.Graph.Subscribe(&subscription.Request{
+		Series: []string{
+			"bike_instant_speed | gt 0 | avg 10m triangle",
+		},
+		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
+		LastPointMs: 0,
+		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
+	}, now, msgCh)
+
+	for m := range msgCh {
+		for _, s := range m.Series {
+			//fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
+			ts := time.UnixMilli(s.Timestamps[0])
+			value := s.Values[0]
+
+			target, _ := app.Vars.GetOne("bike_target_speed")
+
+			e := value - target
+			steps := int(math.Round(math.Abs(e) / stepSize))
+			steps = min(steps, errorSteps)
+			steps = -sign(e) * steps
+
+			outAdjust := float64(steps) * outStepSize
+
+			minTarget := target + outAdjust - minMaxWindow/2.0
+			maxTarget := target + minMaxWindow/2.0 + outAdjust
+
+			fmt.Println(value, e, e/stepSize, steps)
+
+			if err := app.Graph.CreateValue(
+				"bike_instant_speed_min",
+				ts,
+				minTarget,
+			); err != nil {
+				panic(err)
+			}
+
+			if err := app.Graph.CreateValue(
+				"bike_instant_speed_max",
+				ts,
+				maxTarget,
+			); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
+func (app *App) ComputePace() {
+	now := time.Now()
+	msgCh := make(chan *messages.Data)
+	go app.Graph.Subscribe(&subscription.Request{
+		Series: []string{
+			"bike_instant_speed | avg 30s triangle",
+			"bike_instant_speed_min",
+			"bike_instant_speed_max",
+		},
+		WindowSize:  uint64((30 * time.Second).Milliseconds()),
+		LastPointMs: 0,
+		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
+	}, now, msgCh)
+
+	var value, minTarget, maxTarget float64
+
+	for m := range msgCh {
+		if len(m.Series) == 0 {
+			continue
+		}
+
+		for _, s := range m.Series {
+			switch s.Pos {
+			case 0:
+				value = s.Values[0]
+				fmt.Println("value", value)
+			case 1:
+				minTarget = s.Values[0]
+				fmt.Println("minTarget", minTarget)
+			case 2:
+				maxTarget = s.Values[0]
+				fmt.Println("maxTarget", maxTarget)
+			}
+		}
+
+		if value == 0 || minTarget == 0 || maxTarget == 0 {
+			continue
+		}
+
+		var state string
+		switch {
+		case value > maxTarget:
+			state = "too-fast"
+		case value < minTarget:
+			state = "too-slow"
+		default:
+			state = "fairway"
+		}
+
+		fmt.Println(state)
+	}
 }
 
 func sign(x float64) int {
