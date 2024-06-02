@@ -216,25 +216,83 @@ func run() error {
 				steps := int(math.Round(math.Abs(e) / stepSize))
 				steps = min(steps, errorSteps)
 				steps = -sign(e) * steps
-				fmt.Println(value, e, e/stepSize, steps)
 
 				outAdjust := float64(steps) * outStepSize
+
+				minTarget := target + outAdjust - minMaxWindow/2.0
+				maxTarget := target + minMaxWindow/2.0 + outAdjust
+
+				fmt.Println(value, e, e/stepSize, steps)
 
 				if err := graph.CreateValue(
 					"bike_instant_speed_min",
 					ts,
-					target-minMaxWindow/2.0+outAdjust,
+					minTarget,
 				); err != nil {
 					panic(err)
 				}
+
 				if err := graph.CreateValue(
 					"bike_instant_speed_max",
 					ts,
-					target+minMaxWindow/2.0+outAdjust,
+					maxTarget,
 				); err != nil {
 					panic(err)
 				}
 			}
+		}
+	}()
+
+	go func() {
+		now := time.Now()
+		msgCh := make(chan *messages.Data)
+		go graph.Subscribe(&subscription.Request{
+			Series: []string{
+				"bike_instant_speed | avg 30s triangle",
+				"bike_instant_speed_min",
+				"bike_instant_speed_max",
+			},
+			WindowSize:  uint64((30 * time.Second).Milliseconds()),
+			LastPointMs: 0,
+			MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
+		}, now, msgCh)
+
+		var value, minTarget, maxTarget float64
+
+		for m := range msgCh {
+			if len(m.Series) == 0 {
+				continue
+			}
+
+			for _, s := range m.Series {
+				switch s.Pos {
+				case 0:
+					value = s.Values[0]
+					fmt.Println("value", value)
+				case 1:
+					minTarget = s.Values[0]
+					fmt.Println("minTarget", minTarget)
+				case 2:
+					maxTarget = s.Values[0]
+					fmt.Println("maxTarget", maxTarget)
+				}
+			}
+
+			if value == 0 || minTarget == 0 || maxTarget == 0 {
+				continue
+			}
+
+			var state string
+			switch {
+			case value > maxTarget:
+				state = "too-fast"
+			case value < minTarget:
+				state = "too-slow"
+			default:
+				state = "fairway"
+			}
+
+			fmt.Println(state)
 		}
 	}()
 
