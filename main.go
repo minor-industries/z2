@@ -273,39 +273,43 @@ func (app *App) ComputePace() {
 	var value, minTarget, maxTarget float64
 
 	for m := range msgCh {
-		if len(m.Series) == 0 {
-			continue
-		}
-
+		var ts time.Time
 		for _, s := range m.Series {
 			switch s.Pos {
 			case 0:
 				value = s.Values[0]
+				ts = time.UnixMilli(s.Timestamps[0])
 				fmt.Println("value", value)
 			case 1:
 				minTarget = s.Values[0]
+				ts = time.UnixMilli(s.Timestamps[0])
 				fmt.Println("minTarget", minTarget)
 			case 2:
 				maxTarget = s.Values[0]
+				ts = time.UnixMilli(s.Timestamps[0])
 				fmt.Println("maxTarget", maxTarget)
 			}
 		}
 
+		// perhaps we could use a better way to get these values than subscribing and listening for them
 		if value == 0 || minTarget == 0 || maxTarget == 0 {
 			continue
 		}
 
-		var state string
+		var tooFast, tooSlow, fairway float64
+
 		switch {
 		case value > maxTarget:
-			state = "too-fast"
+			tooFast = 1.0
 		case value < minTarget:
-			state = "too-slow"
+			tooSlow = 1.0
 		default:
-			state = "fairway"
+			fairway = 1.0
 		}
 
-		fmt.Println(state)
+		_ = app.Graph.CreateValue("too_fast", ts, tooFast)
+		_ = app.Graph.CreateValue("too_slow", ts, tooSlow)
+		_ = app.Graph.CreateValue("fairway", ts, fairway)
 	}
 }
 
