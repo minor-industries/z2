@@ -39,14 +39,17 @@ var opts struct {
 }
 
 type App struct {
-	Graph *rtgraph.Graph
-	Vars  *variables.Cache
+	Graph        *rtgraph.Graph
+	Vars         *variables.Cache
+	StateChanges chan StateChange
 }
 
 func run() error {
 	gin.SetMode(gin.ReleaseMode)
 
-	app := &App{}
+	app := &App{
+		StateChanges: make(chan StateChange),
+	}
 
 	errCh := make(chan error)
 
@@ -190,6 +193,7 @@ func run() error {
 		errCh <- err
 	}()
 
+	go app.PlaySounds()
 	go app.ComputeBounds()
 	go app.ComputePace()
 
@@ -219,7 +223,6 @@ func (app *App) ComputeBounds() {
 
 	for m := range msgCh {
 		for _, s := range m.Series {
-			//fmt.Println(i, time.Now().UnixMilli(), s.Timestamps, s.Values)
 			ts := time.UnixMilli(s.Timestamps[0])
 			value := s.Values[0]
 
@@ -234,8 +237,6 @@ func (app *App) ComputeBounds() {
 
 			minTarget := target + outAdjust - minMaxWindow/2.0
 			maxTarget := target + minMaxWindow/2.0 + outAdjust
-
-			fmt.Println(value, e, e/stepSize, steps)
 
 			if err := app.Graph.CreateValue(
 				"bike_instant_speed_min",
@@ -256,6 +257,11 @@ func (app *App) ComputeBounds() {
 	}
 }
 
+type StateChange struct {
+	From string
+	To   string
+}
+
 func (app *App) ComputePace() {
 	now := time.Now()
 	msgCh := make(chan *messages.Data)
@@ -270,6 +276,7 @@ func (app *App) ComputePace() {
 		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
 	}, now, msgCh)
 
+	state := "undefined"
 	var value, minTarget, maxTarget float64
 
 	for m := range msgCh {
@@ -279,15 +286,12 @@ func (app *App) ComputePace() {
 			case 0:
 				value = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
-				fmt.Println("value", value)
 			case 1:
 				minTarget = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
-				fmt.Println("minTarget", minTarget)
 			case 2:
 				maxTarget = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
-				fmt.Println("maxTarget", maxTarget)
 			}
 		}
 
@@ -298,18 +302,51 @@ func (app *App) ComputePace() {
 
 		var tooFast, tooSlow, fairway float64
 
+		var newState string
+
 		switch {
 		case value > maxTarget:
+			newState = "too_fast"
 			tooFast = 1.0
 		case value < minTarget:
+			newState = "too_slow"
 			tooSlow = 1.0
 		default:
+			newState = "fairway"
 			fairway = 1.0
 		}
+
+		if state != newState {
+			app.StateChanges <- StateChange{
+				From: state,
+				To:   newState,
+			}
+		}
+
+		state = newState
 
 		_ = app.Graph.CreateValue("too_fast", ts, tooFast)
 		_ = app.Graph.CreateValue("too_slow", ts, tooSlow)
 		_ = app.Graph.CreateValue("fairway", ts, fairway)
+	}
+}
+
+func (app *App) PlaySounds() {
+	duration := 5 * time.Second
+	ticker := time.NewTicker(duration)
+	state := "undefined"
+	t0 := time.Now()
+
+	for {
+		select {
+		case <-ticker.C:
+			fmt.Println(time.Now().Sub(t0).Seconds(), "still in", state)
+		case sc := <-app.StateChanges:
+			ticker.Stop()
+			ticker = time.NewTicker(duration)
+			fmt.Println(time.Now().Sub(t0).Seconds(), sc.From, "->", sc.To)
+			state = sc.To
+		}
 	}
 }
 
