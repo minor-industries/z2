@@ -66,10 +66,14 @@ func (app *App) PlaySounds() {
 		select {
 		case <-ticker.C:
 			fmt.Println(time.Now().Sub(t0).Seconds(), "still in", state)
+
 			switch state {
 			case "too_slow":
-				playAudio("sounds/Computer Error Alert-SoundBible.com-783113881.wav")
+				playAudio("sounds/slow.wav")
+			case "too_fast":
+				playAudio("sounds/fast.wav")
 			}
+
 		case sc := <-app.StateChanges:
 			ticker.Stop()
 			ticker = time.NewTicker(duration)
@@ -78,7 +82,11 @@ func (app *App) PlaySounds() {
 
 			switch state {
 			case "too_slow":
-				playAudio("sounds/Computer Error Alert-SoundBible.com-783113881.wav")
+				playAudio("sounds/slow.wav")
+			case "too_fast":
+				playAudio("sounds/fast.wav")
+			case "fairway":
+				playAudio("sounds/fairway.wav")
 			}
 		}
 	}
