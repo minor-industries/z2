@@ -16,7 +16,7 @@ type Cache struct {
 func NewCache() *Cache {
 	return &Cache{
 		vars: map[string]float64{
-			"bike_target_speed": 42.0, // TODO: this should be in DB
+			"bike_target_speed": 20.0, // TODO: this should be in DB
 		},
 	}
 }

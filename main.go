@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
@@ -95,6 +96,13 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new graph")
 	}
+
+	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
+		return &OpGate{
+			target: "bike_target_speed",
+			vars:   app.Vars,
+		}, nil
+	})
 
 	router := app.Graph.GetEngine()
 
