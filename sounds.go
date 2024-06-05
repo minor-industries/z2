@@ -60,13 +60,10 @@ func (app *App) PlaySounds() {
 	duration := 5 * time.Second
 	ticker := time.NewTicker(duration)
 	state := "undefined"
-	t0 := time.Now()
 
 	for {
 		select {
 		case <-ticker.C:
-			fmt.Println(time.Now().Sub(t0).Seconds(), "still in", state)
-
 			switch state {
 			case "too_slow":
 				playAudio("sounds/slow.wav")
@@ -77,7 +74,6 @@ func (app *App) PlaySounds() {
 		case sc := <-app.StateChanges:
 			ticker.Stop()
 			ticker = time.NewTicker(duration)
-			fmt.Println(time.Now().Sub(t0).Seconds(), sc.From, "->", sc.To)
 			state = sc.To
 
 			switch state {

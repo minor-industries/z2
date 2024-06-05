@@ -98,9 +98,20 @@ func run() error {
 	}
 
 	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
+		if len(args) != 2 {
+			return nil, errors.New("mygate function requires 2 arguments")
+		}
+
+		vars := app.Vars.Get(args)
+		for _, v := range vars {
+			if !v.Present {
+				return nil, fmt.Errorf("variable %s not found", v.Name)
+			}
+		}
+
 		return &OpGate{
-			target:   "bike_target_speed",
-			driftPct: "bike_max_drift_pct",
+			target:   args[0],
+			driftPct: args[1],
 			vars:     app.Vars,
 		}, nil
 	})
