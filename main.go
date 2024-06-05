@@ -216,9 +216,6 @@ func (app *App) ComputeBounds() {
 
 	const (
 		errorSteps = 5
-
-		allowedErrorPct = 1.0
-		maxDriftPct     = 2.0
 	)
 
 	now := time.Now()
@@ -238,6 +235,9 @@ func (app *App) ComputeBounds() {
 			value := s.Values[0]
 
 			target, _ := app.Vars.GetOne("bike_target_speed")
+			maxDriftPct, _ := app.Vars.GetOne("bike_max_drift_pct")
+			allowedErrorPct, _ := app.Vars.GetOne("bike_allowed_error_pct")
+
 			maxDrift := target * maxDriftPct / 100.0
 			allowedError := target * allowedErrorPct / 100.0
 
