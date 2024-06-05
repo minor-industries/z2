@@ -32,7 +32,8 @@ var opts struct {
 
 	Port int `long:"port" default:"8077" env:"PORT"`
 
-	HeartrateMonitors []string `long:"hrm" env:"HRM"`
+	HeartrateMonitors   []string `long:"hrm" env:"HRM"`
+	NoHeartrateMonitors []string `long:"no-hrm" env:"HRM"`
 
 	StaticPath string `long:"static-path" required:"false"`
 

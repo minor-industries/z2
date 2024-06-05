@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 	"tinygo.org/x/bluetooth"
 )
@@ -35,6 +37,8 @@ type Source interface {
 	Characteristics() []bluetooth.UUID
 }
 
+var enableOnce sync.Once
+
 func Run(
 	ctx context.Context,
 	errCh chan error,
@@ -45,18 +49,21 @@ func Run(
 ) error {
 	var adapter = bluetooth.DefaultAdapter
 
-	fmt.Println("enabling")
-
-	if err := adapter.Enable(); err != nil {
+	var err error
+	enableOnce.Do(func() {
+		fmt.Println("enabling")
+		err = adapter.Enable()
+	})
+	if err != nil {
 		return errors.Wrap(err, "enable adapter")
 	}
 
 	ch := make(chan bluetooth.ScanResult, 1)
 
-	fmt.Println("scanning...")
-	err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
+	fmt.Println("scanning...", address)
+	err = adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
 		//fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
-		if result.Address.String() == address {
+		if strings.ToLower(result.Address.String()) == strings.ToLower(address) {
 			adapter.StopScan()
 			ch <- result
 		}
