@@ -99,8 +99,9 @@ func run() error {
 
 	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
 		return &OpGate{
-			target: "bike_target_speed",
-			vars:   app.Vars,
+			target:   "bike_target_speed",
+			driftPct: "bike_max_drift_pct",
+			vars:     app.Vars,
 		}, nil
 	})
 
