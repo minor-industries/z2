@@ -209,12 +209,16 @@ func run() error {
 }
 
 func (app *App) ComputeBounds() {
-	const (
-		allowedError = 0.5
-		errorSteps   = 5
-		stepSize     = allowedError / errorSteps
+	// error vs drift:
+	//  - error: the difference between the long-term average and the target
+	//  - drift: the bounds for the short term average to move about without signaling to the user
+	// drift will typically be configured to be a bit larger than error
 
-		maxDriftPct = 2.5
+	const (
+		errorSteps = 5
+
+		allowedErrorPct = 1.0
+		maxDriftPct     = 2.0
 	)
 
 	now := time.Now()
@@ -235,8 +239,10 @@ func (app *App) ComputeBounds() {
 
 			target, _ := app.Vars.GetOne("bike_target_speed")
 			maxDrift := target * maxDriftPct / 100.0
+			allowedError := target * allowedErrorPct / 100.0
 
-			outStepSize := maxDrift / 2 / errorSteps
+			outStepSize := maxDrift / errorSteps
+			stepSize := allowedError / errorSteps
 
 			e := value - target
 			steps := int(math.Round(math.Abs(e) / stepSize))
@@ -245,8 +251,8 @@ func (app *App) ComputeBounds() {
 
 			outAdjust := float64(steps) * outStepSize
 
-			minTarget := target + outAdjust - maxDrift/2.0
-			maxTarget := target + maxDrift/2.0 + outAdjust
+			minTarget := target + outAdjust - maxDrift
+			maxTarget := target + maxDrift + outAdjust
 
 			if err := app.Graph.CreateValue(
 				"bike_instant_speed_min",
