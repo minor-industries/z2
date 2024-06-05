@@ -303,7 +303,7 @@ func (app *App) ComputePace() {
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
 		Series: []string{
-			"bike_instant_speed | avg 30s triangle",
+			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 30s triangle",
 			"bike_instant_speed_min",
 			"bike_instant_speed_max",
 		},
@@ -313,15 +313,22 @@ func (app *App) ComputePace() {
 	}, now, msgCh)
 
 	state := "undefined"
-	var value, minTarget, maxTarget float64
+	var bikeAvgSpeedShort, minTarget, maxTarget float64
 
 	for m := range msgCh {
 		var ts time.Time
 		for _, s := range m.Series {
 			switch s.Pos {
 			case 0:
-				value = s.Values[0]
+				bikeAvgSpeedShort = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
+				if err := app.Graph.CreateValue(
+					"bike_avg_speed_short",
+					ts,
+					bikeAvgSpeedShort,
+				); err != nil {
+					panic(err)
+				}
 			case 1:
 				minTarget = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
@@ -332,7 +339,7 @@ func (app *App) ComputePace() {
 		}
 
 		// perhaps we could use a better way to get these values than subscribing and listening for them
-		if value == 0 || minTarget == 0 || maxTarget == 0 {
+		if bikeAvgSpeedShort == 0 || minTarget == 0 || maxTarget == 0 {
 			continue
 		}
 
@@ -341,10 +348,10 @@ func (app *App) ComputePace() {
 		var newState string
 
 		switch {
-		case value > maxTarget:
+		case bikeAvgSpeedShort > maxTarget:
 			newState = "too_fast"
 			tooFast = 1.0
-		case value < minTarget:
+		case bikeAvgSpeedShort < minTarget:
 			newState = "too_slow"
 			tooSlow = 1.0
 		default:
