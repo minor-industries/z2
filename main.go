@@ -234,7 +234,7 @@ func (app *App) ComputeBounds() {
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
 		Series: []string{
-			"bike_instant_speed | gt 0 | avg 10m triangle",
+			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 10m triangle",
 		},
 		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
 		LastPointMs: 0,
@@ -244,7 +244,7 @@ func (app *App) ComputeBounds() {
 	for m := range msgCh {
 		for _, s := range m.Series {
 			ts := time.UnixMilli(s.Timestamps[0])
-			value := s.Values[0]
+			bikeAvgSpeedLong := s.Values[0]
 
 			target, _ := app.Vars.GetOne("bike_target_speed")
 			maxDriftPct, _ := app.Vars.GetOne("bike_max_drift_pct")
@@ -256,7 +256,7 @@ func (app *App) ComputeBounds() {
 			outStepSize := maxDrift / errorSteps
 			stepSize := allowedError / errorSteps
 
-			e := value - target
+			e := bikeAvgSpeedLong - target
 			steps := int(math.Round(math.Abs(e) / stepSize))
 			steps = min(steps, errorSteps)
 			steps = -sign(e) * steps
@@ -265,6 +265,14 @@ func (app *App) ComputeBounds() {
 
 			minTarget := target + outAdjust - maxDrift
 			maxTarget := target + maxDrift + outAdjust
+
+			if err := app.Graph.CreateValue(
+				"bike_avg_speed_long",
+				ts,
+				bikeAvgSpeedLong,
+			); err != nil {
+				panic(err)
+			}
 
 			if err := app.Graph.CreateValue(
 				"bike_instant_speed_min",
