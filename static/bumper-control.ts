@@ -1,4 +1,4 @@
-import { ReadVariablesReq, ReadVariablesResp, UpdateVariablesReq, UpdateVariables, ReadVariables } from './api.js';
+import {ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, UpdateVariablesReq} from './api.js';
 
 class BumperControl {
     private container: HTMLElement;
@@ -27,7 +27,7 @@ class BumperControl {
 
     private createControl(): void {
         const controlHTML = `
-            <div class="pure-u-1">
+            <div class="pure-u-1-3">
                 <div class="bumper-container">
                     <label style="margin-right: 10px;">${this.label}</label>
                     <input type="text" class="pure-input-1 bumper-display" value="${this.speed}" readonly>

@@ -156,84 +156,20 @@
     <div class="pure-u-1 pure-u-sm-1-3">
         <div id="graphdiv7" class="rtgraph-graph"></div>
     </div>
-
-    <div class="pure-u-1">
-        <div class="bumper-container">
-            <label for="bumper-display" style="margin-right: 10px;">Target Speed:</label>
-            <input type="text" id="bumper-display" class="pure-input-1 bumper-display" readonly>
-            <div class="bumper-buttons">
-                <button class="pure-button pure-button-primary bumper-button" onclick="changeSpeed(0.5)">▲</button>
-                <button class="pure-button pure-button-primary bumper-button" onclick="changeSpeed(-0.5)">▼</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import {ReadVariables, UpdateVariables} from "./api.js"
-
-        const bikeTargetSpeed = "bike_target_speed";
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            fetchInitialSpeed();
-        });
-
-        async function fetchInitialSpeed() {
-
-            const resp = await ReadVariables({
-                variables: [bikeTargetSpeed]
-            })
-
-            resp.variables.forEach(v => {
-                switch (v.name) {
-                    case bikeTargetSpeed:
-                        updateSpeed(v.value);
-                        return;
-                }
-            })
-        }
-
-        function updateSpeed(value) {
-            const display = document.getElementById('bumper-display');
-            display.value = value;
-        }
-
-        function changeSpeed(delta) {
-            const display = document.getElementById('bumper-display');
-            let currentSpeed = parseFloat(display.value);
-            currentSpeed += delta;
-            display.value = currentSpeed;
-            updateSpeedBackend(currentSpeed);
-        }
-
-        window.changeSpeed = changeSpeed;
-
-        function updateSpeedBackend(newSpeed) {
-            UpdateVariables({
-                variables: [
-                    {
-                        name: bikeTargetSpeed,
-                        value: newSpeed,
-                        present: true,
-                    },
-                ]
-            })
-        }
-
-    </script>
-
-    <div id="controls-container" class="pure-g">
-        <!-- Speed controls will be added here -->
-    </div>
-
-    <script type="module">
-        import BumperControl from './bumper-control.js';
-
-        document.addEventListener("DOMContentLoaded", () => {
-            new BumperControl('controls-container', 'Target Speed 1', 'https://api.example.com/speed1', 1, 1);
-            new BumperControl('controls-container', 'Target Speed 2', 'https://api.example.com/speed2', 1, 1);
-        });
-    </script>
 </div>
+
+<div id="controls-container" class="pure-g">
+    <!-- bumper controls will be added here -->
+</div>
+
+<script type="module">
+    import BumperControl from './bumper-control.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new BumperControl('controls-container', 'Target Speed', 'bike_target_speed', 0.5, 0.5);
+        new BumperControl('controls-container', 'Target Speed', 'bike_target_speed', 0.5, 0.5);
+    });
+</script>
 
 </body>
 </html>
