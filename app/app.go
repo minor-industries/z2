@@ -9,32 +9,6 @@ import (
 	"time"
 )
 
-type Config struct {
-	LongTermAverage  string
-	ShortTermAverage string
-	Target           string
-	MaxDriftPct      string
-	AllowedErrorPct  string
-}
-
-var cfg = Config{
-	LongTermAverage: seriesBuilder(
-		"bike_instant_speed",
-		"mygate bike_target_speed bike_max_drift_pct",
-		"gt 20",
-		"avg 10m triangle",
-	),
-	ShortTermAverage: seriesBuilder(
-		"bike_instant_speed",
-		"mygate bike_target_speed bike_max_drift_pct",
-		"gt 20",
-		"avg 30s triangle",
-	),
-	Target:          "bike_target_speed",
-	MaxDriftPct:     "bike_max_drift_pct",
-	AllowedErrorPct: "bike_allowed_error_pct",
-}
-
 type StateChange struct {
 	From string
 	To   string
@@ -80,7 +54,7 @@ func (app *App) ComputeBounds() {
 	for m := range msgCh {
 		for _, s := range m.Series {
 			ts := time.UnixMilli(s.Timestamps[0])
-			bikeAvgSpeedLong := s.Values[0]
+			avgLong := s.Values[0]
 
 			target, _ := app.vars.GetOne(cfg.Target)
 			maxDriftPct, _ := app.vars.GetOne(cfg.MaxDriftPct)
@@ -92,7 +66,7 @@ func (app *App) ComputeBounds() {
 			outStepSize := maxDrift / errorSteps
 			stepSize := allowedError / errorSteps
 
-			e := bikeAvgSpeedLong - target
+			e := avgLong - target
 			steps := int(math.Round(math.Abs(e) / stepSize))
 			steps = min(steps, errorSteps)
 			steps = -sign(e) * steps
@@ -103,15 +77,15 @@ func (app *App) ComputeBounds() {
 			maxTarget := target + maxDrift + outAdjust
 
 			if err := app.Graph.CreateValue(
-				"bike_avg_speed_long",
+				cfg.LongTermAverageName,
 				ts,
-				bikeAvgSpeedLong,
+				avgLong,
 			); err != nil {
 				panic(err)
 			}
 
 			if err := app.Graph.CreateValue(
-				"bike_instant_speed_min",
+				cfg.DriftMin,
 				ts,
 				minTarget,
 			); err != nil {
@@ -119,7 +93,7 @@ func (app *App) ComputeBounds() {
 			}
 
 			if err := app.Graph.CreateValue(
-				"bike_instant_speed_max",
+				cfg.DriftMax,
 				ts,
 				maxTarget,
 			); err != nil {
@@ -135,8 +109,8 @@ func (app *App) ComputePace() {
 	go app.Graph.Subscribe(&subscription.Request{
 		Series: []string{
 			cfg.ShortTermAverage,
-			"bike_instant_speed_min",
-			"bike_instant_speed_max",
+			cfg.DriftMin,
+			cfg.DriftMax,
 		},
 		WindowSize:  uint64((30 * time.Second).Milliseconds()),
 		LastPointMs: 0,
@@ -144,19 +118,19 @@ func (app *App) ComputePace() {
 	}, now, msgCh)
 
 	state := "undefined"
-	var bikeAvgSpeedShort, minTarget, maxTarget float64
+	var avgShort, minTarget, maxTarget float64
 
 	for m := range msgCh {
 		var ts time.Time
 		for _, s := range m.Series {
 			switch s.Pos {
 			case 0:
-				bikeAvgSpeedShort = s.Values[0]
+				avgShort = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
 				if err := app.Graph.CreateValue(
-					"bike_avg_speed_short",
+					cfg.ShortTermAverageName,
 					ts,
-					bikeAvgSpeedShort,
+					avgShort,
 				); err != nil {
 					panic(err)
 				}
@@ -170,7 +144,7 @@ func (app *App) ComputePace() {
 		}
 
 		// perhaps we could use a better way to get these values than subscribing and listening for them
-		if bikeAvgSpeedShort == 0 || minTarget == 0 || maxTarget == 0 {
+		if avgShort == 0 || minTarget == 0 || maxTarget == 0 {
 			continue
 		}
 
@@ -179,10 +153,10 @@ func (app *App) ComputePace() {
 		var newState string
 
 		switch {
-		case bikeAvgSpeedShort > maxTarget:
+		case avgShort > maxTarget:
 			newState = "too_fast"
 			tooFast = 1.0
-		case bikeAvgSpeedShort < minTarget:
+		case avgShort < minTarget:
 			newState = "too_slow"
 			tooSlow = 1.0
 		default:
