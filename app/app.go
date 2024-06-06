@@ -9,6 +9,32 @@ import (
 	"time"
 )
 
+type Config struct {
+	LongTermAverage  string
+	ShortTermAverage string
+	Target           string
+	MaxDriftPct      string
+	AllowedErrorPct  string
+}
+
+var cfg = Config{
+	LongTermAverage: seriesBuilder(
+		"bike_instant_speed",
+		"mygate bike_target_speed bike_max_drift_pct",
+		"gt 20",
+		"avg 10m triangle",
+	),
+	ShortTermAverage: seriesBuilder(
+		"bike_instant_speed",
+		"mygate bike_target_speed bike_max_drift_pct",
+		"gt 20",
+		"avg 30s triangle",
+	),
+	Target:          "bike_target_speed",
+	MaxDriftPct:     "bike_max_drift_pct",
+	AllowedErrorPct: "bike_allowed_error_pct",
+}
+
 type StateChange struct {
 	From string
 	To   string
@@ -45,9 +71,7 @@ func (app *App) ComputeBounds() {
 	now := time.Now()
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
-		Series: []string{
-			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 10m triangle",
-		},
+		Series:      []string{cfg.LongTermAverage},
 		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
 		LastPointMs: 0,
 		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
@@ -58,9 +82,9 @@ func (app *App) ComputeBounds() {
 			ts := time.UnixMilli(s.Timestamps[0])
 			bikeAvgSpeedLong := s.Values[0]
 
-			target, _ := app.vars.GetOne("bike_target_speed")
-			maxDriftPct, _ := app.vars.GetOne("bike_max_drift_pct")
-			allowedErrorPct, _ := app.vars.GetOne("bike_allowed_error_pct")
+			target, _ := app.vars.GetOne(cfg.Target)
+			maxDriftPct, _ := app.vars.GetOne(cfg.MaxDriftPct)
+			allowedErrorPct, _ := app.vars.GetOne(cfg.AllowedErrorPct)
 
 			maxDrift := target * maxDriftPct / 100.0
 			allowedError := target * allowedErrorPct / 100.0
@@ -110,7 +134,7 @@ func (app *App) ComputePace() {
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
 		Series: []string{
-			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 30s triangle",
+			cfg.ShortTermAverage,
 			"bike_instant_speed_min",
 			"bike_instant_speed_max",
 		},
