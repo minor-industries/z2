@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"bytes"
@@ -74,7 +74,7 @@ func (app *App) PlaySounds() {
 				must(playAudio("sounds/fast.mp3"))
 			}
 
-		case sc := <-app.StateChanges:
+		case sc := <-app.stateChanges:
 			ticker.Stop()
 			ticker = time.NewTicker(duration)
 			state = sc.To

@@ -6,10 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
-	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/rtgraph/database"
-	"github.com/minor-industries/rtgraph/messages"
-	"github.com/minor-industries/rtgraph/subscription"
+	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
@@ -18,10 +16,8 @@ import (
 	"github.com/minor-industries/z2/static"
 	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
-	"math"
 	"net/http"
 	"os"
-	"time"
 )
 
 var opts struct {
@@ -40,18 +36,8 @@ var opts struct {
 	RemoveDB bool `long:"remove-db" required:"false"`
 }
 
-type App struct {
-	Graph        *rtgraph.Graph
-	Vars         *variables.Cache
-	StateChanges chan StateChange
-}
-
 func run() error {
 	gin.SetMode(gin.ReleaseMode)
-
-	app := &App{
-		StateChanges: make(chan StateChange),
-	}
 
 	errCh := make(chan error)
 
@@ -71,7 +57,7 @@ func run() error {
 		return errors.Wrap(err, "get database")
 	}
 
-	app.Graph, err = rtgraph.New(
+	graph, err := rtgraph.New(
 		db,
 		errCh,
 		rtgraph.Opts{},
@@ -98,26 +84,9 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
-		if len(args) != 2 {
-			return nil, errors.New("mygate function requires 2 arguments")
-		}
-
-		vars := app.Vars.Get(args)
-		for _, v := range vars {
-			if !v.Present {
-				return nil, fmt.Errorf("variable %s not found", v.Name)
-			}
-		}
-
-		return &OpGate{
-			target:   args[0],
-			driftPct: args[1],
-			vars:     app.Vars,
-		}, nil
-	})
-
-	router := app.Graph.GetEngine()
+	vars := variables.NewCache()
+	z2App := app.NewApp(graph, vars)
+	router := graph.GetEngine()
 
 	if opts.StaticPath != "" {
 		router.Static("/static", opts.StaticPath)
@@ -133,9 +102,7 @@ func run() error {
 		c.Status(204)
 	})
 
-	app.Vars = variables.NewCache()
-
-	apiHandler := &ApiServer{db: db, vars: app.Vars}
+	apiHandler := &ApiServer{db: db, vars: vars}
 	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(api.NewCalendarServer(apiHandler, nil)))
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
@@ -145,7 +112,7 @@ func run() error {
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
 	mainHandler, err := handler.NewBikeHandler(
-		app.Graph,
+		graph,
 		db,
 		src,
 		cancel,
@@ -162,7 +129,7 @@ func run() error {
 			addr := addr
 			hrmSrc := &heartrate.Source{}
 			h, err := handler.NewBikeHandler(
-				app.Graph,
+				graph,
 				db,
 				hrmSrc,
 				cancel,
@@ -187,7 +154,7 @@ func run() error {
 	}
 
 	go func() {
-		errCh <- app.Graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
+		errCh <- graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
 	go func() {
@@ -214,172 +181,9 @@ func run() error {
 		errCh <- err
 	}()
 
-	go app.PlaySounds()
-	go app.ComputeBounds()
-	go app.ComputePace()
+	z2App.Run()
 
 	return <-errCh
-}
-
-func (app *App) ComputeBounds() {
-	// error vs drift:
-	//  - error: the difference between the long-term average and the target
-	//  - drift: the bounds for the short term average to move about without signaling to the user
-	// drift will typically be configured to be a bit larger than error
-
-	const (
-		errorSteps = 5
-	)
-
-	now := time.Now()
-	msgCh := make(chan *messages.Data)
-	go app.Graph.Subscribe(&subscription.Request{
-		Series: []string{
-			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 10m triangle",
-		},
-		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
-		LastPointMs: 0,
-		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
-	}, now, msgCh)
-
-	for m := range msgCh {
-		for _, s := range m.Series {
-			ts := time.UnixMilli(s.Timestamps[0])
-			bikeAvgSpeedLong := s.Values[0]
-
-			target, _ := app.Vars.GetOne("bike_target_speed")
-			maxDriftPct, _ := app.Vars.GetOne("bike_max_drift_pct")
-			allowedErrorPct, _ := app.Vars.GetOne("bike_allowed_error_pct")
-
-			maxDrift := target * maxDriftPct / 100.0
-			allowedError := target * allowedErrorPct / 100.0
-
-			outStepSize := maxDrift / errorSteps
-			stepSize := allowedError / errorSteps
-
-			e := bikeAvgSpeedLong - target
-			steps := int(math.Round(math.Abs(e) / stepSize))
-			steps = min(steps, errorSteps)
-			steps = -sign(e) * steps
-
-			outAdjust := float64(steps) * outStepSize
-
-			minTarget := target + outAdjust - maxDrift
-			maxTarget := target + maxDrift + outAdjust
-
-			if err := app.Graph.CreateValue(
-				"bike_avg_speed_long",
-				ts,
-				bikeAvgSpeedLong,
-			); err != nil {
-				panic(err)
-			}
-
-			if err := app.Graph.CreateValue(
-				"bike_instant_speed_min",
-				ts,
-				minTarget,
-			); err != nil {
-				panic(err)
-			}
-
-			if err := app.Graph.CreateValue(
-				"bike_instant_speed_max",
-				ts,
-				maxTarget,
-			); err != nil {
-				panic(err)
-			}
-		}
-	}
-}
-
-type StateChange struct {
-	From string
-	To   string
-}
-
-func (app *App) ComputePace() {
-	now := time.Now()
-	msgCh := make(chan *messages.Data)
-	go app.Graph.Subscribe(&subscription.Request{
-		Series: []string{
-			"bike_instant_speed | mygate bike_target_speed bike_max_drift_pct | gt 20 | avg 30s triangle",
-			"bike_instant_speed_min",
-			"bike_instant_speed_max",
-		},
-		WindowSize:  uint64((30 * time.Second).Milliseconds()),
-		LastPointMs: 0,
-		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
-	}, now, msgCh)
-
-	state := "undefined"
-	var bikeAvgSpeedShort, minTarget, maxTarget float64
-
-	for m := range msgCh {
-		var ts time.Time
-		for _, s := range m.Series {
-			switch s.Pos {
-			case 0:
-				bikeAvgSpeedShort = s.Values[0]
-				ts = time.UnixMilli(s.Timestamps[0])
-				if err := app.Graph.CreateValue(
-					"bike_avg_speed_short",
-					ts,
-					bikeAvgSpeedShort,
-				); err != nil {
-					panic(err)
-				}
-			case 1:
-				minTarget = s.Values[0]
-				ts = time.UnixMilli(s.Timestamps[0])
-			case 2:
-				maxTarget = s.Values[0]
-				ts = time.UnixMilli(s.Timestamps[0])
-			}
-		}
-
-		// perhaps we could use a better way to get these values than subscribing and listening for them
-		if bikeAvgSpeedShort == 0 || minTarget == 0 || maxTarget == 0 {
-			continue
-		}
-
-		var tooFast, tooSlow, fairway float64
-
-		var newState string
-
-		switch {
-		case bikeAvgSpeedShort > maxTarget:
-			newState = "too_fast"
-			tooFast = 1.0
-		case bikeAvgSpeedShort < minTarget:
-			newState = "too_slow"
-			tooSlow = 1.0
-		default:
-			newState = "fairway"
-			fairway = 1.0
-		}
-
-		if state != newState {
-			app.StateChanges <- StateChange{
-				From: state,
-				To:   newState,
-			}
-		}
-
-		state = newState
-
-		_ = app.Graph.CreateValue("too_fast", ts, tooFast)
-		_ = app.Graph.CreateValue("too_slow", ts, tooSlow)
-		_ = app.Graph.CreateValue("fairway", ts, fairway)
-	}
-}
-
-func sign(x float64) int {
-	if x < 0 {
-		return -1
-	}
-	return 1
 }
 
 func main() {

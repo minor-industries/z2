@@ -11,8 +11,6 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
-// TODO: might be nice to split into separate handlers, one for DB and one for publishing to broker
-
 type BikeHandler struct {
 	graph   *rtgraph.Graph
 	backend *database.Backend
