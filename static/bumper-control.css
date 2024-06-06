@@ -1,0 +1,27 @@
+.bumper-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.bumper-display {
+    width: 100px;
+    text-align: center;
+    font-size: 1.5em;
+    margin-right: 10px;
+}
+
+.bumper-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.bumper-button {
+    margin: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2em;
+    text-align: center;
+    cursor: pointer;
+}

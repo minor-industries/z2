@@ -16,35 +16,7 @@
     <script type="text/javascript" src="/rtgraph/dygraph.min.js"></script>
     <script type="text/javascript" src="/rtgraph/msgpack.min.js"></script>
 
-    <style>
-        .speed-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 50px;
-        }
-
-        .speed-display {
-            width: 100px;
-            text-align: center;
-            font-size: 1.5em;
-            margin-right: 10px;
-        }
-
-        .speed-buttons {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .speed-button {
-            margin: 5px;
-            width: 30px;
-            height: 30px;
-            font-size: 1.2em;
-            text-align: center;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="/static/bumper-control.css">
 
     <script type="module">
         import {Graph} from '/rtgraph/rtgraph.js';
@@ -186,12 +158,12 @@
     </div>
 
     <div class="pure-u-1">
-        <div class="speed-container">
-            <label for="speed-display" style="margin-right: 10px;">Target Speed:</label>
-            <input type="text" id="speed-display" class="pure-input-1 speed-display" readonly>
-            <div class="speed-buttons">
-                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(0.5)">▲</button>
-                <button class="pure-button pure-button-primary speed-button" onclick="changeSpeed(-0.5)">▼</button>
+        <div class="bumper-container">
+            <label for="bumper-display" style="margin-right: 10px;">Target Speed:</label>
+            <input type="text" id="bumper-display" class="pure-input-1 bumper-display" readonly>
+            <div class="bumper-buttons">
+                <button class="pure-button pure-button-primary bumper-button" onclick="changeSpeed(0.5)">▲</button>
+                <button class="pure-button pure-button-primary bumper-button" onclick="changeSpeed(-0.5)">▼</button>
             </div>
         </div>
     </div>
@@ -221,12 +193,12 @@
         }
 
         function updateSpeed(value) {
-            const display = document.getElementById('speed-display');
+            const display = document.getElementById('bumper-display');
             display.value = value;
         }
 
         function changeSpeed(delta) {
-            const display = document.getElementById('speed-display');
+            const display = document.getElementById('bumper-display');
             let currentSpeed = parseFloat(display.value);
             currentSpeed += delta;
             display.value = currentSpeed;
@@ -247,6 +219,19 @@
             })
         }
 
+    </script>
+
+    <div id="controls-container" class="pure-g">
+        <!-- Speed controls will be added here -->
+    </div>
+
+    <script type="module">
+        import BumperControl from './bumper-control.js';
+
+        document.addEventListener("DOMContentLoaded", () => {
+            new BumperControl('controls-container', 'Target Speed 1', 'https://api.example.com/speed1', 1, 1);
+            new BumperControl('controls-container', 'Target Speed 2', 'https://api.example.com/speed2', 1, 1);
+        });
     </script>
 </div>
 
