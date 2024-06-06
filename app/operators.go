@@ -1,8 +1,12 @@
 package app
 
 import (
+	"fmt"
+	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/rtgraph/schema"
 	"github.com/minor-industries/z2/variables"
+	"github.com/pkg/errors"
+	"time"
 )
 
 type OpGate struct {
@@ -41,4 +45,26 @@ func (o *OpGate) ProcessNewValues(values []schema.Value) []schema.Value {
 	}
 
 	return result
+}
+
+func (app *App) setupGraphFunctions() {
+	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
+		if len(args) != 2 {
+			return nil, errors.New("mygate function requires 2 arguments")
+		}
+
+		vars := app.vars.Get(args)
+		for _, v := range vars {
+			if !v.Present {
+				return nil, fmt.Errorf("variable %s not found", v.Name)
+			}
+		}
+
+		return &OpGate{
+			target:   args[0],
+			driftPct: args[1],
+			vars:     app.vars,
+		}, nil
+	})
+
 }

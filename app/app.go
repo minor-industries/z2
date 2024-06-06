@@ -1,13 +1,10 @@
 package app
 
 import (
-	"fmt"
 	"github.com/minor-industries/rtgraph"
-	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/variables"
-	"github.com/pkg/errors"
 	"math"
 	"time"
 )
@@ -182,28 +179,6 @@ func (app *App) ComputePace() {
 		_ = app.Graph.CreateValue("too_slow", ts, tooSlow)
 		_ = app.Graph.CreateValue("fairway", ts, fairway)
 	}
-}
-
-func (app *App) setupGraphFunctions() {
-	app.Graph.Parser.AddFunction("mygate", func(start time.Time, args []string) (computed_series.Operator, error) {
-		if len(args) != 2 {
-			return nil, errors.New("mygate function requires 2 arguments")
-		}
-
-		vars := app.vars.Get(args)
-		for _, v := range vars {
-			if !v.Present {
-				return nil, fmt.Errorf("variable %s not found", v.Name)
-			}
-		}
-
-		return &OpGate{
-			target:   args[0],
-			driftPct: args[1],
-			vars:     app.vars,
-		}, nil
-	})
-
 }
 
 func (app *App) Run() {
