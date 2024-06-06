@@ -16,18 +16,26 @@
     <script type="text/javascript" src="/rtgraph/dygraph.min.js"></script>
     <script type="text/javascript" src="/rtgraph/msgpack.min.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="/static/bumper-control.css">
+
     <script type="module">
         import {Graph} from '/rtgraph/rtgraph.js';
 
         document.addEventListener("DOMContentLoaded", () => {
             const second = 1000;
             const minute = second * 60;
-            const seriesOpts = {y2: {strokeWidth: 1.0}}
+            const seriesOpts = {
+                y2: {strokeWidth: 1.0},
+                y3: {strokeWidth: 1.0, color: "red"},
+                y4: {strokeWidth: 1.0, color: "red"},
+            }
 
             new Graph(document.getElementById("graphdiv0"), {
                 seriesNames: [
-                    "rower_power | gt 70 | avg 30s triangle",
-                    "rower_power"
+                    "rower_avg_power_short",
+                    "rower_power | mygate rower_target_power rower_max_drift_pct",
+                    "rower_power_min",
+                    "rower_power_max",
                 ],
                 title: "Power: {value}",
                 ylabel: "power (watts)",
@@ -62,7 +70,7 @@
 
             new Graph(document.getElementById("graphdiv3"), {
                 seriesNames: [
-                    "rower_power | gt 70 | avg 10m triangle"
+                    "rower_avg_power_long",
                 ],
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
@@ -110,6 +118,20 @@
         <div id="graphdiv2" class="rtgraph-graph"></div>
     </div>
 </div>
+
+<div id="controls-container" class="pure-g">
+    <!-- bumper controls will be added here -->
+</div>
+
+<script type="module">
+    import BumperControl from './bumper-control.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new BumperControl('controls-container', 'Target Power', 'rower_target_power', 1, 0);
+        new BumperControl('controls-container', 'Max Drift %', 'rower_max_drift_pct', 0.5, 1);
+        new BumperControl('controls-container', 'Max Error %', 'rower_allowed_error_pct', 0.25, 2);
+    });
+</script>
 
 
 </body>
