@@ -2,18 +2,15 @@ package app
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"github.com/ebitengine/oto/v3"
 	"github.com/hajimehoshi/go-mp3"
+	"github.com/minor-industries/z2/static"
 	"github.com/pkg/errors"
 	"io/fs"
 	"sync"
 	"time"
 )
-
-//go:embed sounds/*.mp3
-var audioFiles embed.FS
 
 var contextOnce sync.Once
 var otoContext *oto.Context
@@ -21,7 +18,7 @@ var otoContext *oto.Context
 func playAudio(fileName string) error {
 	fmt.Println("play", fileName)
 
-	fileBytes, err := fs.ReadFile(audioFiles, fileName)
+	fileBytes, err := fs.ReadFile(static.FS, fileName)
 	if err != nil {
 		return errors.Wrap(err, "read audio file")
 	}
