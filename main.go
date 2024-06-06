@@ -85,7 +85,7 @@ func run() error {
 	}
 
 	vars := variables.NewCache()
-	z2App := app.NewApp(graph, vars)
+	z2App := app.NewApp(graph, vars, opts.Source)
 	router := graph.GetEngine()
 
 	if opts.StaticPath != "" {

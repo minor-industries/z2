@@ -15,7 +15,7 @@ type Config struct {
 	DriftMax string
 }
 
-var cfg = Config{
+var bikeConfig = Config{
 	LongTermAverage: seriesBuilder(
 		"bike_instant_speed",
 		"mygate bike_target_speed bike_max_drift_pct",
@@ -38,4 +38,34 @@ var cfg = Config{
 	Target:          "bike_target_speed",
 	MaxDriftPct:     "bike_max_drift_pct",
 	AllowedErrorPct: "bike_allowed_error_pct",
+}
+
+var rowerConfig = Config{
+	LongTermAverage: seriesBuilder(
+		"rower_power",
+		"mygate rower_target_power rower_max_drift_pct",
+		"gt 60",
+		"avg 10m triangle",
+	),
+	LongTermAverageName: "rower_avg_power_long",
+
+	ShortTermAverage: seriesBuilder(
+		"rower_power",
+		"mygate rower_target_power rower_max_drift_pct",
+		"gt 60",
+		"avg 30s triangle",
+	),
+	ShortTermAverageName: "rower_avg_power_short",
+
+	DriftMin: "rower_power_min",
+	DriftMax: "rower_power_max",
+
+	Target:          "rower_target_power",
+	MaxDriftPct:     "rower_max_drift_pct",
+	AllowedErrorPct: "rower_allowed_error_pct",
+}
+
+var configs = map[string]Config{
+	"bike":  bikeConfig,
+	"rower": rowerConfig,
 }

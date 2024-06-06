@@ -18,13 +18,20 @@ type App struct {
 	Graph        *rtgraph.Graph
 	vars         *variables.Cache
 	stateChanges chan StateChange
+	cfg          Config
 }
 
-func NewApp(graph *rtgraph.Graph, vars *variables.Cache) *App {
+func NewApp(graph *rtgraph.Graph, vars *variables.Cache, kind string) *App {
+	cfg, ok := configs[kind]
+	if !ok {
+		panic("unknown kind")
+	}
+
 	app := &App{
 		Graph:        graph,
 		vars:         vars,
 		stateChanges: make(chan StateChange),
+		cfg:          cfg,
 	}
 
 	app.setupGraphFunctions()
@@ -45,7 +52,7 @@ func (app *App) ComputeBounds() {
 	now := time.Now()
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
-		Series:      []string{cfg.LongTermAverage},
+		Series:      []string{app.cfg.LongTermAverage},
 		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
 		LastPointMs: 0,
 		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
@@ -56,9 +63,9 @@ func (app *App) ComputeBounds() {
 			ts := time.UnixMilli(s.Timestamps[0])
 			avgLong := s.Values[0]
 
-			target, _ := app.vars.GetOne(cfg.Target)
-			maxDriftPct, _ := app.vars.GetOne(cfg.MaxDriftPct)
-			allowedErrorPct, _ := app.vars.GetOne(cfg.AllowedErrorPct)
+			target, _ := app.vars.GetOne(app.cfg.Target)
+			maxDriftPct, _ := app.vars.GetOne(app.cfg.MaxDriftPct)
+			allowedErrorPct, _ := app.vars.GetOne(app.cfg.AllowedErrorPct)
 
 			maxDrift := target * maxDriftPct / 100.0
 			allowedError := target * allowedErrorPct / 100.0
@@ -77,7 +84,7 @@ func (app *App) ComputeBounds() {
 			maxTarget := target + maxDrift + outAdjust
 
 			if err := app.Graph.CreateValue(
-				cfg.LongTermAverageName,
+				app.cfg.LongTermAverageName,
 				ts,
 				avgLong,
 			); err != nil {
@@ -85,7 +92,7 @@ func (app *App) ComputeBounds() {
 			}
 
 			if err := app.Graph.CreateValue(
-				cfg.DriftMin,
+				app.cfg.DriftMin,
 				ts,
 				minTarget,
 			); err != nil {
@@ -93,7 +100,7 @@ func (app *App) ComputeBounds() {
 			}
 
 			if err := app.Graph.CreateValue(
-				cfg.DriftMax,
+				app.cfg.DriftMax,
 				ts,
 				maxTarget,
 			); err != nil {
@@ -108,9 +115,9 @@ func (app *App) ComputePace() {
 	msgCh := make(chan *messages.Data)
 	go app.Graph.Subscribe(&subscription.Request{
 		Series: []string{
-			cfg.ShortTermAverage,
-			cfg.DriftMin,
-			cfg.DriftMax,
+			app.cfg.ShortTermAverage,
+			app.cfg.DriftMin,
+			app.cfg.DriftMax,
 		},
 		WindowSize:  uint64((30 * time.Second).Milliseconds()),
 		LastPointMs: 0,
@@ -128,7 +135,7 @@ func (app *App) ComputePace() {
 				avgShort = s.Values[0]
 				ts = time.UnixMilli(s.Timestamps[0])
 				if err := app.Graph.CreateValue(
-					cfg.ShortTermAverageName,
+					app.cfg.ShortTermAverageName,
 					ts,
 					avgShort,
 				); err != nil {

@@ -20,6 +20,10 @@ func NewCache() *Cache {
 			"bike_target_speed":      41.5,
 			"bike_allowed_error_pct": 1.0,
 			"bike_max_drift_pct":     2.0,
+
+			"rower_target_power":      115.0,
+			"rower_allowed_error_pct": 2.0,
+			"rower_max_drift_pct":     5.0,
 		},
 	}
 }
