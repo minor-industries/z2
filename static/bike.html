@@ -130,16 +130,15 @@
 
 <body>
 
-<audio id="myAudio">
-    <source src="path_to_your_audio_file.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
+<audio id="sound-fast">
+    <source src="/static/sounds/fast.mp3" type="audio/mpeg">
 </audio>
 
 <button onclick="playSound()">Play Sound</button>
 
 <script>
     function playSound() {
-        var audio = document.getElementById("myAudio");
+        const audio = document.getElementById("sound-fast");
         audio.play();
     }
 </script>
