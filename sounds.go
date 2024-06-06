@@ -4,56 +4,59 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"io"
-	"log"
+	"github.com/ebitengine/oto/v3"
+	"github.com/hajimehoshi/go-mp3"
+	"github.com/pkg/errors"
+	"io/fs"
+	"sync"
 	"time"
-
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/speaker"
-	"github.com/faiface/beep/wav"
 )
 
-//go:embed sounds/*.wav
+//go:embed sounds/*.mp3
 var audioFiles embed.FS
 
-func playAudio(fileName string) {
+var contextOnce sync.Once
+var otoContext *oto.Context
+
+func playAudio(fileName string) error {
 	fmt.Println("play", fileName)
 
-	// Open the audio file from the embed.FS
-	audioFile, err := audioFiles.Open(fileName)
+	fileBytes, err := fs.ReadFile(audioFiles, fileName)
 	if err != nil {
-		log.Fatalf("Failed to open audio file: %v", err)
-	}
-	defer audioFile.Close()
-
-	// Read the audio file into a buffer
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, audioFile)
-	if err != nil {
-		log.Fatalf("Failed to read audio file: %v", err)
+		return errors.Wrap(err, "read audio file")
 	}
 
-	stream, format, err := wav.Decode(&buf)
-
+	contextOnce.Do(func() {
+		var ready chan struct{}
+		otoContext, ready, err = oto.NewContext(&oto.NewContextOptions{
+			SampleRate:   44100,
+			ChannelCount: 2,
+			Format:       oto.FormatSignedInt16LE,
+		})
+		if err != nil {
+			return
+		}
+		<-ready
+	})
 	if err != nil {
-		log.Fatalf("Failed to decode audio file: %v", err)
+		return fmt.Errorf("failed to create Oto context: %w", err)
 	}
-	defer stream.Close()
 
-	// Initialize the speaker
-	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
+	decoder, err := mp3.NewDecoder(bytes.NewBuffer(fileBytes))
 	if err != nil {
-		log.Fatalf("Failed to initialize speaker: %v", err)
+		return fmt.Errorf("failed to decode MP3: %w", err)
 	}
 
-	// Play the audio file
-	done := make(chan bool)
-	speaker.Play(beep.Seq(stream, beep.Callback(func() {
-		done <- true
-	})))
+	player := otoContext.NewPlayer(decoder)
+	defer player.Close()
 
-	// Wait until playback is finished
-	<-done
+	player.Play()
+
+	for player.IsPlaying() {
+		time.Sleep(time.Millisecond)
+	}
+
+	return nil
 }
 
 func (app *App) PlaySounds() {
@@ -66,9 +69,9 @@ func (app *App) PlaySounds() {
 		case <-ticker.C:
 			switch state {
 			case "too_slow":
-				playAudio("sounds/slow.wav")
+				must(playAudio("sounds/slow.mp3"))
 			case "too_fast":
-				playAudio("sounds/fast.wav")
+				must(playAudio("sounds/fast.mp3"))
 			}
 
 		case sc := <-app.StateChanges:
@@ -78,12 +81,18 @@ func (app *App) PlaySounds() {
 
 			switch state {
 			case "too_slow":
-				playAudio("sounds/slow.wav")
+				must(playAudio("sounds/slow.mp3"))
 			case "too_fast":
-				playAudio("sounds/fast.wav")
+				must(playAudio("sounds/fast.mp3"))
 			case "fairway":
-				playAudio("sounds/fairway.wav")
+				must(playAudio("sounds/fairway.mp3"))
 			}
 		}
+	}
+}
+
+func must(err error) {
+	if err != nil {
+		panic(err)
 	}
 }
