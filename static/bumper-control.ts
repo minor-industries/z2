@@ -2,14 +2,18 @@ import {ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, Upd
 
 class BumperControl {
     private container: HTMLElement;
-    private label: string;
-    private variableName: string;
-    private increment: number;
-    private decrement: number;
-    private speed: number;
+    private readonly label: string;
+    private readonly variableName: string;
+    private readonly increment: number;
+    private speed: number; // TODO: rename, this is more general than speed control
+    private readonly fixed: number | null;
     private display!: HTMLInputElement;
 
-    constructor(containerId: string, label: string, variableName: string, increment: number = 1, decrement: number = 1) {
+    constructor(containerId: string,
+                label: string,
+                variableName: string,
+                increment: number,
+                fixed: number | null = null) {
         const containerElement = document.getElementById(containerId);
         if (!containerElement) {
             throw new Error(`Container with id ${containerId} not found`);
@@ -18,8 +22,8 @@ class BumperControl {
         this.label = label;
         this.variableName = variableName;
         this.increment = increment;
-        this.decrement = decrement;
         this.speed = 0; // default speed
+        this.fixed = fixed;
 
         this.createControl();
         this.fetchInitialSpeed();
@@ -46,7 +50,7 @@ class BumperControl {
 
         // Bind event handlers
         incrementButton.addEventListener('click', () => this.changeSpeed(this.increment));
-        decrementButton.addEventListener('click', () => this.changeSpeed(-this.decrement));
+        decrementButton.addEventListener('click', () => this.changeSpeed(-this.increment));
     }
 
     private async fetchInitialSpeed(): Promise<void> {
@@ -59,7 +63,7 @@ class BumperControl {
             const variable = resp.variables.find(v => v.name === this.variableName);
             if (variable && variable.present) {
                 this.speed = variable.value;
-                this.display.value = this.speed.toString();
+                this.updateValue();
             }
         } catch (error) {
             console.error('Error fetching initial speed:', error);
@@ -68,8 +72,16 @@ class BumperControl {
 
     public async changeSpeed(delta: number): Promise<void> {
         this.speed += delta;
-        this.display.value = this.speed.toString();
+        this.updateValue();
         await this.updateSpeedBackend();
+    }
+
+    private updateValue() {
+        if (this.fixed !== null) {
+            this.display.value = Number(this.speed).toFixed(this.fixed);
+        } else {
+            this.display.value = this.speed.toString();
+        }
     }
 
     private async updateSpeedBackend(): Promise<void> {
