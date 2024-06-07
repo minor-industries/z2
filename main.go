@@ -30,12 +30,16 @@ type Config struct {
 	StaticPath        string   `toml:"static_path"`
 	RemoveDB          bool     `toml:"remove_db"`
 	Webview           bool     `toml:"webview"`
+	XRes              int      `toml:"xres"`
+	YRes              int      `toml:"yres"`
 }
 
 func run() error {
 	opts := Config{
 		Port:    8077,
 		Webview: true,
+		XRes:    1132,
+		YRes:    700,
 	}
 
 	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
@@ -205,7 +209,12 @@ func run() error {
 			errCh2 <- err
 		}()
 
-		runWebview(w, errCh, fmt.Sprintf("http://localhost:%d/static/%s.html", opts.Port, opts.Source))
+		runWebview(
+			&opts,
+			w,
+			errCh,
+			fmt.Sprintf("http://localhost:%d/static/%s.html", opts.Port, opts.Source),
+		)
 		return <-errCh2
 	} else {
 		return <-errCh
@@ -213,13 +222,14 @@ func run() error {
 }
 
 func runWebview(
+	opts *Config,
 	w webview.WebView,
 	ch chan error,
 	url string,
 ) {
 	defer w.Destroy()
 	w.SetTitle("z2")
-	w.SetSize(800, 600, webview.HintNone)
+	w.SetSize(opts.XRes, opts.YRes, webview.HintNone)
 	w.Navigate(url)
 	w.Run()
 	ch <- nil

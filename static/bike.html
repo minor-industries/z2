@@ -134,13 +134,27 @@
     <source src="/static/sounds/fast.mp3" type="audio/mpeg">
 </audio>
 
-<button onclick="playSound()">Play Sound</button>
+<!--<button onclick="playSound()">Play Sound</button>-->
 
 <script>
     function playSound() {
         const audio = document.getElementById("sound-fast");
         audio.play();
     }
+</script>
+
+<div id="controls-container" class="pure-g">
+    <!-- bumper controls will be added here -->
+</div>
+
+<script type="module">
+    import BumperControl from './bumper-control.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new BumperControl('controls-container', 'Target Speed', 'bike_target_speed', 0.5, 1);
+        new BumperControl('controls-container', 'Max Drift %', 'bike_max_drift_pct', 0.1, 1);
+        new BumperControl('controls-container', 'Max Error %', 'bike_allowed_error_pct', 0.1, 1);
+    });
 </script>
 
 <div class="pure-g">
@@ -172,20 +186,6 @@
         <div id="graphdiv7" class="rtgraph-graph"></div>
     </div>
 </div>
-
-<div id="controls-container" class="pure-g">
-    <!-- bumper controls will be added here -->
-</div>
-
-<script type="module">
-    import BumperControl from './bumper-control.js';
-
-    document.addEventListener("DOMContentLoaded", () => {
-        new BumperControl('controls-container', 'Target Speed', 'bike_target_speed', 0.5, 1);
-        new BumperControl('controls-container', 'Max Drift %', 'bike_max_drift_pct', 0.1, 1);
-        new BumperControl('controls-container', 'Max Error %', 'bike_allowed_error_pct', 0.1, 1);
-    });
-</script>
 
 </body>
 </html>
