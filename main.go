@@ -196,7 +196,7 @@ func run() error {
 			errCh2 <- err
 		}()
 
-		runWebview(w, errCh, fmt.Sprintf("http://localhost:%d", opts.Port))
+		runWebview(w, errCh, fmt.Sprintf("http://localhost:%d/static/%s.html", opts.Port, opts.Source))
 		return <-errCh2
 	} else {
 		return <-errCh
