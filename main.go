@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
-	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/app"
@@ -20,31 +20,32 @@ import (
 	"os"
 )
 
-var opts struct {
-	Source string `long:"source" required:"true" env:"SOURCE"`
-
-	ReplayDB   string `long:"replay-db"`
-	NoReplayDB string `long:"no-replay-db"`
-
-	Port int `long:"port" default:"8077" env:"PORT"`
-
-	HeartrateMonitors   []string `long:"hrm" env:"HRM"`
-	NoHeartrateMonitors []string `long:"no-hrm" env:"HRM"`
-
-	StaticPath string `long:"static-path" required:"false"`
-
-	RemoveDB bool `long:"remove-db" required:"false"`
+type Config struct {
+	Source            string   `toml:"source"`
+	ReplayDB          string   `toml:"replay_db"`
+	Port              int      `toml:"port"`
+	HeartrateMonitors []string `toml:"heartrate_monitors"`
+	StaticPath        string   `toml:"static_path"`
+	RemoveDB          bool     `toml:"remove_db"`
 }
 
 func run() error {
+	opts := Config{
+		Port: 8077,
+	}
+
+	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
+	if _, err := toml.DecodeFile(cfgFile, &opts); err != nil {
+		return errors.Wrap(err, "read config file")
+	}
+
+	if opts.Source == "" {
+		return errors.New("missing source")
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 
 	errCh := make(chan error)
-
-	_, err := flags.Parse(&opts)
-	if err != nil {
-		return errors.Wrap(err, "parse flags")
-	}
 
 	dbPath := os.ExpandEnv("$HOME/z2.db")
 

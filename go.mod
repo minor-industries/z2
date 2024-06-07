@@ -3,11 +3,11 @@ module github.com/minor-industries/z2
 go 1.21.1
 
 require (
+	github.com/BurntSushi/toml v1.4.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ebitengine/oto/v3 v3.2.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/hajimehoshi/go-mp3 v0.3.0
-	github.com/jessevdk/go-flags v1.5.0
 	github.com/minor-industries/rtgraph v0.0.13-0.20240605062952-991ec5540cc4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
