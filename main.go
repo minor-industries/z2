@@ -101,7 +101,11 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars := variables.NewCache()
+	vars, err := variables.NewCache(db)
+	if err != nil {
+		return errors.Wrap(err, "new cache")
+	}
+
 	z2App := app.NewApp(graph, vars, opts.Source)
 	router := graph.GetEngine()
 

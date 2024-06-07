@@ -8,7 +8,7 @@ require (
 	github.com/ebitengine/oto/v3 v3.2.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/hajimehoshi/go-mp3 v0.3.0
-	github.com/minor-industries/rtgraph v0.0.13-0.20240605062952-991ec5540cc4
+	github.com/minor-industries/rtgraph v0.0.13-0.20240607184609-e3b936588b76
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/twitchtv/twirp v8.1.3+incompatible

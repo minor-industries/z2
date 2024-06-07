@@ -1,6 +1,12 @@
 package variables
 
-import "sync"
+import (
+	"github.com/minor-industries/rtgraph/database"
+	db2 "github.com/minor-industries/z2/variables/db"
+	"github.com/pkg/errors"
+	"sync"
+	"time"
+)
 
 type Variable struct {
 	Name    string
@@ -11,10 +17,26 @@ type Variable struct {
 type Cache struct {
 	lock sync.Mutex
 	vars map[string]float64
+	db   *database.Backend
 }
 
-func NewCache() *Cache {
-	return &Cache{
+type RawValue struct {
+	ID []byte `gorm:"primary_key"`
+
+	ServiceID        string
+	CharacteristicID string
+
+	Timestamp time.Time `gorm:"index"`
+	Message   []byte
+}
+
+func NewCache(db *database.Backend) (*Cache, error) {
+	if err := db.GetORM().AutoMigrate(&db2.Variable{}); err != nil {
+		return nil, errors.Wrap(err, "automigrate")
+	}
+
+	cache := &Cache{
+		db: db,
 		vars: map[string]float64{
 			// TODO: this should be in DB
 			"bike_target_speed":      41.5,
@@ -26,6 +48,17 @@ func NewCache() *Cache {
 			"rower_max_drift_pct":     5.0,
 		},
 	}
+
+	var rows []db2.Variable
+	tx := db.GetORM().Find(&rows)
+	if tx.Error != nil {
+		return nil, errors.Wrap(tx.Error, "find rows")
+	}
+
+	for _, row := range rows {
+		cache.vars[row.Name] = row.Value
+	}
+	return cache, nil
 }
 
 func (c *Cache) Get(keys []string) []Variable {
@@ -52,8 +85,11 @@ func (c *Cache) Update(vars []Variable) {
 	for _, v := range vars {
 		if v.Present {
 			c.vars[v.Name] = v.Value
-		} else {
-			delete(c.vars, v.Name)
+
+			c.db.Save(&db2.Variable{
+				Name:  v.Name,
+				Value: v.Value,
+			})
 		}
 	}
 }
