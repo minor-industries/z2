@@ -81,10 +81,8 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/minor-industries/platform v0.0.3 h1:DdVgTQL7DmO4RTtASLSopuPsHvdcKISG0TMekPxDOrc=
 github.com/minor-industries/platform v0.0.3/go.mod h1:nkESvK2vUWSKXkTARDVLlAw6TesN3/FCwcWj2L3bDlY=
-github.com/minor-industries/rtgraph v0.0.13-0.20240605062952-991ec5540cc4 h1:cVRfrbig2vOTKjJEaakg/F4eVNWuQ/cAWOMOtzDSDj0=
-github.com/minor-industries/rtgraph v0.0.13-0.20240605062952-991ec5540cc4/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
-github.com/minor-industries/rtgraph v0.0.13-0.20240607184609-e3b936588b76 h1:RWpWTxFVF2a3FGZd2Xs1AAr+ywDV2Sza2e0gXA7DzK8=
-github.com/minor-industries/rtgraph v0.0.13-0.20240607184609-e3b936588b76/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
+github.com/minor-industries/rtgraph v0.0.13 h1:gGV7x1DUTiOlkn+5EFDuXb/T0ivjQiVLsrlQYQE5LB8=
+github.com/minor-industries/rtgraph v0.0.13/go.mod h1:Q4ppCS0abSAOuqws+d+fh07ZDo6drahUO+RPM/3rwlY=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
