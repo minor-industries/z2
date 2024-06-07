@@ -92,6 +92,14 @@ func (app *App) ComputeBounds() {
 			}
 
 			if err := app.Graph.CreateValue(
+				app.cfg.Target,
+				ts,
+				target,
+			); err != nil {
+				panic(err)
+			}
+
+			if err := app.Graph.CreateValue(
 				app.cfg.DriftMin,
 				ts,
 				minTarget,

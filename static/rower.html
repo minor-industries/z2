@@ -71,13 +71,16 @@
             new Graph(document.getElementById("graphdiv3"), {
                 seriesNames: [
                     "rower_avg_power_long",
+                    "rower_target_power",
                 ],
                 title: "Avg Power: {value}",
                 ylabel: "power (watts)",
                 windowSize: 15 * minute,
                 height: 250,
-                // valueRange: [110.0, 140.0],
-                maxGapMs: 5 * second
+                maxGapMs: 5 * second,
+                series: {
+                    y2: {strokeWidth: 1.0, color: "red"},
+                }
             });
 
             new Graph(document.getElementById("graphdiv4"), {

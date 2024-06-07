@@ -73,13 +73,17 @@
 
             new Graph(document.getElementById("graphdiv5"), {
                 seriesNames: [
-                    "bike_avg_speed_long"
+                    "bike_avg_speed_long",
+                    "bike_target_speed"
                 ],
                 title: "Avg Speed: {value}",
                 ylabel: "speed (km/h)",
                 windowSize: 15 * minute,
                 height: 250,
-                maxGapMs: 5 * second
+                maxGapMs: 5 * second,
+                series: {
+                    y2: {strokeWidth: 1.0, color: "red"},
+                }
             });
 
             new Graph(document.getElementById("graphdiv4"), {
