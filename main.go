@@ -63,7 +63,7 @@ func run() error {
 
 	errCh := make(chan error)
 
-	dbPath := os.ExpandEnv("$HOME/z2.db")
+	dbPath := os.ExpandEnv("$HOME/.z2/z2.db")
 
 	if opts.RemoveDB {
 		_ = os.Remove(dbPath)
