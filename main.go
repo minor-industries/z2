@@ -19,6 +19,7 @@ import (
 	webview "github.com/webview/webview_go"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -43,7 +44,15 @@ func run() error {
 	}
 
 	if opts.Source == "" {
-		return errors.New("missing source")
+		// temporary hack for supporting desktop launchers
+		switch filepath.Base(os.Args[0]) {
+		case "z2-bike":
+			opts.Source = "bike"
+		case "z2-rower":
+			opts.Source = "rower"
+		default:
+			return errors.New("missing source")
+		}
 	}
 
 	gin.SetMode(gin.ReleaseMode)
