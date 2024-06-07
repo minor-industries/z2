@@ -4,12 +4,15 @@ go 1.21.1
 
 require (
 	github.com/davecgh/go-spew v1.1.1
+	github.com/ebitengine/oto/v3 v3.2.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/hajimehoshi/go-mp3 v0.3.0
 	github.com/jessevdk/go-flags v1.5.0
-	github.com/minor-industries/rtgraph v0.0.12
+	github.com/minor-industries/rtgraph v0.0.13-0.20240605062952-991ec5540cc4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/twitchtv/twirp v8.1.3+incompatible
+	github.com/webview/webview_go v0.0.0-20240220051247-56f456ca3a43
 	google.golang.org/protobuf v1.33.0
 	tinygo.org/x/bluetooth v0.9.0
 )
@@ -21,9 +24,7 @@ require (
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/ebitengine/oto/v3 v3.2.0 // indirect
 	github.com/ebitengine/purego v0.7.0 // indirect
-	github.com/faiface/beep v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gammazero/deque v0.2.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
