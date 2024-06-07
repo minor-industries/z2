@@ -13,5 +13,7 @@ func main() {
 	w.SetSize(800, 600, webview.HintNone)
 	w.Navigate("http://localhost:8000")
 	w.Run()
+
+	w.Terminate()
 	fmt.Println("here")
 }

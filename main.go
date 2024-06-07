@@ -16,6 +16,7 @@ import (
 	"github.com/minor-industries/z2/static"
 	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
+	webview "github.com/webview/webview_go"
 	"net/http"
 	"os"
 )
@@ -27,11 +28,13 @@ type Config struct {
 	HeartrateMonitors []string `toml:"heartrate_monitors"`
 	StaticPath        string   `toml:"static_path"`
 	RemoveDB          bool     `toml:"remove_db"`
+	Webview           bool     `toml:"webview"`
 }
 
 func run() error {
 	opts := Config{
-		Port: 8077,
+		Port:    8077,
+		Webview: true,
 	}
 
 	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
@@ -184,7 +187,33 @@ func run() error {
 
 	z2App.Run()
 
-	return <-errCh
+	if opts.Webview {
+		w := webview.New(true)
+		errCh2 := make(chan error)
+		go func() {
+			err = <-errCh
+			w.Terminate()
+			errCh2 <- err
+		}()
+
+		runWebview(w, errCh, fmt.Sprintf("http://localhost:%d", opts.Port))
+		return <-errCh2
+	} else {
+		return <-errCh
+	}
+}
+
+func runWebview(
+	w webview.WebView,
+	ch chan error,
+	url string,
+) {
+	defer w.Destroy()
+	w.SetTitle("z2")
+	w.SetSize(800, 600, webview.HintNone)
+	w.Navigate(url)
+	w.Run()
+	ch <- nil
 }
 
 func main() {
