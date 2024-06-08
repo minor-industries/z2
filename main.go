@@ -32,6 +32,7 @@ type Config struct {
 	Webview           bool     `toml:"webview"`
 	XRes              int      `toml:"xres"`
 	YRes              int      `toml:"yres"`
+	Scan              bool     `toml:"scan"`
 }
 
 func run() error {
@@ -45,6 +46,10 @@ func run() error {
 	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
 	if _, err := toml.DecodeFile(cfgFile, &opts); err != nil {
 		return errors.Wrap(err, "read config file")
+	}
+
+	if opts.Scan {
+		return source.Scan()
 	}
 
 	if opts.Source == "" {

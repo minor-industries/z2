@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/chrispappas/golang-generics-set v1.0.1
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ebitengine/oto/v3 v3.2.0
 	github.com/gin-gonic/gin v1.9.1
