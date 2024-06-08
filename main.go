@@ -11,8 +11,10 @@ import (
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/source/bike"
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/replay"
+	"github.com/minor-industries/z2/source/rower"
 	"github.com/minor-industries/z2/static"
 	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
@@ -33,6 +35,8 @@ type Config struct {
 	XRes              int      `toml:"xres"`
 	YRes              int      `toml:"yres"`
 	Scan              bool     `toml:"scan"`
+
+	Devices map[string]string `toml:"devices"`
 }
 
 func run() error {
@@ -133,8 +137,12 @@ func run() error {
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	//src := &mainHandler.BikeSource{}
-	srcAddr, src := getSource(opts.Source)
+	srcAddr, src, err := getSource(opts)
+	if err != nil {
+		return errors.Wrap(err, "get source")
+	}
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
 	mainHandler, err := handler.NewBikeHandler(
@@ -227,6 +235,28 @@ func run() error {
 		return <-errCh2
 	} else {
 		return <-errCh
+	}
+}
+
+func getSource(opts Config) (string, source.Source, error) {
+	switch opts.Source {
+	case "bike", "rower":
+	default:
+		return "", nil, errors.Errorf("unknown source: %s", opts.Source)
+	}
+
+	hwid, ok := opts.Devices[opts.Source]
+	if !ok {
+		return "", nil, errors.Errorf("no device hardware ID specified for [%s]", opts.Source)
+	}
+
+	switch opts.Source {
+	case "bike":
+		return hwid, &bike.BikeSource{}, nil
+	case "rower":
+		return hwid, rower.NewRowerSource(), nil
+	default:
+		panic(fmt.Errorf("unknown source: %s", opts.Source))
 	}
 }
 
