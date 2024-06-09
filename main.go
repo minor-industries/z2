@@ -118,6 +118,8 @@ func run() error {
 	z2App := app.NewApp(graph, vars, opts.Source)
 	router := graph.GetEngine()
 
+	setupSse(router)
+
 	if opts.StaticPath != "" {
 		router.Static("/static", opts.StaticPath)
 	} else {
