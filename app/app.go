@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/variables"
@@ -14,14 +15,23 @@ type StateChange struct {
 	To   string
 }
 
+type PlaySound struct {
+	Sound string
+}
+
+func (p *PlaySound) Name() string {
+	return "PlaySound"
+}
+
 type App struct {
 	Graph        *rtgraph.Graph
 	vars         *variables.Cache
 	stateChanges chan StateChange
 	cfg          Config
+	broker       *broker.Broker
 }
 
-func NewApp(graph *rtgraph.Graph, vars *variables.Cache, kind string) *App {
+func NewApp(graph *rtgraph.Graph, vars *variables.Cache, br *broker.Broker, kind string) *App {
 	cfg, ok := configs[kind]
 	if !ok {
 		panic("unknown kind")
@@ -32,6 +42,7 @@ func NewApp(graph *rtgraph.Graph, vars *variables.Cache, kind string) *App {
 		vars:         vars,
 		stateChanges: make(chan StateChange),
 		cfg:          cfg,
+		broker:       br,
 	}
 
 	app.setupGraphFunctions()

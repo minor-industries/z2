@@ -15,7 +15,9 @@ import (
 var contextOnce sync.Once
 var otoContext *oto.Context
 
-func playAudio(name string) error {
+func (app *App) playAudio(name string) error {
+	app.broker.Publish(&PlaySound{Sound: name})
+
 	fileName := fmt.Sprintf("sounds/%s.mp3", name)
 
 	fmt.Println("play", fileName)
@@ -68,9 +70,9 @@ func (app *App) PlaySounds() {
 		case <-ticker.C:
 			switch state {
 			case "too_slow":
-				must(playAudio("slow"))
+				must(app.playAudio("slow"))
 			case "too_fast":
-				must(playAudio("fast"))
+				must(app.playAudio("fast"))
 			}
 
 		case sc := <-app.stateChanges:
@@ -80,11 +82,11 @@ func (app *App) PlaySounds() {
 
 			switch state {
 			case "too_slow":
-				must(playAudio("slow"))
+				must(app.playAudio("slow"))
 			case "too_fast":
-				must(playAudio("fast"))
+				must(app.playAudio("fast"))
 			case "fairway":
-				must(playAudio("fairway"))
+				must(app.playAudio("fairway"))
 			}
 		}
 	}

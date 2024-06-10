@@ -6,6 +6,7 @@ import (
 	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/gen/go/api"
@@ -115,10 +116,13 @@ func run() error {
 		return errors.Wrap(err, "new cache")
 	}
 
-	z2App := app.NewApp(graph, vars, opts.Source)
+	br := broker.NewBroker()
+	go br.Start()
+
+	z2App := app.NewApp(graph, vars, br, opts.Source)
 	router := graph.GetEngine()
 
-	setupSse(router)
+	setupSse(br, router)
 
 	if opts.StaticPath != "" {
 		router.Static("/static", opts.StaticPath)
