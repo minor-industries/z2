@@ -17,6 +17,7 @@ var otoContext *oto.Context
 
 func (app *App) playAudio(name string) error {
 	app.broker.Publish(&PlaySound{Sound: name})
+	return nil // TODO
 
 	fileName := fmt.Sprintf("sounds/%s.mp3", name)
 

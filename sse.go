@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/z2/app"
-	"time"
 )
 
 func setupSse(
@@ -16,9 +15,6 @@ func setupSse(
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
 		c.Writer.Header().Set("Connection", "keep-alive")
-
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
 
 		clientGone := c.Request.Context().Done()
 
@@ -39,10 +35,6 @@ func setupSse(
 			case <-clientGone:
 				fmt.Println("Client disconnected")
 				return
-			case t := <-ticker.C:
-				sendMsg(
-					fmt.Sprintf("Current time is %s", t.Format(time.RFC3339)),
-				)
 			case m, ok := <-ch:
 				if !ok {
 					return

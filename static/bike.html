@@ -138,6 +138,14 @@
     <source src="/static/sounds/fast.mp3" type="audio/mpeg">
 </audio>
 
+<audio id="sound-slow">
+    <source src="/static/sounds/slow.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sound-fairway">
+    <source src="/static/sounds/fairway.mp3" type="audio/mpeg">
+</audio>
+
 <button onclick="playSound()">Play Sound</button>
 
 <script>
@@ -190,6 +198,20 @@
         <div id="graphdiv7" class="rtgraph-graph"></div>
     </div>
 </div>
+
+<script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+        const es = new EventSource('/events');
+
+        es.onmessage = (event) => {
+            console.log("event:", event.data)
+
+            const audio = document.getElementById(`sound-${event.data}`);
+            audio.play();
+        };
+    });
+</script>
+
 
 </body>
 </html>
