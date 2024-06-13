@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ import (
 	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
 	webview "github.com/webview/webview_go"
+	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -40,6 +42,9 @@ type Config struct {
 
 	Devices map[string]string `toml:"devices"`
 }
+
+//go:embed templates/*.html
+var templatesFS embed.FS
 
 func run() error {
 	opts := Config{
@@ -123,6 +128,16 @@ func run() error {
 
 	z2App := app.NewApp(graph, vars, br, opts.Source, opts.Audio)
 	router := graph.GetEngine()
+
+	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*"))
+	router.SetHTMLTemplate(tmpl)
+
+	router.GET("/bike.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "bike.html", gin.H{
+			"title": "Bike Page",
+			// Add any other data you want to pass to the template
+		})
+	})
 
 	setupSse(br, router)
 

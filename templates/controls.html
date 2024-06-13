@@ -1,0 +1,36 @@
+{{ define "controls" }}
+
+<audio id="sound-fast">
+    <source src="/static/sounds/fast.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sound-slow">
+    <source src="/static/sounds/slow.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sound-fairway">
+    <source src="/static/sounds/fairway.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    let i = 0;
+    const sounds = ["sound-fairway", "sound-slow", "sound-fast"]
+
+    function playSound() {
+        i %= sounds.length;
+        const audio = document.getElementById(sounds[i]);
+        i++;
+        audio.play();
+    }
+</script>
+
+<div id="controls-container" class="pure-g">
+    <div class="bumper-container pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
+        <button class="pure-button pure-button-primary" onclick="playSound()">Enable/Test Sounds</button>
+    </div>
+
+    <!-- bumper controls will be added here -->
+</div>
+
+{{ end }}
+

@@ -1,0 +1,16 @@
+{{ define "sound-events" }}
+
+<script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+        const es = new EventSource('/events');
+
+        es.onmessage = (event) => {
+            console.log("event:", event.data)
+
+            const audio = document.getElementById(`sound-${event.data}`);
+            audio.play();
+        };
+    });
+</script>
+
+{{ end }}
