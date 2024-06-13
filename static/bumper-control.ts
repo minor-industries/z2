@@ -31,7 +31,7 @@ class BumperControl {
 
     private createControl(): void {
         const controlHTML = `
-            <div class="pure-u-1-3">
+            <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
                 <div class="bumper-container">
                     <label style="margin-right: 10px;">${this.label}</label>
                     <input type="text" class="pure-input-1 bumper-display" value="${this.speed}" readonly>
