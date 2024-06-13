@@ -134,8 +134,13 @@ func run() error {
 
 	router.GET("/bike.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "bike.html", gin.H{
-			"title": "Bike Page",
-			// Add any other data you want to pass to the template
+			"Title": "Bike",
+		})
+	})
+
+	router.GET("/rower.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "rower.html", gin.H{
+			"Title": "Rower",
 		})
 	})
 
