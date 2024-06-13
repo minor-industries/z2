@@ -16,8 +16,15 @@ var contextOnce sync.Once
 var otoContext *oto.Context
 
 func (app *App) playAudio(name string) error {
-	app.broker.Publish(&PlaySound{Sound: name})
-	return nil // TODO
+	switch app.audioPlayer {
+	case "browser":
+		app.broker.Publish(&PlaySound{Sound: name})
+		return nil
+	case "backend":
+	// pass
+	default:
+		return fmt.Errorf("unknown audio player")
+	}
 
 	fileName := fmt.Sprintf("sounds/%s.mp3", name)
 

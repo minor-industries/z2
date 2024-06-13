@@ -29,12 +29,25 @@ type App struct {
 	stateChanges chan StateChange
 	cfg          Config
 	broker       *broker.Broker
+	audioPlayer  string
 }
 
-func NewApp(graph *rtgraph.Graph, vars *variables.Cache, br *broker.Broker, kind string) *App {
+func NewApp(
+	graph *rtgraph.Graph,
+	vars *variables.Cache,
+	br *broker.Broker,
+	kind string,
+	audioPlayer string,
+) *App {
 	cfg, ok := configs[kind]
 	if !ok {
 		panic("unknown kind")
+	}
+
+	switch audioPlayer {
+	case "browser", "backend":
+	default:
+		panic("unknown audio player")
 	}
 
 	app := &App{
@@ -43,6 +56,7 @@ func NewApp(graph *rtgraph.Graph, vars *variables.Cache, br *broker.Broker, kind
 		stateChanges: make(chan StateChange),
 		cfg:          cfg,
 		broker:       br,
+		audioPlayer:  audioPlayer,
 	}
 
 	app.setupGraphFunctions()

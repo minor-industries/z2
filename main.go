@@ -36,6 +36,7 @@ type Config struct {
 	XRes              int      `toml:"xres"`
 	YRes              int      `toml:"yres"`
 	Scan              bool     `toml:"scan"`
+	Audio             string   `toml:"audio"`
 
 	Devices map[string]string `toml:"devices"`
 }
@@ -46,6 +47,7 @@ func run() error {
 		Webview: true,
 		XRes:    1132,
 		YRes:    700,
+		Audio:   "browser",
 	}
 
 	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
@@ -119,7 +121,7 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	z2App := app.NewApp(graph, vars, br, opts.Source)
+	z2App := app.NewApp(graph, vars, br, opts.Source, opts.Audio)
 	router := graph.GetEngine()
 
 	setupSse(br, router)
