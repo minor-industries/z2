@@ -258,7 +258,7 @@ func run() error {
 			&opts,
 			w,
 			errCh,
-			fmt.Sprintf("http://localhost:%d/static/%s.html", opts.Port, opts.Source),
+			fmt.Sprintf("http://localhost:%d/%s.html", opts.Port, opts.Source),
 		)
 		return <-errCh2
 	} else {
