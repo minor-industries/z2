@@ -144,6 +144,18 @@ func run() error {
 		})
 	})
 
+	router.GET("/data-bike.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "data-bike.html", gin.H{
+			"Title": "Bike",
+		})
+	})
+
+	router.GET("/data-rower.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "data-rower.html", gin.H{
+			"Title": "Rower",
+		})
+	})
+
 	setupSse(br, router)
 
 	if opts.StaticPath != "" {

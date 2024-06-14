@@ -1,0 +1,94 @@
+{{ template "header" . }}
+
+<script type="module">
+    import {Graph} from '/rtgraph/rtgraph.js';
+    import {DeleteRange} from "/static/api.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seriesOpts = {y2: {strokeWidth: 1.0}}
+
+        const g1 = new Graph(document.getElementById("graphdiv0"), {
+            seriesNames: [
+                "rower_avg_power_long",
+                "rower_avg_power_short"
+            ],
+            title: "Avg Power",
+            ylabel: "power (watts)",
+            windowSize: null,
+            height: 250,
+            maxGapMs: 5 * second,
+            series: seriesOpts,
+            disableScroll: true,
+        });
+
+        const g2 = new Graph(document.getElementById("graphdiv1"), {
+            seriesNames: [
+                "heartrate | avg 2m triangle",
+                "heartrate"
+            ],
+            title: "Heartrate",
+            ylabel: "bpm",
+            windowSize: null,
+            height: 250,
+            series: seriesOpts,
+            maxGapMs: 5 * second,
+            disableScroll: true,
+        });
+
+        const graphs = [
+            g1.dygraph,
+            g2.dygraph,
+        ];
+
+        const sync = Dygraph.synchronize(graphs, {
+            selection: true,
+            zoom: true,
+            range: false,
+        });
+
+        const keyDown = ev => {
+            switch (ev.code) {
+                case "KeyD":
+                    const range = graphs[0].xAxisRange();
+                    const dateRange = [new Date(range[0]), new Date(range[1])];
+                    console.log(range);
+
+                    const startNano = BigInt(Math.round(range[0] * 1e3));
+                    const endNano = BigInt(Math.round(range[1] * 1e3));
+                    console.log(startNano, endNano);
+
+                    const prompt = `are you sure you want to delete the currently visible range? \n${dateRange[0]}\n${dateRange[1]}`;
+                    const ok = confirm(prompt)
+                    if (ok) {
+                        alert(`deleting ${dateRange}`)
+                        return DeleteRange({
+                            start: startNano.toString(),
+                            end: endNano.toString()
+                        });
+                    }
+                    return;
+                case "KeyK":
+
+
+                default:
+                    return Promise.resolve();
+            }
+        };
+
+        document.addEventListener("keydown", ev => {
+            keyDown(ev);
+        })
+    });
+</script>
+
+<div class="pure-g">
+    <div class="pure-u-1">
+        <div id="graphdiv0" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
+    </div>
+</div>
+
+{{ template "footer" . }}
