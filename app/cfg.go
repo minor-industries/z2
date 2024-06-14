@@ -7,6 +7,7 @@ type Config struct {
 	ShortTermAverage     string
 	ShortTermAverageName string
 
+	PaceMetric      string
 	Target          string
 	MaxDriftPct     string
 	AllowedErrorPct string
@@ -35,6 +36,7 @@ var bikeConfig = Config{
 	DriftMin: "bike_instant_speed_min",
 	DriftMax: "bike_instant_speed_max",
 
+	PaceMetric:      "bike_instant_speed",
 	Target:          "bike_target_speed",
 	MaxDriftPct:     "bike_max_drift_pct",
 	AllowedErrorPct: "bike_allowed_error_pct",
@@ -60,6 +62,7 @@ var rowerConfig = Config{
 	DriftMin: "rower_power_min",
 	DriftMax: "rower_power_max",
 
+	PaceMetric:      "rower_power",
 	Target:          "rower_target_power",
 	MaxDriftPct:     "rower_max_drift_pct",
 	AllowedErrorPct: "rower_allowed_error_pct",

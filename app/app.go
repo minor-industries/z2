@@ -60,6 +60,7 @@ func NewApp(
 	}
 
 	app.setupGraphFunctions()
+	app.setupGraphFunctions2()
 
 	return app
 }
@@ -219,8 +220,25 @@ func (app *App) ComputePace() {
 	}
 }
 
+func (app *App) DetectWorkouts() {
+	now := time.Now()
+	msgCh := make(chan *messages.Data)
+	go app.Graph.Subscribe(&subscription.Request{
+		Series: []string{
+			seriesBuilder(app.cfg.PaceMetric, "detect-workout bike_target_speed bike_max_drift_pct"),
+		},
+		WindowSize:  uint64((90 * time.Second).Milliseconds()),
+		LastPointMs: 0,
+		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
+	}, now, msgCh)
+
+	for range msgCh {
+	}
+}
+
 func (app *App) Run() {
 	go app.PlaySounds()
 	go app.ComputeBounds()
 	go app.ComputePace()
+	go app.DetectWorkouts()
 }

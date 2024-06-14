@@ -1,0 +1,88 @@
+package app
+
+import (
+	"fmt"
+	"github.com/gammazero/deque"
+	"github.com/minor-industries/rtgraph/computed_series"
+	"github.com/minor-industries/rtgraph/schema"
+	"github.com/minor-industries/z2/variables"
+	"github.com/pkg/errors"
+	"time"
+)
+
+type FcnDetectWorkout struct {
+	target        string
+	driftPct      string
+	vars          *variables.Cache
+	workoutActive bool
+}
+
+func (f *FcnDetectWorkout) AddValue(v schema.Value) {}
+
+func (f *FcnDetectWorkout) RemoveValue(v schema.Value) {}
+
+func (f *FcnDetectWorkout) Compute(values *deque.Deque[schema.Value]) (float64, bool) {
+	if values.Len() == 0 {
+		f.toggle(false, schema.Value{}) // TODO: second argument
+		return 0, false
+	}
+
+	target, ok := f.vars.GetOne(f.target)
+	if !ok {
+		panic("unknown variable") // TODO
+	}
+
+	driftPct, ok := f.vars.GetOne(f.driftPct)
+	if !ok {
+		panic("unknown variable") // TODO
+	}
+
+	driftedTarget := target * (1 - driftPct/100.0)
+
+	for i := 0; i < values.Len(); i++ {
+		s := values.At(i)
+		value := s.Value
+		if value >= driftedTarget {
+			f.toggle(true, s)
+		}
+	}
+
+	return 0, false // hmm, this just swallows all points, is that cool (maybe for now anyway)?
+}
+
+func (f *FcnDetectWorkout) toggle(b bool, s schema.Value) {
+	if b {
+		if !f.workoutActive {
+			fmt.Println("detected start of workout", s.Timestamp, s.Value)
+		}
+	} else {
+		if f.workoutActive {
+			fmt.Println("detected end of workout", s.Timestamp, s.Value)
+		}
+	}
+	f.workoutActive = b
+}
+
+func (app *App) setupGraphFunctions2() {
+	app.Graph.Parser.AddFunction("detect-workout", func(start time.Time, args []string) (computed_series.Operator, error) {
+		if len(args) != 2 {
+			return nil, errors.New("detect-workout requires 2 arguments")
+		}
+
+		vars := app.vars.Get(args)
+		for _, v := range vars {
+			if !v.Present {
+				return nil, fmt.Errorf("variable %s not found", v.Name)
+			}
+		}
+
+		// TODO: perhaps start has to be part of Fcn, not "NewComputedSeries"
+		fcn := computed_series.NewComputedSeries(&FcnDetectWorkout{
+			vars:     app.vars,
+			target:   args[0],
+			driftPct: args[1],
+		}, 90*time.Second, time.Time{})
+
+		return fcn, nil
+	})
+}
