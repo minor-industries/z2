@@ -60,7 +60,6 @@ func NewApp(
 	}
 
 	app.setupGraphFunctions()
-	app.setupGraphFunctions2()
 
 	return app
 }

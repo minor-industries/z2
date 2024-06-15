@@ -3,11 +3,8 @@ package app
 import (
 	"fmt"
 	"github.com/gammazero/deque"
-	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/rtgraph/schema"
 	"github.com/minor-industries/z2/variables"
-	"github.com/pkg/errors"
-	"time"
 )
 
 type FcnDetectWorkout struct {
@@ -61,28 +58,4 @@ func (f *FcnDetectWorkout) toggle(b bool, s schema.Value) {
 		}
 	}
 	f.workoutActive = b
-}
-
-func (app *App) setupGraphFunctions2() {
-	app.Graph.Parser.AddFunction("detect-workout", func(start time.Time, args []string) (computed_series.Operator, error) {
-		if len(args) != 2 {
-			return nil, errors.New("detect-workout requires 2 arguments")
-		}
-
-		vars := app.vars.Get(args)
-		for _, v := range vars {
-			if !v.Present {
-				return nil, fmt.Errorf("variable %s not found", v.Name)
-			}
-		}
-
-		// TODO: perhaps start has to be part of Fcn, not "NewComputedSeries"
-		fcn := computed_series.NewComputedSeries(&FcnDetectWorkout{
-			vars:     app.vars,
-			target:   args[0],
-			driftPct: args[1],
-		}, 90*time.Second, time.Time{})
-
-		return fcn, nil
-	})
 }

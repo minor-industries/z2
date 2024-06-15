@@ -38,11 +38,11 @@
 
         const g1 = new Graph(document.getElementById("graphdiv0"), {
             seriesNames: [
-                "bike_avg_speed_long",
-                "bike_avg_speed_short",
-                "bike_instant_speed_min",
-                "bike_instant_speed_max",
-                "bike_target_speed",
+                "bike_avg_speed_long | time-bin",
+                "bike_avg_speed_short | time-bin",
+                "bike_instant_speed_min | time-bin",
+                "bike_instant_speed_max | time-bin",
+                "bike_target_speed | time-bin",
             ],
             title: "Avg Speed",
             ylabel: "speed (km/h)",
@@ -55,8 +55,8 @@
 
         const g2 = new Graph(document.getElementById("graphdiv1"), {
             seriesNames: [
-                "heartrate | avg 2m triangle",
-                "heartrate"
+                "heartrate | avg 2m triangle | time-bin",
+                "heartrate | time-bin"
             ],
             title: "Heartrate",
             ylabel: "bpm",
