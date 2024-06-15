@@ -1,5 +1,27 @@
 {{ template "header" . }}
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function selectOption(option, xval) {
+        Swal.fire(`You selected: ${option}: ${xval}`);
+    }
+
+    function showModal(xval) {
+        console.log(xval);
+        Swal.fire({
+            title: 'Select an option',
+            showCancelButton: true,
+            showConfirmButton: false,
+            html: `
+                    <button class="swal2-confirm swal2-styled" onclick="selectOption('start', ${xval})">Workout Start</button>
+                    <button class="swal2-confirm swal2-styled" onclick="selectOption('end', ${xval})">Workout End</button>
+                `
+        });
+    }
+</script>
+
+
 <script type="module">
     import {Graph} from '/rtgraph/rtgraph.js';
     import {DeleteRange} from "/static/api.js";
@@ -7,12 +29,20 @@
     document.addEventListener("DOMContentLoaded", () => {
         const second = 1000;
 
-        const seriesOpts = {y2: {strokeWidth: 1.0}}
+        const seriesOpts = {
+            y2: {strokeWidth: 1.0},
+            y3: {strokeWidth: 1.0, color: "red"},
+            y4: {strokeWidth: 1.0, color: "red"},
+            y5: {strokeWidth: 1.0, color: "red"},
+        }
 
         const g1 = new Graph(document.getElementById("graphdiv0"), {
             seriesNames: [
                 "bike_avg_speed_long",
-                "bike_avg_speed_short"
+                "bike_avg_speed_short",
+                "bike_instant_speed_min",
+                "bike_instant_speed_max",
+                "bike_target_speed",
             ],
             title: "Avg Speed",
             ylabel: "speed (km/h)",
@@ -42,6 +72,23 @@
             g2.dygraph,
         ];
 
+        g1.dygraph.updateOptions({
+            pointClickCallback: function (e, point) {
+                const an1 = {
+                    series: 'y1',
+                    x: point.xval,
+                    shortText: 'M',
+                    text: 'Marker'
+                };
+                console.log(an1);
+                g1.dygraph.setAnnotations([an1]);
+                g2.dygraph.setAnnotations([an1]);
+
+                console.log(point);
+                showModal(point.xval);
+            },
+        })
+
         const sync = Dygraph.synchronize(graphs, {
             selection: true,
             zoom: true,
@@ -70,8 +117,6 @@
                     }
                     return;
                 case "KeyK":
-
-
                 default:
                     return Promise.resolve();
             }
