@@ -28,9 +28,9 @@
         </tr>
         </thead>
         <tbody>
-        {{#each dates}}
+        {{#each result_sets}}
         <tr>
-            <td><a href="data-detail.html?date={{datestr}}">{{datestr}}</a></td>
+            <td><a href="/data-bike.html?date={{date}}">{{date}}</a></td>
             <td>{{count}}</td>
         </tr>
         {{/each}}
@@ -43,10 +43,10 @@
 </div>
 
 <script type="module">
-    import {GetDates} from "./api.js";
+    import {GetEvents} from "/calendar/api.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
-        const resp = await GetDates({});
+        const resp = await GetEvents({});
         console.log(JSON.stringify(resp));
 
         const template = document.getElementById('dates-template').innerHTML;

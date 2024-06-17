@@ -1,17 +1,5 @@
 import {rpc} from "./rpc.js";
 
-export interface GetDatesReq {
-}
-
-export interface DateInfo {
-    datestr: string;
-    count: number;
-}
-
-export interface GetDatesResp {
-    dates: DateInfo[];
-}
-
 export type Empty = {};
 
 export interface DeleteRangeReq {
@@ -35,10 +23,6 @@ export interface ReadVariablesReq {
 
 export interface ReadVariablesResp {
     variables: Variable[];
-}
-
-export function GetDates(req: GetDatesReq): Promise<GetDatesResp> {
-    return rpc("api.Calendar", "GetDates", req);
 }
 
 export function DeleteRange(req: DeleteRangeReq): Promise<Empty> {
