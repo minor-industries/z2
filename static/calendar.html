@@ -1,0 +1,34 @@
+<html lang="EN">
+<head>
+    <title>Calendar View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/calendar/cal.css" rel="stylesheet" type="text/css">
+    <link href="/rtgraph/purecss/base-min.css" rel="stylesheet" type="text/css">
+    <link href="/rtgraph/purecss/pure-min.css" rel="stylesheet" type="text/css">
+    <link href="/rtgraph/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
+    <script src="/static/handlebars.js"></script>
+    <script type="module">
+        import {addEvent, renderYear} from "/calendar/calendar.js";
+        import {GetEvents} from "/calendar/api.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const year = renderYear(Handlebars, 2024);
+            document.body.appendChild(year);
+
+            const resp = await GetEvents({
+                view: "default" //TODO
+            });
+            console.log(resp);
+
+            resp.result_sets.forEach(s => {
+                addEvent(s);
+            })
+
+        });
+    </script>
+</head>
+<body>
+
+
+</body>
+</html>

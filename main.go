@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
+	"github.com/minor-industries/calendar/frontend"
+	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database"
@@ -173,8 +175,16 @@ func run() error {
 	})
 
 	apiHandler := &ApiServer{db: db, vars: vars}
-	router.Any("/twirp/api.Calendar/*Method", gin.WrapH(api.NewCalendarServer(apiHandler, nil)))
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
+
+	router.GET("/calendar/*file", func(c *gin.Context) {
+		c.FileFromFS(c.Param("file"), http.FS(frontend.FS))
+	})
+
+	router.POST(
+		"/twirp/calendar.Calendar/*Method",
+		gin.WrapH(calendar.NewCalendarServer(apiHandler, nil)),
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
