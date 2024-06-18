@@ -7,7 +7,12 @@
     document.addEventListener("DOMContentLoaded", () => {
         const second = 1000;
 
-        const seriesOpts = {y2: {strokeWidth: 1.0}}
+        const seriesOpts = {
+            y2: {strokeWidth: 1.0},
+            y3: {strokeWidth: 1.0, color: "red"},
+            y4: {strokeWidth: 1.0, color: "red"},
+            y5: {strokeWidth: 1.0, color: "red"},
+        };
 
         const url = new URL(window.location.href);
         const params = new URLSearchParams(url.search);
@@ -16,7 +21,10 @@
         const g1 = new Graph(document.getElementById("graphdiv0"), {
             seriesNames: [
                 "rower_avg_power_long",
-                "rower_avg_power_short"
+                "rower_avg_power_short",
+                "rower_target_power",
+                "rower_power_min",
+                "rower_power_max",
             ],
             title: "Avg Power",
             ylabel: "power (watts)",
