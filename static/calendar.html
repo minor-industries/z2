@@ -21,7 +21,9 @@
             console.log(resp);
 
             resp.result_sets.forEach(s => {
-                addEvent(s);
+                addEvent(s, event => {
+                    window.location.href = `/data-rower.html?date=${event.date}`;
+                });
             })
 
         });
