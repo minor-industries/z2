@@ -14,6 +14,7 @@ type Config struct {
 
 	DriftMin string
 	DriftMax string
+	Color    string
 }
 
 var bikeConfig = Config{
@@ -40,6 +41,8 @@ var bikeConfig = Config{
 	Target:          "bike_target_speed",
 	MaxDriftPct:     "bike_max_drift_pct",
 	AllowedErrorPct: "bike_allowed_error_pct",
+
+	Color: "blue",
 }
 
 var rowerConfig = Config{
@@ -66,6 +69,8 @@ var rowerConfig = Config{
 	Target:          "rower_target_power",
 	MaxDriftPct:     "rower_max_drift_pct",
 	AllowedErrorPct: "rower_allowed_error_pct",
+
+	Color: "green",
 }
 
 var configs = map[string]Config{

@@ -174,7 +174,7 @@ func run() error {
 		c.Status(204)
 	})
 
-	apiHandler := &ApiServer{db: db, vars: vars}
+	apiHandler := app.NewApiServer(db, vars)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	router.GET("/calendar/*file", func(c *gin.Context) {

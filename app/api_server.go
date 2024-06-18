@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"context"
@@ -13,6 +13,10 @@ import (
 type ApiServer struct {
 	db   *database.Backend
 	vars *variables.Cache
+}
+
+func NewApiServer(db *database.Backend, vars *variables.Cache) *ApiServer {
+	return &ApiServer{db: db, vars: vars}
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
@@ -93,24 +97,28 @@ type Result struct {
 func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventReq) (*calendar.CalendarEventResp, error) {
 	var rows []Result
 
-	a.db.GetORM().Raw(`
-        SELECT 
-            DATE(timestamp) AS date,
-            COUNT(*) AS count
-        FROM` + "`raw_values`" + `
-        GROUP BY DATE(timestamp)
-        ORDER BY date DESC
-    `).Scan(&rows)
-
 	var result []*calendar.CalendarResultSet
 
-	for _, row := range rows {
-		result = append(result, &calendar.CalendarResultSet{
-			Color: "blue",
-			Date:  row.Date,
-			Query: "",
-			Count: int32(row.Count),
-		})
+	for query, cfg := range configs {
+		a.db.GetORM().Raw(`
+	        SELECT 
+    	        DATE(timestamp) AS date,
+        	    COUNT(*) AS count
+        	FROM`+"`values`"+`
+			WHERE series_id = ?
+        	GROUP BY DATE(timestamp)
+        	ORDER BY date DESC`,
+			database.HashedID(cfg.PaceMetric),
+		).Scan(&rows)
+
+		for _, row := range rows {
+			result = append(result, &calendar.CalendarResultSet{
+				Color: cfg.Color,
+				Date:  row.Date,
+				Query: query,
+				Count: int32(row.Count),
+			})
+		}
 	}
 
 	return &calendar.CalendarEventResp{ResultSets: result}, nil
