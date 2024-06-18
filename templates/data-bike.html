@@ -26,6 +26,10 @@
     import {Graph} from '/rtgraph/rtgraph.js';
     import {DeleteRange} from "/static/api.js";
 
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const date = params.get('date');
+
     document.addEventListener("DOMContentLoaded", () => {
         const second = 1000;
 
@@ -51,6 +55,7 @@
             maxGapMs: 5 * second,
             series: seriesOpts,
             disableScroll: true,
+            date: date,
         });
 
         const g2 = new Graph(document.getElementById("graphdiv1"), {
@@ -65,6 +70,7 @@
             series: seriesOpts,
             maxGapMs: 5 * second,
             disableScroll: true,
+            date: date,
         });
 
         const graphs = [
