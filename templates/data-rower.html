@@ -9,6 +9,10 @@
 
         const seriesOpts = {y2: {strokeWidth: 1.0}}
 
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        const date = params.get('date');
+
         const g1 = new Graph(document.getElementById("graphdiv0"), {
             seriesNames: [
                 "rower_avg_power_long",
@@ -21,6 +25,7 @@
             maxGapMs: 5 * second,
             series: seriesOpts,
             disableScroll: true,
+            date: date,
         });
 
         const g2 = new Graph(document.getElementById("graphdiv1"), {
@@ -35,6 +40,7 @@
             series: seriesOpts,
             maxGapMs: 5 * second,
             disableScroll: true,
+            date: date,
         });
 
         const graphs = [

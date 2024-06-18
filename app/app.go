@@ -80,7 +80,6 @@ func (app *App) ComputeBounds() {
 		Series:      []string{app.cfg.LongTermAverage},
 		WindowSize:  uint64((10 * time.Minute).Milliseconds()),
 		LastPointMs: 0,
-		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
 	}, now, msgCh)
 
 	for m := range msgCh {
@@ -154,7 +153,6 @@ func (app *App) ComputePace() {
 		},
 		WindowSize:  uint64((30 * time.Second).Milliseconds()),
 		LastPointMs: 0,
-		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
 	}, now, msgCh)
 
 	state := "undefined"
@@ -228,7 +226,6 @@ func (app *App) DetectWorkouts() {
 		},
 		WindowSize:  uint64((90 * time.Second).Milliseconds()),
 		LastPointMs: 0,
-		MaxGapMs:    uint64((5 * time.Second).Milliseconds()),
 	}, now, msgCh)
 
 	for range msgCh {
