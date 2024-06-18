@@ -1,22 +1,21 @@
 {{ template "header" . }}
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href=" https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.min.css " rel="stylesheet">
+<script src=" https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.all.min.js "></script>
 
 <script>
-    function selectOption(option, xval) {
-        Swal.fire(`You selected: ${option}: ${xval}`);
-    }
-
     function showModal(xval) {
         console.log(xval);
         Swal.fire({
             title: 'Select an option',
-            showCancelButton: true,
-            showConfirmButton: false,
-            html: `
-                    <button class="swal2-confirm swal2-styled" onclick="selectOption('start', ${xval})">Workout Start</button>
-                    <button class="swal2-confirm swal2-styled" onclick="selectOption('end', ${xval})">Workout End</button>
-                `
+            input: "radio",
+            showCloseButton: true,
+            inputOptions: {
+                start: "start",
+                end: "end",
+            }
+        }).then(value => {
+            console.log(value);
         });
     }
 </script>
