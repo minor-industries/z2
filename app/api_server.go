@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/jinzhu/now"
 	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/gen/go/api"
@@ -90,7 +91,6 @@ func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*
 }
 
 type Result struct {
-	Date  string
 	Count int64
 }
 
@@ -99,25 +99,30 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 
 	var result []*calendar.CalendarResultSet
 
-	for query, cfg := range configs {
-		a.db.GetORM().Raw(`
-	        SELECT 
-    	        DATE(timestamp) AS date,
+	end := now.With(time.Now()).BeginningOfDay().AddDate(0, 0, 10)
+	for cur := now.MustParse("2024-06-01"); cur.Before(end); cur = cur.AddDate(0, 0, 1) {
+		next := cur.AddDate(0, 0, 1)
+		for query, cfg := range configs {
+			a.db.GetORM().Raw(`
+	        SELECT
         	    COUNT(*) AS count
         	FROM`+"`values`"+`
-			WHERE series_id = ?
-        	GROUP BY DATE(timestamp)
-        	ORDER BY date DESC`,
-			database.HashedID(cfg.PaceMetric),
-		).Scan(&rows)
-
-		for _, row := range rows {
-			result = append(result, &calendar.CalendarResultSet{
-				Color: cfg.Color,
-				Date:  row.Date,
-				Query: query,
-				Count: int32(row.Count),
-			})
+			WHERE series_id = ? and timestamp >= ? and timestamp < ?`,
+				database.HashedID(cfg.PaceMetric),
+				cur.UnixMilli(),
+				next.UnixMilli(),
+			).Scan(&rows)
+			for _, row := range rows {
+				if row.Count == 0 {
+					continue
+				}
+				result = append(result, &calendar.CalendarResultSet{
+					Color: cfg.Color,
+					Date:  cur.Format("2006-01-02"),
+					Query: query,
+					Count: int32(row.Count),
+				})
+			}
 		}
 	}
 
