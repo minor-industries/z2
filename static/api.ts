@@ -3,8 +3,8 @@ import {rpc} from "./rpc.js";
 export type Empty = {};
 
 export interface DeleteRangeReq {
-    start: bigint;
-    end: bigint;
+    start: number;
+    end: number;
 }
 
 export interface Variable {

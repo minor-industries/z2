@@ -67,22 +67,14 @@ func showTime(description string, t time.Time) {
 }
 
 func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*api.Empty, error) {
-	// TODO: operate in UTC
-	locGMTMinus7 := time.FixedZone("GMT-7", -7*3600)
-	start := time.UnixMicro(req.Start).In(locGMTMinus7)
-	end := time.UnixMicro(req.End).In(locGMTMinus7)
+	orm := a.db.GetORM()
 
-	showTime("bgn", start)
-	showTime("end", end)
-
-	db_ := a.db.GetORM()
-
-	res := db_.Where("Timestamp >= ? and Timestamp <= ?", start, end).Delete(&database.RawValue{})
+	res := orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.RawValue{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
 
-	res = db_.Where("Timestamp >= ? and Timestamp <= ?", start, end).Delete(&database.Value{})
+	res = orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Value{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
