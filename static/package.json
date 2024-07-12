@@ -7,6 +7,6 @@
     "build": "tsc && cp `find lib -type f` dist && node esbuild.config.mjs"
   },
   "dependencies": {
-    "calendar": "file:../../calendar/frontend"
+    "calendar": "github:minor-industries/calendar#v0.0.2"
   }
 }
