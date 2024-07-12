@@ -5,6 +5,6 @@ build({
     bundle: true,
     outfile: './dist/bundle.js',
     format: 'esm',
-    minify: true,
+    minify: false,
     plugins: [],
 }).catch(() => process.exit(1));

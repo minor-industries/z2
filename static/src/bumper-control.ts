@@ -1,6 +1,6 @@
 import {ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, UpdateVariablesReq} from './api.js';
 
-class BumperControl {
+export class BumperControl {
     private container: HTMLElement;
     private readonly label: string;
     private readonly variableName: string;
@@ -101,5 +101,3 @@ class BumperControl {
         }
     }
 }
-
-export default BumperControl;
