@@ -5,5 +5,8 @@
   },
   "scripts": {
     "build": "tsc && cp `find lib -type f` dist && node esbuild.config.mjs"
+  },
+  "dependencies": {
+    "calendar": "file:../../calendar/frontend"
   }
 }

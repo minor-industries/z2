@@ -7,7 +7,9 @@
     <link href="/rtgraph/purecss/pure-min.css" rel="stylesheet" type="text/css">
     <link href="/rtgraph/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
     <script type="module">
-        import {addEvent, GetEvents, renderYear} from "/static/dist/calendar.js";
+        import {calendar} from "/static/dist/bundle.js";
+
+        const {addEvent, GetEvents, renderYear} = calendar;
 
         document.addEventListener("DOMContentLoaded", async () => {
             const year = renderYear(2024);
