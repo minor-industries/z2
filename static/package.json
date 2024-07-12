@@ -4,6 +4,6 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "tsc && cp `find lib -type f` dist"
+    "build": "tsc && cp `find lib -type f` dist && node esbuild.config.mjs"
   }
 }
