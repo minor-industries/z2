@@ -6,13 +6,12 @@
       "DOM",
       "ES2020"
     ],
-    "outDir": ".",
-    "rootDir": ".",
+    "outDir": "dist",
+    "rootDir": "src",
     "strict": true
   },
   "include": [
-    "*.ts"
-    // Include all files in the src directory
+    "src/**/*.ts"
   ],
   "exclude": []
 }
