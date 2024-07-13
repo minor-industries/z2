@@ -1,32 +1,45 @@
-import {ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, UpdateVariablesReq} from './api.js';
+import { ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, UpdateVariablesReq } from './api.js';
+
+interface BumperControlConfig {
+    containerId: string;
+    label: string;
+    variableName: string;
+    increment: number;
+    defaultValue: number;
+    fixed?: number;
+    maxValue?: number;
+    minValue?: number;
+}
 
 export class BumperControl {
     private container: HTMLElement;
     private readonly label: string;
     private readonly variableName: string;
     private readonly increment: number;
-    private speed: number; // TODO: rename, this is more general than speed control
-    private readonly fixed: number | null;
+    private value: number; // renamed from speed
+    private readonly fixed?: number;
+    private readonly maxValue?: number;
+    private readonly minValue?: number;
+    private readonly defaultValue: number;
     private display!: HTMLInputElement;
 
-    constructor(containerId: string,
-                label: string,
-                variableName: string,
-                increment: number,
-                fixed: number | null = null) {
-        const containerElement = document.getElementById(containerId);
+    constructor(config: BumperControlConfig) {
+        const containerElement = document.getElementById(config.containerId);
         if (!containerElement) {
-            throw new Error(`Container with id ${containerId} not found`);
+            throw new Error(`Container with id ${config.containerId} not found`);
         }
         this.container = containerElement;
-        this.label = label;
-        this.variableName = variableName;
-        this.increment = increment;
-        this.speed = 0; // default speed
-        this.fixed = fixed;
+        this.label = config.label;
+        this.variableName = config.variableName;
+        this.increment = config.increment;
+        this.value = 0; // default value
+        this.fixed = config.fixed;
+        this.maxValue = config.maxValue;
+        this.minValue = config.minValue;
+        this.defaultValue = config.defaultValue;
 
         this.createControl();
-        this.fetchInitialSpeed();
+        this.fetchInitialValue();
     }
 
     private createControl(): void {
@@ -34,7 +47,7 @@ export class BumperControl {
             <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
                 <div class="bumper-container">
                     <label style="margin-right: 10px;">${this.label}</label>
-                    <input type="text" class="pure-input-1 bumper-display" value="${this.speed}" readonly>
+                    <input type="text" class="pure-input-1 bumper-display" value="${this.value}" readonly>
                     <div class="bumper-buttons">
                         <button class="pure-button pure-button-primary bumper-button">▲</button>
                         <button class="pure-button pure-button-primary bumper-button">▼</button>
@@ -49,11 +62,11 @@ export class BumperControl {
         const decrementButton = lastElement.querySelector('.bumper-buttons button:nth-child(2)') as HTMLButtonElement;
 
         // Bind event handlers
-        incrementButton.addEventListener('click', () => this.changeSpeed(this.increment));
-        decrementButton.addEventListener('click', () => this.changeSpeed(-this.increment));
+        incrementButton.addEventListener('click', () => this.changeValue(this.increment));
+        decrementButton.addEventListener('click', () => this.changeValue(-this.increment));
     }
 
-    private async fetchInitialSpeed(): Promise<void> {
+    private async fetchInitialValue(): Promise<void> {
         try {
             const req: ReadVariablesReq = {
                 variables: [this.variableName]
@@ -62,42 +75,52 @@ export class BumperControl {
             const resp: ReadVariablesResp = await ReadVariables(req);
             const variable = resp.variables.find(v => v.name === this.variableName);
             if (variable && variable.present) {
-                this.speed = variable.value;
-                this.updateValue();
+                this.value = variable.value;
+            } else {
+                this.value = this.defaultValue;
+                await this.updateValueBackend();
             }
+            this.updateDisplay();
         } catch (error) {
-            console.error('Error fetching initial speed:', error);
+            console.error('Error fetching initial value:', error);
         }
     }
 
-    public async changeSpeed(delta: number): Promise<void> {
-        this.speed += delta;
-        this.updateValue();
-        await this.updateSpeedBackend();
+    public async changeValue(delta: number): Promise<void> {
+        let newValue = this.value + delta;
+        if (this.maxValue !== undefined && newValue > this.maxValue) {
+            newValue = this.maxValue;
+        }
+        if (this.minValue !== undefined && newValue < this.minValue) {
+            newValue = this.minValue;
+        }
+        this.value = newValue;
+        this.updateDisplay();
+        await this.updateValueBackend();
     }
 
-    private updateValue() {
-        if (this.fixed !== null) {
-            this.display.value = Number(this.speed).toFixed(this.fixed);
+    private updateDisplay() {
+        if (this.fixed !== undefined) {
+            this.display.value = Number(this.value).toFixed(this.fixed);
         } else {
-            this.display.value = this.speed.toString();
+            this.display.value = this.value.toString();
         }
     }
 
-    private async updateSpeedBackend(): Promise<void> {
+    private async updateValueBackend(): Promise<void> {
         try {
             const req: UpdateVariablesReq = {
                 variables: [{
                     name: this.variableName,
-                    value: this.speed,
+                    value: this.value,
                     present: true
                 }]
             };
 
             await UpdateVariables(req);
-            console.log('Speed updated successfully');
+            console.log('Value updated successfully');
         } catch (error) {
-            console.error('Error updating speed:', error);
+            console.error('Error updating value:', error);
         }
     }
 }

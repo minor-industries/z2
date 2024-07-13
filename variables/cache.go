@@ -38,7 +38,7 @@ func NewCache(db *database.Backend) (*Cache, error) {
 	cache := &Cache{
 		db: db,
 		vars: map[string]float64{
-			// TODO: this should be in DB
+			// TODO: this should be elsewhere
 			"bike_target_speed":      41.5,
 			"bike_allowed_error_pct": 1.0,
 			"bike_max_drift_pct":     2.0,
