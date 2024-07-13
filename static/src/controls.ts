@@ -1,32 +1,51 @@
 import {BumperControl} from "./bumper-control.js";
 
-export async function setupControls() {
+export function setupControls(
+    containerId: string,
+    suffix = ""
+) {
     const bc1 = new BumperControl({
-        containerId: 'controls-container',
+        containerId: containerId,
         label: 'Target Speed',
-        variableName: `bike_target_speed`,
+        variableName: `bike_target_speed${suffix}`,
         increment: 0.25,
         defaultValue: 35,
         fixed: 2
     });
 
     const bc2 = new BumperControl({
-        containerId: 'controls-container',
+        containerId: containerId,
         label: 'Max Drift %',
-        variableName: `bike_max_drift_pct`,
+        variableName: `bike_max_drift_pct${suffix}`,
         increment: 0.1,
         defaultValue: 2.0,
         fixed: 1
     });
 
     const bc3 = new BumperControl({
-        containerId: 'controls-container',
+        containerId: containerId,
         label: 'Max Error %',
-        variableName: `bike_allowed_error_pct`,
+        variableName: `bike_allowed_error_pct${suffix}`,
         increment: 0.1,
         defaultValue: 1.0,
         fixed: 1
     });
 }
 
+export function createPresetControls() {
+    ["A", "B", "C", "D"].forEach(v => {
+        const containerId = `preset_${v}`;
+        const suffix = `_${v}`;
 
+        setupControls(containerId, suffix);
+
+        new BumperControl({
+            containerId: containerId,
+            label: 'Timer (seconds)',
+            variableName: `bike_preset_timer${suffix}`,
+            increment: 10,
+            defaultValue: 60 * 4,
+            fixed: 0
+        });
+    });
+}

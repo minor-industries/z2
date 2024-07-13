@@ -1,0 +1,39 @@
+{{ template "header" . }}
+
+<style>
+    .center-text {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+    .spaced-container {
+        margin-bottom: 20px; /* Adjust the value as needed */
+    }
+</style>
+
+{{ define "preset" }}
+<div id="preset_{{ . }}" class="pure-g spaced-container">
+    <div class="pure-u-1 center-text">
+        Preset {{ . }}
+    </div>
+</div>
+<div id="controls-container" class="pure-g spaced-container">
+    <!-- bumper controls will be added here -->
+</div>
+{{ end }}
+
+{{ template "preset" "A" }}
+{{ template "preset" "B" }}
+{{ template "preset" "C" }}
+{{ template "preset" "D" }}
+
+<script type="module">
+    import {createPresetControls} from '/static/dist/bundle.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        createPresetControls();
+    });
+</script>
+
+{{ template "footer" . }}

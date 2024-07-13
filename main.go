@@ -157,6 +157,12 @@ func run() error {
 		})
 	})
 
+	router.GET("/bike-presets.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "bike-presets.html", gin.H{
+			"Title": "Bike",
+		})
+	})
+
 	setupSse(br, router)
 
 	if opts.StaticPath != "" {
