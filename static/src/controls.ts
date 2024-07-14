@@ -4,7 +4,7 @@ import {ReadVariables, ReadVariablesResp} from "./api.js";
 export function setupControls(
     containerId: string,
     suffix = ""
-) {
+): BumperControl[] {
     const bc1 = new BumperControl({
         containerId: containerId,
         label: 'Target Speed',
@@ -35,7 +35,7 @@ export function setupControls(
     return [bc1, bc2, bc3];
 }
 
-export function createPresetControls() {
+export function createPresetControls(): void {
     ["A", "B", "C", "D"].forEach(v => {
         const containerId = `preset_${v}`;
         const suffix = `_${v}`;
@@ -53,25 +53,28 @@ export function createPresetControls() {
     });
 }
 
-export async function registerPresets(controls: BumperControl[]) {
+export async function registerPresets(controls: BumperControl[]): Promise<void> {
     ["A", "B", "C", "D"].forEach(v => {
-        document.getElementById(`preset${v}`)!.addEventListener('click', async (event) => {
+        document.getElementById(`preset${v}`)!.addEventListener('click', async () => {
             const suffix = `_${v}`;
 
             const variables = [
                 'bike_target_speed',
                 'bike_max_drift_pct',
-                'bike_allowed_error_pct'
+                'bike_allowed_error_pct',
+                `bike_preset_timer`
             ];
 
             const presetNames = variables.map(name => `${name}${suffix}`);
             const resp: ReadVariablesResp = await ReadVariables({variables: presetNames});
 
-            for (let i = 0; i < variables.length; i++) {
-                const name = variables[i];
+            const controlVariables = variables.slice(0, -1);
+
+            for (let i = 0; i < controlVariables.length; i++) {
+                const name = controlVariables[i];
                 const control = controls.find(c => c.getVariableName() === name);
                 if (!control) {
-                    console.log(name, "control not found")
+                    console.log(name, "control not found");
                     continue;
                 }
                 const preset = resp.variables[i];
@@ -82,6 +85,41 @@ export async function registerPresets(controls: BumperControl[]) {
                 await control.setValue(preset.value);
                 console.log("Preset loaded:", name, preset.value);
             }
+
+            const timerVariable = resp.variables.slice(-1)[0];
+
+            const display = document.querySelector('#timerDisplay')!;
+            if (timerVariable.present && timerVariable.value > 0) {
+                startTimer(timerVariable.value, display as HTMLElement);
+            } else {
+                display.textContent = "00:00";
+                clearInterval(timerInterval);
+            }
         });
     });
+}
+
+let timerInterval: number | undefined;
+
+function startTimer(duration: number, display: HTMLElement): void {
+    const endTime = Date.now() + duration * 1000;
+
+    if (timerInterval !== undefined) {
+        clearInterval(timerInterval);
+    }
+
+    timerInterval = window.setInterval(() => {
+        const remainingTime = Math.floor((endTime - Date.now()) / 1000);
+        const minutes = Math.floor(Math.abs(remainingTime) / 60);
+        const seconds = Math.abs(remainingTime) % 60;
+
+        const displayMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
+        const displaySeconds = seconds < 10 ? "0" + seconds : seconds.toString();
+
+        display.textContent = (remainingTime < 0 ? "-" : "") + displayMinutes + ":" + displaySeconds;
+
+        if (remainingTime <= -3600) {  // Stop updating after 1 hour into negative
+            clearInterval(timerInterval);
+        }
+    }, 1000);
 }
