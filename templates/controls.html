@@ -42,9 +42,10 @@
 </div>
 
 <script type="module">
-    import {registerPresets} from "/static/dist/bundle.js";
+    import {registerPresets, setupControls} from "/static/dist/bundle.js";
 
     document.addEventListener("DOMContentLoaded", () => {
+        setupControls('controls-container');
         registerPresets();
     });
 </script>
