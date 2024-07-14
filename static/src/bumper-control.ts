@@ -87,16 +87,24 @@ export class BumperControl {
     }
 
     public async changeValue(delta: number): Promise<void> {
-        let newValue = this.value + delta;
-        if (this.maxValue !== undefined && newValue > this.maxValue) {
-            newValue = this.maxValue;
-        }
-        if (this.minValue !== undefined && newValue < this.minValue) {
-            newValue = this.minValue;
-        }
-        this.value = newValue;
+        const newValue = this.value + delta;
+        await this.setValue(newValue);
+    }
+
+    public async setValue(newValue: number): Promise<void> {
+        this.value = this.validateValue(newValue);
         this.updateDisplay();
         await this.updateValueBackend();
+    }
+
+    private validateValue(value: number): number {
+        if (this.maxValue !== undefined && value > this.maxValue) {
+            return this.maxValue;
+        }
+        if (this.minValue !== undefined && value < this.minValue) {
+            return this.minValue;
+        }
+        return value;
     }
 
     private updateDisplay() {
