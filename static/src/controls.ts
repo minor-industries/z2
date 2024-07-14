@@ -121,5 +121,5 @@ function startTimer(duration: number, display: HTMLElement): void {
         if (remainingTime <= -3600) {  // Stop updating after 1 hour into negative
             clearInterval(timerInterval);
         }
-    }, 1000);
+    }, 50);
 }
