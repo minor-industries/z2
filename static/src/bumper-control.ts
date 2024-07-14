@@ -97,6 +97,10 @@ export class BumperControl {
         await this.updateValueBackend();
     }
 
+    public getVariableName(): string {
+        return this.variableName;
+    }
+
     private validateValue(value: number): number {
         if (this.maxValue !== undefined && value > this.maxValue) {
             return this.maxValue;
