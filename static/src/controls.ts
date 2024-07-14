@@ -30,6 +30,8 @@ export function setupControls(
         defaultValue: 1.0,
         fixed: 1
     });
+
+    return [bc1, bc2, bc3];
 }
 
 export function createPresetControls() {
@@ -50,10 +52,10 @@ export function createPresetControls() {
     });
 }
 
-export function registerPresets() {
+export function registerPresets(controls: BumperControl[]) {
     ["A", "B", "C", "D"].forEach(v => {
         document.getElementById(`preset${v}`)!.addEventListener('click', (event) => {
-            console.log("preset", v);
+            console.log("preset", v, controls);
         });
     });
 }
