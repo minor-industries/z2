@@ -1,4 +1,5 @@
 import {BumperControl} from "./bumper-control.js";
+import {ReadVariables, ReadVariablesResp} from "./api.js";
 
 export function setupControls(
     containerId: string,
@@ -52,10 +53,35 @@ export function createPresetControls() {
     });
 }
 
-export function registerPresets(controls: BumperControl[]) {
+export async function registerPresets(controls: BumperControl[]) {
     ["A", "B", "C", "D"].forEach(v => {
-        document.getElementById(`preset${v}`)!.addEventListener('click', (event) => {
-            console.log("preset", v, controls);
+        document.getElementById(`preset${v}`)!.addEventListener('click', async (event) => {
+            const suffix = `_${v}`;
+
+            const variables = [
+                'bike_target_speed',
+                'bike_max_drift_pct',
+                'bike_allowed_error_pct'
+            ];
+
+            const presetNames = variables.map(name => `${name}${suffix}`);
+            const resp: ReadVariablesResp = await ReadVariables({variables: presetNames});
+
+            for (let i = 0; i < variables.length; i++) {
+                const name = variables[i];
+                const control = controls.find(c => c.getVariableName() === name);
+                if (!control) {
+                    console.log(name, "control not found")
+                    continue;
+                }
+                const preset = resp.variables[i];
+                if (!preset.present) {
+                    console.log(name, "preset not present")
+                    continue;
+                }
+                await control.setValue(preset.value);
+                console.log("Preset loaded:", name, preset.value);
+            }
         });
     });
 }
