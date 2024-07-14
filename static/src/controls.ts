@@ -49,3 +49,11 @@ export function createPresetControls() {
         });
     });
 }
+
+export function registerPresets() {
+    ["A", "B", "C", "D"].forEach(v => {
+        document.getElementById(`preset${v}`)!.addEventListener('click', (event) => {
+            console.log("preset", v);
+        });
+    });
+}

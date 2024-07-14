@@ -30,16 +30,24 @@
             Enable Sounds
         </button>
 
-        <button class="pure-button pure-button-primary" style="margin: 2px;">A</button>
-        <button class="pure-button pure-button-primary" style="margin: 2px;">B</button>
-        <button class="pure-button pure-button-primary" style="margin: 2px;">C</button>
-        <button class="pure-button pure-button-primary" style="margin: 2px;">D</button>
+        <button id="presetA" class="pure-button pure-button-primary" style="margin: 2px;">A</button>
+        <button id="presetB" class="pure-button pure-button-primary" style="margin: 2px;">B</button>
+        <button id="presetC" class="pure-button pure-button-primary" style="margin: 2px;">C</button>
+        <button id="presetD" class="pure-button pure-button-primary" style="margin: 2px;">D</button>
     </div>
 
     <!--    <div class="bumper-container pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">-->
     <!--    </div>-->
     <!-- bumper controls will be added here -->
 </div>
+
+<script type="module">
+    import {registerPresets} from "/static/dist/bundle.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        registerPresets();
+    });
+</script>
 
 {{ end }}
 
