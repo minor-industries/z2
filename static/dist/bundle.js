@@ -6036,7 +6036,8 @@ var BumperControl = class {
 };
 
 // dist/controls.js
-function setupControls(containerId, suffix = "") {
+function setupControls(containerId, kind, suffix = "") {
+  console.log("setup", kind);
   const bc1 = new BumperControl({
     containerId,
     label: "Target Speed",
@@ -6078,7 +6079,8 @@ function createPresetControls() {
     });
   });
 }
-async function registerPresets(controls) {
+async function registerPresets(controls, kind) {
+  console.log("register", kind);
   ["A", "B", "C", "D"].forEach((v) => {
     document.getElementById(`preset${v}`).addEventListener("click", async () => {
       const suffix = `_${v}`;

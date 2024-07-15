@@ -44,8 +44,8 @@
     import {registerPresets, setupControls} from "/static/dist/bundle.js";
 
     document.addEventListener("DOMContentLoaded", () => {
-        const controls = setupControls('controls-container');
-        registerPresets(controls);
+        const controls = setupControls('controls-container', "{{.}}");
+        registerPresets(controls, "{{.}}");
     });
 </script>
 

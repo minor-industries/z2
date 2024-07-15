@@ -1,5 +1,9 @@
 {{ template "header" . }}
+
+{{ with "bike" }}
 {{ template "controls" .}}
+{{ end }}
+
 {{ template "sound-events" .}}
 
 <script type="module">

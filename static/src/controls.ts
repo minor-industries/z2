@@ -3,8 +3,11 @@ import {ReadVariables, ReadVariablesResp} from "./api.js";
 
 export function setupControls(
     containerId: string,
+    kind: string,
     suffix = ""
 ): BumperControl[] {
+    console.log("setup", kind);
+
     const bc1 = new BumperControl({
         containerId: containerId,
         label: 'Target Speed',
@@ -53,7 +56,12 @@ export function createPresetControls(): void {
     });
 }
 
-export async function registerPresets(controls: BumperControl[]): Promise<void> {
+export async function registerPresets(
+    controls: BumperControl[],
+    kind: string,
+): Promise<void> {
+    console.log("register", kind);
+
     ["A", "B", "C", "D"].forEach(v => {
         document.getElementById(`preset${v}`)!.addEventListener('click', async () => {
             const suffix = `_${v}`;
