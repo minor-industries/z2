@@ -6,8 +6,19 @@ export function setupControls(
     kind: string,
     suffix = ""
 ): BumperControl[] {
-    console.log("setup", kind);
+    if (kind === "bike") {
+        return setupBikeControls(containerId, suffix);
+    } else if (kind === "rower") {
+        return setupRowerControls(containerId, suffix);
+    }
 
+    throw new Error(`unknown kind: ${kind}`);
+}
+
+function setupBikeControls(
+    containerId: string,
+    suffix: string,
+): BumperControl[] {
     const bc1 = new BumperControl({
         containerId: containerId,
         label: 'Target Speed',
@@ -37,6 +48,41 @@ export function setupControls(
 
     return [bc1, bc2, bc3];
 }
+
+function setupRowerControls(
+    containerId: string,
+    suffix: string,
+): BumperControl[] {
+    const bc1 = new BumperControl({
+        containerId: containerId,
+        label: 'Target Power',
+        variableName: `rower_target_power${suffix}`,
+        increment: 1,
+        defaultValue: 100,
+        fixed: 0
+    });
+
+    const bc2 = new BumperControl({
+        containerId: containerId,
+        label: 'Max Drift %',
+        variableName: `rower_max_drift_pct${suffix}`,
+        increment: 0.1,
+        defaultValue: 2.0,
+        fixed: 1
+    });
+
+    const bc3 = new BumperControl({
+        containerId: containerId,
+        label: 'Max Error %',
+        variableName: `bike_allowed_error_pct${suffix}`,
+        increment: 0.1,
+        defaultValue: 1.0,
+        fixed: 1
+    });
+
+    return [bc1, bc2, bc3];
+}
+
 
 export function createPresetControls(): void {
     ["A", "B", "C", "D"].forEach(v => {
