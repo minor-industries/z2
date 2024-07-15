@@ -67,34 +67,33 @@ function setupRowerControls(
         label: 'Max Drift %',
         variableName: `rower_max_drift_pct${suffix}`,
         increment: 0.1,
-        defaultValue: 2.0,
+        defaultValue: 5.0,
         fixed: 1
     });
 
     const bc3 = new BumperControl({
         containerId: containerId,
         label: 'Max Error %',
-        variableName: `bike_allowed_error_pct${suffix}`,
+        variableName: `rower_allowed_error_pct${suffix}`,
         increment: 0.1,
-        defaultValue: 1.0,
+        defaultValue: 2.0,
         fixed: 1
     });
 
     return [bc1, bc2, bc3];
 }
 
-
-export function createPresetControls(): void {
+export function createPresetControls(kind: string): void {
     ["A", "B", "C", "D"].forEach(v => {
         const containerId = `preset_${v}`;
         const suffix = `_${v}`;
 
-        setupControls(containerId, suffix);
+        setupControls(containerId, kind, suffix);
 
         new BumperControl({
             containerId: containerId,
             label: 'Timer (seconds)',
-            variableName: `bike_preset_timer${suffix}`,
+            variableName: `${kind}_preset_timer${suffix}`,
             increment: 10,
             defaultValue: 60 * 4,
             fixed: 0
@@ -102,22 +101,32 @@ export function createPresetControls(): void {
     });
 }
 
+type VariableLists = Record<string, string[]>;
+
+const variableLists: VariableLists = {
+    bike: [
+        'bike_target_speed',
+        'bike_max_drift_pct',
+        'bike_allowed_error_pct',
+        'bike_preset_timer'
+    ],
+    rower: [
+        'rower_target_power',
+        'rower_max_drift_pct',
+        'rower_allowed_error_pct',
+        'rower_preset_timer'
+    ]
+}
+
 export async function registerPresets(
     controls: BumperControl[],
     kind: string,
 ): Promise<void> {
-    console.log("register", kind);
-
     ["A", "B", "C", "D"].forEach(v => {
         document.getElementById(`preset${v}`)!.addEventListener('click', async () => {
             const suffix = `_${v}`;
 
-            const variables = [
-                'bike_target_speed',
-                'bike_max_drift_pct',
-                'bike_allowed_error_pct',
-                `bike_preset_timer`
-            ];
+            const variables = variableLists[kind];
 
             const presetNames = variables.map(name => `${name}${suffix}`);
             const resp: ReadVariablesResp = await ReadVariables({variables: presetNames});

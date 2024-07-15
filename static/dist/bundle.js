@@ -6037,7 +6037,14 @@ var BumperControl = class {
 
 // dist/controls.js
 function setupControls(containerId, kind, suffix = "") {
-  console.log("setup", kind);
+  if (kind === "bike") {
+    return setupBikeControls(containerId, suffix);
+  } else if (kind === "rower") {
+    return setupRowerControls(containerId, suffix);
+  }
+  throw new Error(`unknown kind: ${kind}`);
+}
+function setupBikeControls(containerId, suffix) {
   const bc1 = new BumperControl({
     containerId,
     label: "Target Speed",
@@ -6064,32 +6071,67 @@ function setupControls(containerId, kind, suffix = "") {
   });
   return [bc1, bc2, bc3];
 }
-function createPresetControls() {
+function setupRowerControls(containerId, suffix) {
+  const bc1 = new BumperControl({
+    containerId,
+    label: "Target Power",
+    variableName: `rower_target_power${suffix}`,
+    increment: 1,
+    defaultValue: 100,
+    fixed: 0
+  });
+  const bc2 = new BumperControl({
+    containerId,
+    label: "Max Drift %",
+    variableName: `rower_max_drift_pct${suffix}`,
+    increment: 0.1,
+    defaultValue: 5,
+    fixed: 1
+  });
+  const bc3 = new BumperControl({
+    containerId,
+    label: "Max Error %",
+    variableName: `rower_allowed_error_pct${suffix}`,
+    increment: 0.1,
+    defaultValue: 2,
+    fixed: 1
+  });
+  return [bc1, bc2, bc3];
+}
+function createPresetControls(kind) {
   ["A", "B", "C", "D"].forEach((v) => {
     const containerId = `preset_${v}`;
     const suffix = `_${v}`;
-    setupControls(containerId, suffix);
+    setupControls(containerId, kind, suffix);
     new BumperControl({
       containerId,
       label: "Timer (seconds)",
-      variableName: `bike_preset_timer${suffix}`,
+      variableName: `${kind}_preset_timer${suffix}`,
       increment: 10,
       defaultValue: 60 * 4,
       fixed: 0
     });
   });
 }
+var variableLists = {
+  bike: [
+    "bike_target_speed",
+    "bike_max_drift_pct",
+    "bike_allowed_error_pct",
+    "bike_preset_timer"
+  ],
+  rower: [
+    "rower_target_power",
+    "rower_max_drift_pct",
+    "rower_allowed_error_pct",
+    "rower_preset_timer"
+  ]
+};
 async function registerPresets(controls, kind) {
-  console.log("register", kind);
   ["A", "B", "C", "D"].forEach((v) => {
     document.getElementById(`preset${v}`).addEventListener("click", async () => {
       const suffix = `_${v}`;
-      const variables = [
-        "bike_target_speed",
-        "bike_max_drift_pct",
-        "bike_allowed_error_pct",
-        `bike_preset_timer`
-      ];
+      const variables = variableLists[kind];
       const presetNames = variables.map((name) => `${name}${suffix}`);
       const resp = await ReadVariables({ variables: presetNames });
       const controlVariables = variables.slice(0, -1);
