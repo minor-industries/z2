@@ -8,6 +8,6 @@
   },
   "dependencies": {
     "calendar": "github:minor-industries/calendar#v0.0.2",
-    "rtgraph": "github:minor-industries/rtgraph#js/module"
+    "rtgraph": "file:../../rtgraph"
   }
 }

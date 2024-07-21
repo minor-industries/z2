@@ -70,6 +70,9 @@
             maxGapMs: 5 * second,
             disableScroll: true,
             date: date,
+            drawCallback: (lo, hi, indicies, series) => {
+                console.log(lo, hi, indicies);
+            }
         });
 
         const graphs = [
