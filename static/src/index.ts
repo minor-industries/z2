@@ -1,5 +1,5 @@
 import * as calendar from 'calendar'
-import {Graph} from "rtgraph";
+import {Graph, synchronize} from "rtgraph";
 
 export * from "./api.js";
 export * from "./rpc.js";
@@ -8,5 +8,6 @@ export * from "./controls.js";
 
 export {
     calendar,
-    Graph
+    Graph,
+    synchronize
 };

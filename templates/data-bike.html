@@ -22,7 +22,7 @@
 
 
 <script type="module">
-    import {Graph} from '/static/dist/bundle.js';
+    import {Graph, synchronize} from '/static/dist/bundle.js';
     import {DeleteRange} from "/static/dist/bundle.js";
 
     const url = new URL(window.location.href);
@@ -94,7 +94,7 @@
             },
         })
 
-        const sync = Dygraph.synchronize(graphs, {
+        const sync = synchronize(graphs, {
             selection: true,
             zoom: true,
             range: false,
