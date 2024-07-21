@@ -1,8 +1,12 @@
 import * as calendar from 'calendar'
+import {Graph} from "rtgraph";
 
 export * from "./api.js";
 export * from "./rpc.js";
 export * from "./bumper-control.js";
-export * from "./controls.js"
+export * from "./controls.js";
 
-export {calendar};
+export {
+    calendar,
+    Graph
+};
