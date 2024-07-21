@@ -57,9 +57,9 @@ function setupRowerControls(
         containerId: containerId,
         label: 'Target Power',
         variableName: `rower_target_power${suffix}`,
-        increment: 1,
+        increment: 2.5,
         defaultValue: 100,
-        fixed: 0
+        fixed: 1
     });
 
     const bc2 = new BumperControl({
