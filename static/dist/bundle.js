@@ -15375,6 +15375,138 @@ function ReadVariables(req) {
   return rpc2("api.Api", "ReadVariables", req);
 }
 
+// dist/bike.js
+function select(args, i) {
+  return {
+    lo: args.lo,
+    hi: args.hi,
+    i0: args.indices[i][0],
+    i1: args.indices[i][1],
+    Ts: args.series[i].Timestamps,
+    V: args.series[i].Values
+  };
+}
+function maxV(args, i) {
+  let max = Number.MIN_VALUE;
+  const { i0, i1, V } = select(args, i);
+  for (let i2 = i0; i2 < i1; i2++) {
+    if (V[i2] > max) {
+      max = V[i2];
+    }
+  }
+  return max === Number.MIN_VALUE ? NaN : max;
+}
+function avgV(args, i) {
+  const { i0, i1, V } = select(args, i);
+  let count = 0;
+  let sum = 0;
+  for (let i2 = i0; i2 < i1; i2++) {
+    count++;
+    sum += V[i2];
+  }
+  return count === 0 ? NaN : sum / count;
+}
+function deltaT(args, i) {
+  const { lo, hi } = select(args, i);
+  return (hi - lo) / 1e3 / 60;
+}
+function setupBikeAnalysis(date, showModal) {
+  const second = 1e3;
+  const seriesOpts = {
+    y2: { strokeWidth: 1 },
+    y3: { strokeWidth: 1, color: "red" },
+    y4: { strokeWidth: 1, color: "red" },
+    y5: { strokeWidth: 1, color: "red" }
+  };
+  const g1 = new Graph(document.getElementById("graphdiv0"), {
+    seriesNames: [
+      "bike_avg_speed_long | time-bin",
+      "bike_avg_speed_short | time-bin",
+      "bike_instant_speed_min | time-bin",
+      "bike_instant_speed_max | time-bin",
+      "bike_target_speed | time-bin"
+    ],
+    title: "Avg Speed",
+    ylabel: "speed (km/h)",
+    windowSize: null,
+    height: 250,
+    maxGapMs: 5 * second,
+    series: seriesOpts,
+    disableScroll: true,
+    date
+  });
+  const g2 = new Graph(document.getElementById("graphdiv1"), {
+    seriesNames: [
+      "heartrate | avg 2m triangle | time-bin",
+      "heartrate | time-bin"
+    ],
+    title: "Heartrate",
+    ylabel: "bpm",
+    windowSize: null,
+    height: 250,
+    series: seriesOpts,
+    maxGapMs: 5 * second,
+    disableScroll: true,
+    date,
+    drawCallback: (args) => {
+      console.log("max Value", maxV(args, 0), "delta t", deltaT(args, 0), "avg HR", avgV(args, 1));
+    }
+  });
+  const graphs = [
+    g1.dygraph,
+    g2.dygraph
+  ];
+  g1.dygraph.updateOptions({
+    pointClickCallback: function(e, point) {
+      const an1 = {
+        series: "y1",
+        x: point.xval,
+        shortText: "M",
+        text: "Marker"
+      };
+      console.log(an1);
+      g1.dygraph.setAnnotations([an1]);
+      g2.dygraph.setAnnotations([an1]);
+      console.log(point);
+      showModal(point.xval);
+    }
+  });
+  const sync = synchronizer_default(graphs, {
+    selection: true,
+    zoom: true,
+    range: false
+  });
+  const keyDown = (ev) => {
+    switch (ev.code) {
+      case "KeyD":
+        const range = graphs[0].xAxisRange();
+        const dateRange = [new Date(range[0]), new Date(range[1])];
+        console.log(range);
+        const start = Math.floor(range[0]);
+        const end = Math.ceil(range[1]);
+        console.log(start, end);
+        const prompt = `are you sure you want to delete the currently visible range? 
+${dateRange[0]}
+${dateRange[1]}`;
+        const ok = confirm(prompt);
+        if (ok) {
+          alert(`deleting ${dateRange}`);
+          return DeleteRange({
+            start,
+            end
+          });
+        }
+        return;
+      case "KeyK":
+      default:
+        return Promise.resolve();
+    }
+  };
+  document.addEventListener("keydown", (ev) => {
+    keyDown(ev);
+  });
+}
+
 // dist/bumper-control.js
 var BumperControl = class {
   constructor(config) {
@@ -15632,6 +15764,7 @@ export {
   createPresetControls,
   registerPresets,
   rpc2 as rpc,
+  setupBikeAnalysis,
   setupControls,
   synchronizer_default as synchronize
 };
