@@ -29,6 +29,18 @@
     const params = new URLSearchParams(url.search);
     const date = params.get('date');
 
+    function maxV(i0, i1, Ts, V) {
+        let max = Number.MIN_VALUE;
+
+        for (let i = i0; i < i1; i++) {
+            if (V[i] > max) {
+                max = V[i];
+            }
+        }
+
+        return max === Number.MIN_VALUE ? NaN : max;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const second = 1000;
 
@@ -70,8 +82,12 @@
             maxGapMs: 5 * second,
             disableScroll: true,
             date: date,
-            drawCallback: (lo, hi, indicies, series) => {
-                console.log(lo, hi, indicies);
+            drawCallback: (args) => {
+                console.log("maxV", maxV(
+                    args.indices[0][0],
+                    args.indices[0][1],
+                    args.series[0].Timestamps,
+                    args.series[0].Values))
             }
         });
 
