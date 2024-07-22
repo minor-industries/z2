@@ -29,8 +29,21 @@
     const params = new URLSearchParams(url.search);
     const date = params.get('date');
 
-    function maxV(i0, i1, Ts, V) {
+    function select(args, i) {
+        return {
+            lo: args.lo,
+            hi: args.hi,
+            i0: args.indices[i][0],
+            i1: args.indices[i][1],
+            Ts: args.series[i].Timestamps,
+            V: args.series[i].Values
+        }
+    }
+
+    function maxV(args, i) {
         let max = Number.MIN_VALUE;
+
+        const {i0, i1, V} = select(args, i);
 
         for (let i = i0; i < i1; i++) {
             if (V[i] > max) {
@@ -40,6 +53,26 @@
 
         return max === Number.MIN_VALUE ? NaN : max;
     }
+
+    function avgV(args, i) {
+        const {i0, i1, V} = select(args, i);
+
+        let count = 0;
+        let sum = 0;
+
+        for (let i = i0; i < i1; i++) {
+            count++;
+            sum += V[i];
+        }
+
+        return count === 0 ? NaN : sum / count;
+    }
+
+    function deltaT(args, i) {
+        const {lo, hi} = select(args, i);
+        return (hi - lo) / 1000.0 / 60.0
+    }
+
 
     document.addEventListener("DOMContentLoaded", () => {
         const second = 1000;
@@ -83,11 +116,11 @@
             disableScroll: true,
             date: date,
             drawCallback: (args) => {
-                console.log("maxV", maxV(
-                    args.indices[0][0],
-                    args.indices[0][1],
-                    args.series[0].Timestamps,
-                    args.series[0].Values))
+                console.log(
+                    "max Value", maxV(args, 0),
+                    "delta t", deltaT(args, 0),
+                    "avg HR", avgV(args, 1),
+                );
             }
         });
 
