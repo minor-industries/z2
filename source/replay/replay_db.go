@@ -3,6 +3,7 @@ package replay
 import (
 	"context"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
 	"time"
@@ -28,7 +29,7 @@ func RunDB(
 		return errors.Wrap(err, "get replay database")
 	}
 
-	var rows []database.RawValue
+	var rows []data.RawValue
 	tx := db.GetORM().Find(&rows)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "load rows")

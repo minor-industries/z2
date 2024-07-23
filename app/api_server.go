@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/now"
 	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/variables"
 	"time"
@@ -21,10 +22,10 @@ func NewApiServer(db *database.Backend, vars *variables.Cache) *ApiServer {
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
-	vars := make([]variables.Variable, len(req.Variables))
+	vars := make([]data.Variable, len(req.Variables))
 
 	for i, v := range req.Variables {
-		vars[i] = variables.Variable{
+		vars[i] = data.Variable{
 			Name:    v.Name,
 			Value:   v.Value,
 			Present: v.Present,
@@ -69,7 +70,7 @@ func showTime(description string, t time.Time) {
 func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*api.Empty, error) {
 	orm := a.db.GetORM()
 
-	res := orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.RawValue{})
+	res := orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&data.RawValue{})
 	if res.Error != nil {
 		return nil, res.Error
 	}

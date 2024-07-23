@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
 	"time"
@@ -50,7 +51,7 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	h.backend.Insert(&database.RawValue{
+	h.backend.Insert(&data.RawValue{
 		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),

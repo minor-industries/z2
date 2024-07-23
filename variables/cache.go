@@ -2,17 +2,10 @@ package variables
 
 import (
 	"github.com/minor-industries/rtgraph/database"
-	db2 "github.com/minor-industries/z2/variables/db"
+	"github.com/minor-industries/z2/data"
 	"github.com/pkg/errors"
 	"sync"
-	"time"
 )
-
-type Variable struct {
-	Name    string
-	Value   float64
-	Present bool
-}
 
 type Cache struct {
 	lock sync.Mutex
@@ -20,21 +13,7 @@ type Cache struct {
 	db   *database.Backend
 }
 
-type RawValue struct {
-	ID []byte `gorm:"primary_key"`
-
-	ServiceID        string
-	CharacteristicID string
-
-	Timestamp time.Time `gorm:"index"`
-	Message   []byte
-}
-
 func NewCache(db *database.Backend) (*Cache, error) {
-	if err := db.GetORM().AutoMigrate(&db2.Variable{}); err != nil {
-		return nil, errors.Wrap(err, "automigrate")
-	}
-
 	cache := &Cache{
 		db: db,
 		vars: map[string]float64{
@@ -49,7 +28,7 @@ func NewCache(db *database.Backend) (*Cache, error) {
 		},
 	}
 
-	var rows []db2.Variable
+	var rows []data.Variable
 	tx := db.GetORM().Find(&rows)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "find rows")
@@ -61,14 +40,14 @@ func NewCache(db *database.Backend) (*Cache, error) {
 	return cache, nil
 }
 
-func (c *Cache) Get(keys []string) []Variable {
+func (c *Cache) Get(keys []string) []data.Variable {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var result []Variable
+	var result []data.Variable
 	for _, k := range keys {
 		v, present := c.vars[k]
-		result = append(result, Variable{
+		result = append(result, data.Variable{
 			Name:    k,
 			Value:   v,
 			Present: present,
@@ -78,7 +57,7 @@ func (c *Cache) Get(keys []string) []Variable {
 	return result
 }
 
-func (c *Cache) Update(vars []Variable) {
+func (c *Cache) Update(vars []data.Variable) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -86,7 +65,7 @@ func (c *Cache) Update(vars []Variable) {
 		if v.Present {
 			c.vars[v.Name] = v.Value
 
-			c.db.Save(&db2.Variable{
+			c.db.Save(&data.Variable{
 				Name:  v.Name,
 				Value: v.Value,
 			})

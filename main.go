@@ -11,6 +11,7 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/app"
+	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
@@ -90,6 +91,13 @@ func run() error {
 	db, err := database.Get(dbPath, errCh)
 	if err != nil {
 		return errors.Wrap(err, "get database")
+	}
+
+	if err := db.GetORM().AutoMigrate(
+		&data.Variable{},
+		&data.RawValue{},
+	); err != nil {
+		return errors.Wrap(err, "automigrate")
 	}
 
 	graph, err := rtgraph.New(
