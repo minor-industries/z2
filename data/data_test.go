@@ -4,10 +4,27 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/stretchr/testify/require"
+	"math"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
+
+func avg(values []database.Value) float64 {
+	if len(values) == 0 {
+		return math.NaN()
+	}
+
+	sum := 0.0
+	count := 0
+	for _, value := range values {
+		sum += value.Value
+		count++
+	}
+
+	return sum / float64(count)
+}
 
 func TestData(t *testing.T) {
 	errCh := make(chan error)
@@ -47,6 +64,7 @@ func TestData(t *testing.T) {
 			dt,
 		)
 
+		var intervals []string
 		interval := 15 * time.Minute
 		for i := 0; ; i++ {
 			ti := t0.Add(interval * time.Duration(i))
@@ -56,7 +74,7 @@ func TestData(t *testing.T) {
 				tn = t1
 			}
 
-			fmt.Println(" interval", i, ti, tn.Sub(ti))
+			//fmt.Println(" interval", i, ti, tn.Sub(ti))
 
 			sID := database.HashedID("heartrate")
 
@@ -69,11 +87,13 @@ func TestData(t *testing.T) {
 			).Find(&values)
 			require.NoError(t, tx.Error)
 
-			fmt.Println(len(values))
+			intervals = append(intervals, fmt.Sprintf("%.1f", avg(values)))
 
 			if tn.Equal(t1) {
 				break
 			}
 		}
+
+		fmt.Println("\t" + strings.Join(intervals, "   "))
 	}
 }
