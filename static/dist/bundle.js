@@ -15462,7 +15462,11 @@ function setupBikeAnalysis(date, showModal) {
         series: "y1",
         x: point.xval,
         shortText: "M",
-        text: "Marker"
+        text: "Marker",
+        attachAtBottom: true,
+        dblClickHandler: function(annotation, point2, dygraph, event) {
+          console.log(annotation);
+        }
       };
       console.log(an1);
       g1.dygraph.setAnnotations([an1]);

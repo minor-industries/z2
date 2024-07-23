@@ -1,5 +1,6 @@
 import {DrawCallbackArgs, Graph, synchronize} from 'rtgraph';
 import {DeleteRange} from "./api";
+import {dygraphs} from 'dygraphs'
 
 function select(args: DrawCallbackArgs, i: number) {
     return {
@@ -102,12 +103,21 @@ export function setupBikeAnalysis(date: string | null, showModal: any) {
     ];
 
     (g1.dygraph as any).updateOptions({
-        pointClickCallback: function (e: any, point: any) {
-            const an1 = {
+        pointClickCallback: function (e: MouseEvent, point: dygraphs.Point) {
+            const an1: dygraphs.Annotation = {
                 series: 'y1',
                 x: point.xval,
                 shortText: 'M',
-                text: 'Marker'
+                text: 'Marker',
+                attachAtBottom: true,
+                dblClickHandler: function (
+                    annotation: dygraphs.Annotation,
+                    point: dygraphs.Point,
+                    dygraph: any,
+                    event: MouseEvent,
+                ) {
+                    console.log(annotation);
+                },
             };
             console.log(an1);
             (g1.dygraph as any).setAnnotations([an1]);
