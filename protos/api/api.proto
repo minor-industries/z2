@@ -31,8 +31,20 @@ message ReadVariablesResp {
   repeated Variable variables = 1;
 }
 
+message Marker {
+  string id = 1;
+  string type = 2;
+  string ref = 3;
+  int64 timestamp = 4;
+}
+
+message AddMarkerReq {
+  Marker marker = 1;
+}
+
 service Api {
   rpc DeleteRange (DeleteRangeReq) returns (Empty);
   rpc UpdateVariables (UpdateVariablesReq) returns (Empty);
   rpc ReadVariables (ReadVariablesReq) returns (ReadVariablesResp);
+  rpc AddMarker (AddMarkerReq) returns (Empty);
 }

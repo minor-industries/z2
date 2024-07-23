@@ -120,5 +120,21 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 	}
 
 	return &calendar.CalendarEventResp{ResultSets: result}, nil
+}
 
+func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.Empty, error) {
+	orm := a.db.GetORM()
+
+	marker := data.Marker{
+		ID:        req.Marker.Id,
+		Type:      req.Marker.Type,
+		Ref:       req.Marker.Ref,
+		Timestamp: req.Marker.Timestamp,
+	}
+
+	if res := orm.Create(&marker); res.Error != nil {
+		return nil, res.Error
+	}
+
+	return &api.Empty{}, nil
 }

@@ -1,7 +1,7 @@
 package data
 
 type Marker struct {
-	ID []byte `gorm:"primary_key"`
+	ID string `gorm:"primary_key"`
 
 	Type      string `gorm:"index;not null"`
 	Ref       string `gorm:"index;not null"`

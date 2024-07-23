@@ -15365,6 +15365,9 @@ function rpc2(service, method, req) {
 }
 
 // dist/api.js
+function AddMarker(req) {
+  return rpc2("api.Api", "AddMarker", req);
+}
 function DeleteRange(req) {
   return rpc2("api.Api", "DeleteRange", req);
 }
@@ -15483,7 +15486,7 @@ function setupBikeAnalysis(date) {
         series: "y1",
         x: m.timestamp,
         shortText: m.type,
-        text: "Marker",
+        text: m.type,
         // TODO:
         attachAtBottom: true,
         dblClickHandler: function(annotation, point2, dygraph, event) {
@@ -15779,6 +15782,7 @@ function startTimer(duration, display) {
   }, 50);
 }
 export {
+  AddMarker,
   BumperControl,
   DeleteRange,
   Graph,
