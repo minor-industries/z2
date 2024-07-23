@@ -110,6 +110,8 @@ export function setupBikeAnalysis(date: string | null) {
                 case 'b':
                 case 'e':
                     break;
+                case null:
+                    return;
                 default:
                     alert("unknown kind");
                     return;
