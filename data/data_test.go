@@ -38,10 +38,29 @@ func TestData(t *testing.T) {
 		b := markers[i]
 		e := markers[i+1]
 
-		dt := time.UnixMilli(e.Timestamp).Sub(time.UnixMilli(b.Timestamp))
+		t0 := time.UnixMilli(b.Timestamp)
+		t1 := time.UnixMilli(e.Timestamp)
+
+		dt := t1.Sub(t0)
 		fmt.Println(
-			time.UnixMilli(e.Timestamp),
+			t0,
 			dt,
 		)
+
+		interval := 15 * time.Minute
+		for i := 0; ; i++ {
+			t := t0.Add(interval * time.Duration(i))
+			tn := t0.Add(interval * time.Duration(i+1))
+
+			if tn.After(t1) {
+				tn = t1
+			}
+
+			fmt.Println(" interval", i, t, tn.Sub(t))
+
+			if tn.Equal(t1) {
+				break
+			}
+		}
 	}
 }
