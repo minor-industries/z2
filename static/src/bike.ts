@@ -46,9 +46,19 @@ function deltaT(args: DrawCallbackArgs, i: number) {
     return (hi - lo) / 1000.0 / 60.0
 }
 
+type MarkerType = "b" | "e";
+
+export type Marker = {
+    type: MarkerType
+    ref: string
+    timestamp: number
+}
+
 // TODO: showModal should be redone
 export function setupBikeAnalysis(date: string | null) {
     const second = 1000;
+
+    const markers: Marker[] = [];
 
     const seriesOpts = {
         y2: {strokeWidth: 1.0},
@@ -88,7 +98,7 @@ export function setupBikeAnalysis(date: string | null) {
         maxGapMs: 5 * second,
         disableScroll: true,
         date: date,
-        drawCallback: (args) => {
+        drawCallback: (args: DrawCallbackArgs) => {
             console.log(
                 "max Value", maxV(args, 0),
                 "delta t", deltaT(args, 0),
@@ -105,23 +115,34 @@ export function setupBikeAnalysis(date: string | null) {
     (g1.dygraph as any).updateOptions({
         pointClickCallback: function (e: MouseEvent, point: dygraphs.Point) {
 
-            const kind = prompt("(b)egin or (e)nd?")
-            switch (kind) {
+            const markerType = prompt("(b)egin or (e)nd?")
+            switch (markerType) {
                 case 'b':
                 case 'e':
                     break;
                 case null:
                     return;
                 default:
-                    alert("unknown kind");
+                    alert("unknown markerType");
                     return;
             }
 
-            const an1: dygraphs.Annotation = {
+            if (point.xval === undefined) {
+                console.log("no xval");
+                return;
+            }
+
+            markers.push({
+                type: markerType,
+                ref: "bike",
+                timestamp: point.xval,
+            })
+
+            const annotations = markers.map(m => ({
                 series: 'y1',
-                x: point.xval,
-                shortText: kind,
-                text: 'Marker',
+                x: m.timestamp,
+                shortText: m.type,
+                text: m.type, // TODO:
                 attachAtBottom: true,
                 dblClickHandler: function (
                     annotation: dygraphs.Annotation,
@@ -131,10 +152,10 @@ export function setupBikeAnalysis(date: string | null) {
                 ) {
                     console.log(annotation);
                 },
-            };
-            console.log(an1);
-            (g1.dygraph as any).setAnnotations([an1]);
-            (g2.dygraph as any).setAnnotations([an1]);
+            }));
+
+            (g1.dygraph as any).setAnnotations(annotations);
+            (g2.dygraph as any).setAnnotations(annotations);
 
             console.log(point);
         },

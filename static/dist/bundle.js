@@ -15412,6 +15412,7 @@ function deltaT(args, i) {
 }
 function setupBikeAnalysis(date) {
   const second = 1e3;
+  const markers = [];
   const seriesOpts = {
     y2: { strokeWidth: 1 },
     y3: { strokeWidth: 1, color: "red" },
@@ -15458,28 +15459,39 @@ function setupBikeAnalysis(date) {
   ];
   g1.dygraph.updateOptions({
     pointClickCallback: function(e, point) {
-      const kind = prompt("(b)egin or (e)nd?");
-      switch (kind) {
+      const markerType = prompt("(b)egin or (e)nd?");
+      switch (markerType) {
         case "b":
         case "e":
           break;
+        case null:
+          return;
         default:
-          alert("unknown kind");
+          alert("unknown markerType");
           return;
       }
-      const an1 = {
+      if (point.xval === void 0) {
+        console.log("no xval");
+        return;
+      }
+      markers.push({
+        type: markerType,
+        ref: "bike",
+        timestamp: point.xval
+      });
+      const annotations2 = markers.map((m) => ({
         series: "y1",
-        x: point.xval,
-        shortText: kind,
+        x: m.timestamp,
+        shortText: m.type,
         text: "Marker",
+        // TODO:
         attachAtBottom: true,
         dblClickHandler: function(annotation, point2, dygraph, event) {
           console.log(annotation);
         }
-      };
-      console.log(an1);
-      g1.dygraph.setAnnotations([an1]);
-      g2.dygraph.setAnnotations([an1]);
+      }));
+      g1.dygraph.setAnnotations(annotations2);
+      g2.dygraph.setAnnotations(annotations2);
       console.log(point);
     }
   });
