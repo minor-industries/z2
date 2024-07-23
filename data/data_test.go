@@ -49,14 +49,27 @@ func TestData(t *testing.T) {
 
 		interval := 15 * time.Minute
 		for i := 0; ; i++ {
-			t := t0.Add(interval * time.Duration(i))
+			ti := t0.Add(interval * time.Duration(i))
 			tn := t0.Add(interval * time.Duration(i+1))
 
 			if tn.After(t1) {
 				tn = t1
 			}
 
-			fmt.Println(" interval", i, t, tn.Sub(t))
+			fmt.Println(" interval", i, ti, tn.Sub(ti))
+
+			sID := database.HashedID("heartrate")
+
+			var values []database.Value
+			tx := orm.Where(
+				"series_id = ? and timestamp >= ? and timestamp < ?",
+				sID,
+				ti.UnixMilli(),
+				tn.UnixMilli(),
+			).Find(&values)
+			require.NoError(t, tx.Error)
+
+			fmt.Println(len(values))
 
 			if tn.Equal(t1) {
 				break
