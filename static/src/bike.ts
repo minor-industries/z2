@@ -104,6 +104,9 @@ export function setupBikeAnalysis(date: string | null, showModal: any) {
 
     (g1.dygraph as any).updateOptions({
         pointClickCallback: function (e: MouseEvent, point: dygraphs.Point) {
+
+            showModal(point.xval);
+
             const an1: dygraphs.Annotation = {
                 series: 'y1',
                 x: point.xval,
@@ -124,7 +127,6 @@ export function setupBikeAnalysis(date: string | null, showModal: any) {
             (g2.dygraph as any).setAnnotations([an1]);
 
             console.log(point);
-            showModal(point.xval);
         },
     })
 
