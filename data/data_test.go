@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestData(t *testing.T) {
@@ -23,9 +24,24 @@ func TestData(t *testing.T) {
 	tx := orm.Where("ref = ?", "bike").Order("timestamp asc").Find(&markers)
 	require.NoError(t, tx.Error)
 
-	fmt.Println(len(markers))
+	require.True(t, len(markers)%2 == 0)
+	for i, marker := range markers {
+		switch i % 2 {
+		case 0:
+			require.Equal(t, "b", marker.Type)
+		case 1:
+			require.Equal(t, "e", marker.Type)
+		}
+	}
 
-	for _, marker := range markers {
-		fmt.Println(marker)
+	for i := 0; i < len(markers); i += 2 {
+		b := markers[i]
+		e := markers[i+1]
+
+		dt := time.UnixMilli(e.Timestamp).Sub(time.UnixMilli(b.Timestamp))
+		fmt.Println(
+			time.UnixMilli(e.Timestamp),
+			dt,
+		)
 	}
 }
