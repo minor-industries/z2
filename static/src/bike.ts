@@ -1,6 +1,7 @@
 import {DrawCallbackArgs, Graph, synchronize} from 'rtgraph';
-import {DeleteRange} from "./api";
+import * as api from "./api";
 import {dygraphs} from 'dygraphs'
+import {v4 as uuidv4} from 'uuid';
 
 function select(args: DrawCallbackArgs, i: number) {
     return {
@@ -49,6 +50,7 @@ function deltaT(args: DrawCallbackArgs, i: number) {
 type MarkerType = "b" | "e";
 
 export type Marker = {
+    id: string,
     type: MarkerType
     ref: string
     timestamp: number
@@ -59,6 +61,15 @@ export function setupBikeAnalysis(date: string | null) {
     const second = 1000;
 
     const markers: Marker[] = [];
+
+    const saveMarkers = async () => {
+        for (let i = 0; i < markers.length; i++) {
+            const m = markers[i];
+            await api.AddMarker({
+                marker: m,
+            });
+        }
+    };
 
     const seriesOpts = {
         y2: {strokeWidth: 1.0},
@@ -133,6 +144,7 @@ export function setupBikeAnalysis(date: string | null) {
             }
 
             markers.push({
+                id: uuidv4(),
                 type: markerType,
                 ref: "bike",
                 timestamp: point.xval,
@@ -182,13 +194,17 @@ export function setupBikeAnalysis(date: string | null) {
                 const ok = confirm(prompt)
                 if (ok) {
                     alert(`deleting ${dateRange}`)
-                    return DeleteRange({
+                    return api.DeleteRange({
                         start: start,
                         end: end,
                     });
                 }
                 return;
-            case "KeyK":
+            case "KeyS":
+                if (confirm("save markers?")) {
+                    saveMarkers();
+                }
+                return;
             default:
                 return Promise.resolve();
         }

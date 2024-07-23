@@ -7,7 +7,9 @@
     "build": "tsc && cp `find lib -type f` dist && node esbuild.config.mjs"
   },
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "calendar": "github:minor-industries/calendar#v0.0.2",
-    "rtgraph": "file:../../rtgraph"
+    "rtgraph": "file:../../rtgraph",
+    "uuid": "^10.0.0"
   }
 }
