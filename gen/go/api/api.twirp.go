@@ -39,6 +39,8 @@ type Api interface {
 	ReadVariables(context.Context, *ReadVariablesReq) (*ReadVariablesResp, error)
 
 	AddMarker(context.Context, *AddMarkerReq) (*Empty, error)
+
+	LoadMarkers(context.Context, *LoadMarkersReq) (*LoadMarkersResp, error)
 }
 
 // ===================
@@ -47,7 +49,7 @@ type Api interface {
 
 type apiProtobufClient struct {
 	client      HTTPClient
-	urls        [4]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -75,11 +77,12 @@ func NewApiProtobufClient(baseURL string, client HTTPClient, opts ...twirp.Clien
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "api", "Api")
-	urls := [4]string{
+	urls := [5]string{
 		serviceURL + "DeleteRange",
 		serviceURL + "UpdateVariables",
 		serviceURL + "ReadVariables",
 		serviceURL + "AddMarker",
+		serviceURL + "LoadMarkers",
 	}
 
 	return &apiProtobufClient{
@@ -274,13 +277,59 @@ func (c *apiProtobufClient) callAddMarker(ctx context.Context, in *AddMarkerReq)
 	return out, nil
 }
 
+func (c *apiProtobufClient) LoadMarkers(ctx context.Context, in *LoadMarkersReq) (*LoadMarkersResp, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "api")
+	ctx = ctxsetters.WithServiceName(ctx, "Api")
+	ctx = ctxsetters.WithMethodName(ctx, "LoadMarkers")
+	caller := c.callLoadMarkers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *LoadMarkersReq) (*LoadMarkersResp, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*LoadMarkersReq)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*LoadMarkersReq) when calling interceptor")
+					}
+					return c.callLoadMarkers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*LoadMarkersResp)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*LoadMarkersResp) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *apiProtobufClient) callLoadMarkers(ctx context.Context, in *LoadMarkersReq) (*LoadMarkersResp, error) {
+	out := new(LoadMarkersResp)
+	ctx, err := doProtobufRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 // ===============
 // Api JSON Client
 // ===============
 
 type apiJSONClient struct {
 	client      HTTPClient
-	urls        [4]string
+	urls        [5]string
 	interceptor twirp.Interceptor
 	opts        twirp.ClientOptions
 }
@@ -308,11 +357,12 @@ func NewApiJSONClient(baseURL string, client HTTPClient, opts ...twirp.ClientOpt
 	// Build method URLs: <baseURL>[<prefix>]/<package>.<Service>/<Method>
 	serviceURL := sanitizeBaseURL(baseURL)
 	serviceURL += baseServicePath(pathPrefix, "api", "Api")
-	urls := [4]string{
+	urls := [5]string{
 		serviceURL + "DeleteRange",
 		serviceURL + "UpdateVariables",
 		serviceURL + "ReadVariables",
 		serviceURL + "AddMarker",
+		serviceURL + "LoadMarkers",
 	}
 
 	return &apiJSONClient{
@@ -507,6 +557,52 @@ func (c *apiJSONClient) callAddMarker(ctx context.Context, in *AddMarkerReq) (*E
 	return out, nil
 }
 
+func (c *apiJSONClient) LoadMarkers(ctx context.Context, in *LoadMarkersReq) (*LoadMarkersResp, error) {
+	ctx = ctxsetters.WithPackageName(ctx, "api")
+	ctx = ctxsetters.WithServiceName(ctx, "Api")
+	ctx = ctxsetters.WithMethodName(ctx, "LoadMarkers")
+	caller := c.callLoadMarkers
+	if c.interceptor != nil {
+		caller = func(ctx context.Context, req *LoadMarkersReq) (*LoadMarkersResp, error) {
+			resp, err := c.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*LoadMarkersReq)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*LoadMarkersReq) when calling interceptor")
+					}
+					return c.callLoadMarkers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*LoadMarkersResp)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*LoadMarkersResp) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+	return caller(ctx, in)
+}
+
+func (c *apiJSONClient) callLoadMarkers(ctx context.Context, in *LoadMarkersReq) (*LoadMarkersResp, error) {
+	out := new(LoadMarkersResp)
+	ctx, err := doJSONRequest(ctx, c.client, c.opts.Hooks, c.urls[4], in, out)
+	if err != nil {
+		twerr, ok := err.(twirp.Error)
+		if !ok {
+			twerr = twirp.InternalErrorWith(err)
+		}
+		callClientError(ctx, c.opts.Hooks, twerr)
+		return nil, err
+	}
+
+	callClientResponseReceived(ctx, c.opts.Hooks)
+
+	return out, nil
+}
+
 // ==================
 // Api Server Handler
 // ==================
@@ -615,6 +711,9 @@ func (s *apiServer) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	case "AddMarker":
 		s.serveAddMarker(ctx, resp, req)
+		return
+	case "LoadMarkers":
+		s.serveLoadMarkers(ctx, resp, req)
 		return
 	default:
 		msg := fmt.Sprintf("no handler for path %q", req.URL.Path)
@@ -1343,6 +1442,186 @@ func (s *apiServer) serveAddMarkerProtobuf(ctx context.Context, resp http.Respon
 	callResponseSent(ctx, s.hooks)
 }
 
+func (s *apiServer) serveLoadMarkers(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	header := req.Header.Get("Content-Type")
+	i := strings.Index(header, ";")
+	if i == -1 {
+		i = len(header)
+	}
+	switch strings.TrimSpace(strings.ToLower(header[:i])) {
+	case "application/json":
+		s.serveLoadMarkersJSON(ctx, resp, req)
+	case "application/protobuf":
+		s.serveLoadMarkersProtobuf(ctx, resp, req)
+	default:
+		msg := fmt.Sprintf("unexpected Content-Type: %q", req.Header.Get("Content-Type"))
+		twerr := badRouteError(msg, req.Method, req.URL.Path)
+		s.writeError(ctx, resp, twerr)
+	}
+}
+
+func (s *apiServer) serveLoadMarkersJSON(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "LoadMarkers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	d := json.NewDecoder(req.Body)
+	rawReqBody := json.RawMessage{}
+	if err := d.Decode(&rawReqBody); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+	reqContent := new(LoadMarkersReq)
+	unmarshaler := protojson.UnmarshalOptions{DiscardUnknown: true}
+	if err = unmarshaler.Unmarshal(rawReqBody, reqContent); err != nil {
+		s.handleRequestBodyError(ctx, resp, "the json request could not be decoded", err)
+		return
+	}
+
+	handler := s.Api.LoadMarkers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *LoadMarkersReq) (*LoadMarkersResp, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*LoadMarkersReq)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*LoadMarkersReq) when calling interceptor")
+					}
+					return s.Api.LoadMarkers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*LoadMarkersResp)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*LoadMarkersResp) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *LoadMarkersResp
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *LoadMarkersResp and nil error while calling LoadMarkers. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	marshaler := &protojson.MarshalOptions{UseProtoNames: !s.jsonCamelCase, EmitUnpopulated: !s.jsonSkipDefaults}
+	respBytes, err := marshaler.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal json response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/json")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
+func (s *apiServer) serveLoadMarkersProtobuf(ctx context.Context, resp http.ResponseWriter, req *http.Request) {
+	var err error
+	ctx = ctxsetters.WithMethodName(ctx, "LoadMarkers")
+	ctx, err = callRequestRouted(ctx, s.hooks)
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+
+	buf, err := io.ReadAll(req.Body)
+	if err != nil {
+		s.handleRequestBodyError(ctx, resp, "failed to read request body", err)
+		return
+	}
+	reqContent := new(LoadMarkersReq)
+	if err = proto.Unmarshal(buf, reqContent); err != nil {
+		s.writeError(ctx, resp, malformedRequestError("the protobuf request could not be decoded"))
+		return
+	}
+
+	handler := s.Api.LoadMarkers
+	if s.interceptor != nil {
+		handler = func(ctx context.Context, req *LoadMarkersReq) (*LoadMarkersResp, error) {
+			resp, err := s.interceptor(
+				func(ctx context.Context, req interface{}) (interface{}, error) {
+					typedReq, ok := req.(*LoadMarkersReq)
+					if !ok {
+						return nil, twirp.InternalError("failed type assertion req.(*LoadMarkersReq) when calling interceptor")
+					}
+					return s.Api.LoadMarkers(ctx, typedReq)
+				},
+			)(ctx, req)
+			if resp != nil {
+				typedResp, ok := resp.(*LoadMarkersResp)
+				if !ok {
+					return nil, twirp.InternalError("failed type assertion resp.(*LoadMarkersResp) when calling interceptor")
+				}
+				return typedResp, err
+			}
+			return nil, err
+		}
+	}
+
+	// Call service method
+	var respContent *LoadMarkersResp
+	func() {
+		defer ensurePanicResponses(ctx, resp, s.hooks)
+		respContent, err = handler(ctx, reqContent)
+	}()
+
+	if err != nil {
+		s.writeError(ctx, resp, err)
+		return
+	}
+	if respContent == nil {
+		s.writeError(ctx, resp, twirp.InternalError("received a nil *LoadMarkersResp and nil error while calling LoadMarkers. nil responses are not supported"))
+		return
+	}
+
+	ctx = callResponsePrepared(ctx, s.hooks)
+
+	respBytes, err := proto.Marshal(respContent)
+	if err != nil {
+		s.writeError(ctx, resp, wrapInternal(err, "failed to marshal proto response"))
+		return
+	}
+
+	ctx = ctxsetters.WithStatusCode(ctx, http.StatusOK)
+	resp.Header().Set("Content-Type", "application/protobuf")
+	resp.Header().Set("Content-Length", strconv.Itoa(len(respBytes)))
+	resp.WriteHeader(http.StatusOK)
+	if n, err := resp.Write(respBytes); err != nil {
+		msg := fmt.Sprintf("failed to write response, %d of %d bytes written: %s", n, len(respBytes), err.Error())
+		twerr := twirp.NewError(twirp.Unknown, msg)
+		ctx = callError(ctx, s.hooks, twerr)
+	}
+	callResponseSent(ctx, s.hooks)
+}
+
 func (s *apiServer) ServiceDescriptor() ([]byte, int) {
 	return twirpFileDescriptor0, 0
 }
@@ -1924,30 +2203,34 @@ func callClientError(ctx context.Context, h *twirp.ClientHooks, err twirp.Error)
 }
 
 var twirpFileDescriptor0 = []byte{
-	// 395 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x52, 0xc9, 0x8a, 0xdb, 0x40,
-	0x10, 0x45, 0x96, 0x37, 0x95, 0x6c, 0xc7, 0xee, 0x6c, 0xc2, 0x04, 0x62, 0x94, 0x8b, 0x49, 0xc0,
-	0x0a, 0x36, 0x84, 0x9c, 0x42, 0x1c, 0x92, 0x63, 0x72, 0x68, 0x48, 0x0e, 0x61, 0x2e, 0x6d, 0x54,
-	0x16, 0xcd, 0x68, 0xe9, 0x91, 0xda, 0x06, 0x7f, 0xea, 0xfc, 0xcd, 0xd0, 0x25, 0xcb, 0x96, 0x34,
-	0x73, 0x99, 0x5b, 0x6d, 0xaf, 0xaa, 0xdf, 0x7b, 0x0d, 0x63, 0xa1, 0x64, 0x20, 0x94, 0x5c, 0xa9,
-	0x3c, 0xd3, 0x19, 0xb3, 0x85, 0x92, 0xf3, 0xf7, 0x51, 0x96, 0x45, 0x31, 0x06, 0x54, 0xda, 0x1d,
-	0xf6, 0x81, 0x96, 0x09, 0x16, 0x5a, 0x24, 0xaa, 0x9c, 0xf2, 0xbf, 0xc2, 0xe4, 0x27, 0xc6, 0xa8,
-	0x91, 0x8b, 0x34, 0x42, 0x8e, 0x77, 0xec, 0x15, 0xf4, 0x0a, 0x2d, 0x72, 0xed, 0x59, 0x0b, 0x6b,
-	0x69, 0xf3, 0x32, 0x61, 0x53, 0xb0, 0x31, 0x0d, 0xbd, 0x0e, 0xd5, 0x4c, 0xe8, 0x0f, 0xa0, 0xf7,
-	0x2b, 0x51, 0xfa, 0xe4, 0xff, 0x81, 0xe1, 0x3f, 0x91, 0x4b, 0xb1, 0x8b, 0x91, 0x31, 0xe8, 0xa6,
-	0x22, 0x41, 0xc2, 0x3a, 0x9c, 0x62, 0xb3, 0xf0, 0x28, 0xe2, 0x03, 0x12, 0xd8, 0xe2, 0x65, 0xc2,
-	0x3c, 0x18, 0xa8, 0x1c, 0x0b, 0x4c, 0xb5, 0x67, 0x2f, 0xac, 0xe5, 0x90, 0x57, 0xa9, 0xbf, 0x05,
-	0xf6, 0x57, 0x85, 0x42, 0x63, 0xb5, 0xb5, 0x30, 0xcf, 0xfa, 0x04, 0xce, 0xb1, 0xca, 0x3d, 0x6b,
-	0x61, 0x2f, 0xdd, 0xf5, 0x78, 0x65, 0xd8, 0x56, 0x53, 0xfc, 0xda, 0xf7, 0x3f, 0xc3, 0x94, 0xa3,
-	0x08, 0x1b, 0x0b, 0xde, 0xb5, 0x17, 0x38, 0x75, 0xc4, 0x77, 0x98, 0xb5, 0x10, 0x85, 0x7a, 0xde,
-	0xcd, 0x1b, 0xe8, 0xff, 0x16, 0xf9, 0x2d, 0xe6, 0x6c, 0x02, 0x1d, 0x19, 0x9e, 0x25, 0xe8, 0xc8,
-	0xd0, 0x88, 0xa2, 0x4f, 0xaa, 0xe4, 0xef, 0x70, 0x8a, 0x8d, 0x9e, 0x39, 0xee, 0x89, 0xba, 0xc3,
-	0x4d, 0x68, 0xde, 0x77, 0x31, 0xc7, 0xeb, 0x92, 0xce, 0xd7, 0x82, 0xbf, 0x81, 0xd1, 0x36, 0x0c,
-	0xcb, 0x03, 0x86, 0xcd, 0x07, 0xe8, 0x27, 0x94, 0xd0, 0x1d, 0x77, 0xed, 0xd2, 0xbb, 0xce, 0xfd,
-	0x73, 0x6b, 0x7d, 0x6f, 0x81, 0xbd, 0x55, 0x92, 0xad, 0xc0, 0xad, 0x99, 0xcc, 0x5e, 0xd2, 0x6c,
-	0xd3, 0xf6, 0x39, 0x50, 0x91, 0x1c, 0x65, 0x5f, 0xe0, 0x45, 0xcb, 0x01, 0xf6, 0x96, 0xda, 0x8f,
-	0x7d, 0x69, 0xe0, 0xbe, 0xc1, 0xb8, 0x21, 0x22, 0x7b, 0x4d, 0xcd, 0xb6, 0x15, 0xf3, 0x37, 0x4f,
-	0x95, 0x0b, 0xc5, 0x3e, 0x82, 0x73, 0x21, 0xc9, 0x66, 0x34, 0x54, 0x27, 0x5d, 0xbf, 0xf5, 0x63,
-	0xf4, 0x1f, 0x22, 0x4c, 0x83, 0x28, 0x33, 0x5f, 0x7e, 0xd7, 0xa7, 0xdf, 0xbc, 0x79, 0x08, 0x00,
-	0x00, 0xff, 0xff, 0x80, 0x26, 0x29, 0x6a, 0x04, 0x03, 0x00, 0x00,
+	// 452 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0x4d, 0x6f, 0xd3, 0x40,
+	0x10, 0x95, 0xe3, 0x34, 0xa9, 0xc7, 0x4d, 0xda, 0x0e, 0x05, 0xac, 0x08, 0x89, 0xc8, 0x08, 0x29,
+	0x02, 0x29, 0x41, 0xa9, 0x54, 0xe5, 0x84, 0x08, 0x82, 0x1b, 0x70, 0x58, 0x09, 0x0e, 0x88, 0xcb,
+	0x46, 0x9e, 0x5a, 0x2b, 0x62, 0x7b, 0xf1, 0x6e, 0x2b, 0xf5, 0x77, 0xf0, 0x87, 0xd1, 0x8e, 0xed,
+	0x26, 0x9b, 0x72, 0xe9, 0x6d, 0x3e, 0xf6, 0xcd, 0x9b, 0x79, 0x33, 0x0b, 0x23, 0xa9, 0xd5, 0x42,
+	0x6a, 0x35, 0xd7, 0x75, 0x65, 0x2b, 0x0c, 0xa5, 0x56, 0x93, 0x97, 0x79, 0x55, 0xe5, 0x5b, 0x5a,
+	0x70, 0x68, 0x73, 0x73, 0xbd, 0xb0, 0xaa, 0x20, 0x63, 0x65, 0xa1, 0x9b, 0x57, 0xe9, 0x0a, 0xc6,
+	0x9f, 0x68, 0x4b, 0x96, 0x84, 0x2c, 0x73, 0x12, 0xf4, 0x07, 0x2f, 0xe0, 0xc8, 0x58, 0x59, 0xdb,
+	0x24, 0x98, 0x06, 0xb3, 0x50, 0x34, 0x0e, 0x9e, 0x41, 0x48, 0x65, 0x96, 0xf4, 0x38, 0xe6, 0xcc,
+	0x74, 0x08, 0x47, 0x9f, 0x0b, 0x6d, 0xef, 0xd2, 0x6f, 0x70, 0xfc, 0x43, 0xd6, 0x4a, 0x6e, 0xb6,
+	0x84, 0x08, 0xfd, 0x52, 0x16, 0xc4, 0xd8, 0x48, 0xb0, 0xed, 0x0a, 0xde, 0xca, 0xed, 0x0d, 0x31,
+	0x38, 0x10, 0x8d, 0x83, 0x09, 0x0c, 0x75, 0x4d, 0x86, 0x4a, 0x9b, 0x84, 0xd3, 0x60, 0x76, 0x2c,
+	0x3a, 0x37, 0x5d, 0x03, 0x7e, 0xd7, 0x99, 0xb4, 0xd4, 0x55, 0x35, 0xae, 0xad, 0xb7, 0x10, 0xdd,
+	0x76, 0x7e, 0x12, 0x4c, 0xc3, 0x59, 0xbc, 0x1c, 0xcd, 0xdd, 0xb4, 0xdd, 0x2b, 0xb1, 0xcb, 0xa7,
+	0xef, 0xe0, 0x4c, 0x90, 0xcc, 0xbc, 0x02, 0x2f, 0x0e, 0x0b, 0x44, 0xfb, 0x88, 0x0f, 0x70, 0x7e,
+	0x80, 0x30, 0xfa, 0x71, 0x9c, 0xbf, 0x60, 0xf0, 0x55, 0xd6, 0xbf, 0xa9, 0xc6, 0x31, 0xf4, 0x54,
+	0xd6, 0x4a, 0xd0, 0x53, 0x99, 0x13, 0xc5, 0xde, 0xe9, 0x66, 0xfe, 0x48, 0xb0, 0xed, 0xf4, 0xac,
+	0xe9, 0x9a, 0x47, 0x8f, 0x84, 0x33, 0x5d, 0x7f, 0xf7, 0xcb, 0x49, 0xfa, 0xac, 0xf3, 0x2e, 0x90,
+	0x5e, 0xc2, 0xc9, 0x3a, 0xcb, 0x1a, 0x02, 0x37, 0xcd, 0x2b, 0x18, 0x14, 0xec, 0x30, 0x4f, 0xbc,
+	0x8c, 0xb9, 0xaf, 0x36, 0xdf, 0xa6, 0xd2, 0x2b, 0x18, 0x7f, 0xa9, 0x64, 0x8b, 0x62, 0x11, 0x5a,
+	0xda, 0x60, 0x47, 0x8b, 0xd0, 0x77, 0x5a, 0x77, 0xcd, 0x39, 0x3b, 0x5d, 0xc1, 0xa9, 0x87, 0x33,
+	0x1a, 0x5f, 0xc3, 0xb0, 0x29, 0xda, 0x09, 0xe1, 0x11, 0x76, 0xb9, 0xe5, 0xdf, 0x1e, 0x84, 0x6b,
+	0xad, 0x70, 0x0e, 0xf1, 0xde, 0x59, 0xe1, 0x13, 0x7e, 0xec, 0x1f, 0xda, 0x04, 0x38, 0xc8, 0x37,
+	0x84, 0x57, 0x70, 0x7a, 0xb0, 0x73, 0x7c, 0xce, 0xe9, 0x87, 0x97, 0xe0, 0xe1, 0xde, 0xc3, 0xc8,
+	0x5b, 0x1b, 0x3e, 0xe5, 0xe4, 0xe1, 0xf2, 0x27, 0xcf, 0xfe, 0x17, 0x36, 0x1a, 0xdf, 0x40, 0x74,
+	0x2f, 0x2b, 0x9e, 0xf3, 0xa3, 0x7d, 0x99, 0x3d, 0xae, 0x15, 0xc4, 0x7b, 0xaa, 0xb4, 0x33, 0xf9,
+	0xfa, 0x4e, 0x2e, 0x1e, 0x06, 0x8d, 0xfe, 0x78, 0xf2, 0x13, 0x72, 0x2a, 0x17, 0x79, 0xe5, 0xbe,
+	0xe7, 0x66, 0xc0, 0x3f, 0xef, 0xf2, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x89, 0xed, 0x73, 0x03,
+	0xb0, 0x03, 0x00, 0x00,
 }

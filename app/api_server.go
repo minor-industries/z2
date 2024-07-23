@@ -138,3 +138,39 @@ func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.
 
 	return &api.Empty{}, nil
 }
+
+func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*api.LoadMarkersResp, error) {
+	orm := a.db.GetORM()
+
+	// Parse the date string to time.Time
+	date, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		return nil, err
+	}
+
+	startOfDay := date
+	endOfDay := date.Add(24 * time.Hour)
+
+	var markers []data.Marker
+	if err := orm.Where(
+		"ref = ? AND timestamp >= ? AND timestamp < ?",
+		req.Ref,
+		startOfDay.UnixMilli(),
+		endOfDay.UnixMilli(),
+	).
+		Order("timestamp asc").Find(&markers).Error; err != nil {
+		return nil, err
+	}
+
+	respMarkers := make([]*api.Marker, len(markers))
+	for i, marker := range markers {
+		respMarkers[i] = &api.Marker{
+			Id:        marker.ID,
+			Type:      marker.Type,
+			Ref:       marker.Ref,
+			Timestamp: marker.Timestamp,
+		}
+	}
+
+	return &api.LoadMarkersResp{Markers: respMarkers}, nil
+}

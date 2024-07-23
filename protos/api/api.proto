@@ -42,9 +42,19 @@ message AddMarkerReq {
   Marker marker = 1;
 }
 
+message LoadMarkersReq {
+  string ref = 1;
+  string date = 2; // Date in the format "2024-01-02"
+}
+
+message LoadMarkersResp {
+  repeated Marker markers = 1;
+}
+
 service Api {
   rpc DeleteRange (DeleteRangeReq) returns (Empty);
   rpc UpdateVariables (UpdateVariablesReq) returns (Empty);
   rpc ReadVariables (ReadVariablesReq) returns (ReadVariablesResp);
   rpc AddMarker (AddMarkerReq) returns (Empty);
+  rpc LoadMarkers (LoadMarkersReq) returns (LoadMarkersResp);
 }

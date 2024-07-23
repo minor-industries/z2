@@ -15377,6 +15377,9 @@ function UpdateVariables(req) {
 function ReadVariables(req) {
   return rpc2("api.Api", "ReadVariables", req);
 }
+function LoadMarkers(req) {
+  return rpc2("api.Api", "LoadMarkers", req);
+}
 
 // node_modules/uuid/dist/esm-browser/stringify.js
 var byteToHex = [];
@@ -15513,6 +15516,21 @@ function setupBikeAnalysis(date) {
       console.log("max Value", maxV(args, 0), "delta t", deltaT(args, 0), "avg HR", avgV(args, 1));
     }
   });
+  function updateAnnotations() {
+    const annotations2 = markers.map((m) => ({
+      series: "y1",
+      x: m.timestamp,
+      shortText: m.type,
+      text: m.type,
+      // TODO:
+      attachAtBottom: true,
+      dblClickHandler: function(annotation, point, dygraph, event) {
+        console.log(annotation);
+      }
+    }));
+    g1.dygraph.setAnnotations(annotations2);
+    g2.dygraph.setAnnotations(annotations2);
+  }
   const graphs = [
     g1.dygraph,
     g2.dygraph
@@ -15540,20 +15558,7 @@ function setupBikeAnalysis(date) {
         ref: "bike",
         timestamp: point.xval
       });
-      const annotations2 = markers.map((m) => ({
-        series: "y1",
-        x: m.timestamp,
-        shortText: m.type,
-        text: m.type,
-        // TODO:
-        attachAtBottom: true,
-        dblClickHandler: function(annotation, point2, dygraph, event) {
-          console.log(annotation);
-        }
-      }));
-      g1.dygraph.setAnnotations(annotations2);
-      g2.dygraph.setAnnotations(annotations2);
-      console.log(point);
+      updateAnnotations();
     }
   });
   const sync = synchronizer_default(graphs, {
@@ -15591,6 +15596,10 @@ ${dateRange[1]}`;
         return Promise.resolve();
     }
   };
+  LoadMarkers({ date, ref: "bike" }).then((resp) => {
+    markers.push(...resp.markers);
+    updateAnnotations();
+  });
   document.addEventListener("keydown", (ev) => {
     keyDown(ev);
   });
@@ -15848,6 +15857,7 @@ export {
   BumperControl,
   DeleteRange,
   Graph,
+  LoadMarkers,
   ReadVariables,
   UpdateVariables,
   dist_exports as calendar,

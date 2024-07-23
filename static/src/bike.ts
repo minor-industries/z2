@@ -47,17 +47,15 @@ function deltaT(args: DrawCallbackArgs, i: number) {
     return (hi - lo) / 1000.0 / 60.0
 }
 
-type MarkerType = "b" | "e";
-
 export type Marker = {
-    id: string,
-    type: MarkerType
+    id: string
+    type: string
     ref: string
     timestamp: number
 }
 
 // TODO: showModal should be redone
-export function setupBikeAnalysis(date: string | null) {
+export function setupBikeAnalysis(date: string) {
     const second = 1000;
 
     const markers: Marker[] = [];
@@ -118,6 +116,27 @@ export function setupBikeAnalysis(date: string | null) {
         }
     });
 
+    function updateAnnotations() {
+        const annotations = markers.map(m => ({
+            series: 'y1',
+            x: m.timestamp,
+            shortText: m.type,
+            text: m.type, // TODO:
+            attachAtBottom: true,
+            dblClickHandler: function (
+                annotation: dygraphs.Annotation,
+                point: dygraphs.Point,
+                dygraph: any,
+                event: MouseEvent,
+            ) {
+                console.log(annotation);
+            },
+        }));
+
+        (g1.dygraph as any).setAnnotations(annotations);
+        (g2.dygraph as any).setAnnotations(annotations);
+    }
+
     const graphs = [
         g1.dygraph,
         g2.dygraph,
@@ -148,28 +167,9 @@ export function setupBikeAnalysis(date: string | null) {
                 type: markerType,
                 ref: "bike",
                 timestamp: point.xval,
-            })
+            });
 
-            const annotations = markers.map(m => ({
-                series: 'y1',
-                x: m.timestamp,
-                shortText: m.type,
-                text: m.type, // TODO:
-                attachAtBottom: true,
-                dblClickHandler: function (
-                    annotation: dygraphs.Annotation,
-                    point: dygraphs.Point,
-                    dygraph: any,
-                    event: MouseEvent,
-                ) {
-                    console.log(annotation);
-                },
-            }));
-
-            (g1.dygraph as any).setAnnotations(annotations);
-            (g2.dygraph as any).setAnnotations(annotations);
-
-            console.log(point);
+            updateAnnotations();
         },
     })
 
@@ -209,6 +209,11 @@ export function setupBikeAnalysis(date: string | null) {
                 return Promise.resolve();
         }
     };
+
+    api.LoadMarkers({date: date, ref: "bike"}).then(resp => {
+        markers.push(...resp.markers);
+        updateAnnotations();
+    })
 
     document.addEventListener("keydown", ev => {
         keyDown(ev);
