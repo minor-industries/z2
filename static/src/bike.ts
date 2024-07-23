@@ -47,7 +47,7 @@ function deltaT(args: DrawCallbackArgs, i: number) {
 }
 
 // TODO: showModal should be redone
-export function setupBikeAnalysis(date: string | null, showModal: any) {
+export function setupBikeAnalysis(date: string | null) {
     const second = 1000;
 
     const seriesOpts = {
@@ -105,12 +105,20 @@ export function setupBikeAnalysis(date: string | null, showModal: any) {
     (g1.dygraph as any).updateOptions({
         pointClickCallback: function (e: MouseEvent, point: dygraphs.Point) {
 
-            showModal(point.xval);
+            const kind = prompt("(b)egin or (e)nd?")
+            switch (kind) {
+                case 'b':
+                case 'e':
+                    break;
+                default:
+                    alert("unknown kind");
+                    return;
+            }
 
             const an1: dygraphs.Annotation = {
                 series: 'y1',
                 x: point.xval,
-                shortText: 'M',
+                shortText: kind,
                 text: 'Marker',
                 attachAtBottom: true,
                 dblClickHandler: function (

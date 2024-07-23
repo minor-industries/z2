@@ -15410,7 +15410,7 @@ function deltaT(args, i) {
   const { lo, hi } = select(args, i);
   return (hi - lo) / 1e3 / 60;
 }
-function setupBikeAnalysis(date, showModal) {
+function setupBikeAnalysis(date) {
   const second = 1e3;
   const seriesOpts = {
     y2: { strokeWidth: 1 },
@@ -15458,10 +15458,19 @@ function setupBikeAnalysis(date, showModal) {
   ];
   g1.dygraph.updateOptions({
     pointClickCallback: function(e, point) {
+      const kind = prompt("(b)egin or (e)nd?");
+      switch (kind) {
+        case "b":
+        case "e":
+          break;
+        default:
+          alert("unknown kind");
+          return;
+      }
       const an1 = {
         series: "y1",
         x: point.xval,
-        shortText: "M",
+        shortText: kind,
         text: "Marker",
         attachAtBottom: true,
         dblClickHandler: function(annotation, point2, dygraph, event) {
@@ -15472,7 +15481,6 @@ function setupBikeAnalysis(date, showModal) {
       g1.dygraph.setAnnotations([an1]);
       g2.dygraph.setAnnotations([an1]);
       console.log(point);
-      showModal(point.xval);
     }
   });
   const sync = synchronizer_default(graphs, {
@@ -15489,10 +15497,10 @@ function setupBikeAnalysis(date, showModal) {
         const start = Math.floor(range[0]);
         const end = Math.ceil(range[1]);
         console.log(start, end);
-        const prompt = `are you sure you want to delete the currently visible range? 
+        const prompt2 = `are you sure you want to delete the currently visible range? 
 ${dateRange[0]}
 ${dateRange[1]}`;
-        const ok = confirm(prompt);
+        const ok = confirm(prompt2);
         if (ok) {
           alert(`deleting ${dateRange}`);
           return DeleteRange({
