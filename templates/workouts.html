@@ -1,18 +1,20 @@
 {{ template "header" . }}
 
-<table class="pure-table pure-table-bordered">
-    {{range .Data}}
-    <tr>
-        <td colspan="6">{{.Info}}</td>
-    </tr>
-    {{range .Data}}
-    <tr>
-        {{range .}}
-        <td>{{.}}</td>
+<div style="margin: 50px;">
+    <table class="pure-table pure-table-bordered">
+        {{range .Data}}
+        <tr>
+            <td colspan="6">{{.Info}}</td>
+        </tr>
+        {{range .Data}}
+        <tr>
+            {{range .}}
+            <td>{{.}}</td>
+            {{end}}
+        </tr>
         {{end}}
-    </tr>
-    {{end}}
-    {{end}}
-</table>
+        {{end}}
+    </table>
+</div>
 
 {{ template "footer" . }}
