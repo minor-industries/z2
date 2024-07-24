@@ -35,7 +35,11 @@ type Row struct {
 	Data [][maxCols]string
 }
 
-func GenerateData(orm *gorm.DB) ([]Row, error) {
+func GenerateData(
+	orm *gorm.DB,
+	ref string,
+	paceMetric string,
+) ([]Row, error) {
 	var result []Row
 
 	err := orm.AutoMigrate(&data.Marker{})
@@ -44,7 +48,7 @@ func GenerateData(orm *gorm.DB) ([]Row, error) {
 	}
 
 	var markers []data.Marker
-	tx := orm.Where("ref = ?", "bike").Order("timestamp asc").Find(&markers)
+	tx := orm.Where("ref = ?", ref).Order("timestamp asc").Find(&markers)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "find")
 	}
@@ -80,7 +84,7 @@ func GenerateData(orm *gorm.DB) ([]Row, error) {
 			Date: t0.Format("2006-01-02"),
 		}
 
-		if err := computeIntervals(orm, &row, t0, t1, 2, "bike_instant_speed"); err != nil {
+		if err := computeIntervals(orm, &row, t0, t1, 2, paceMetric); err != nil {
 			return nil, errors.Wrap(err, "compute interval")
 		}
 		if err := computeIntervals(orm, &row, t0, t1, 1, "heartrate"); err != nil {

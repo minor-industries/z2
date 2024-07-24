@@ -174,7 +174,15 @@ func run() error {
 	})
 
 	router.GET("/workouts.html", func(c *gin.Context) {
-		data, err := workouts.GenerateData(db.GetORM())
+		ref := c.Query("ref")
+
+		cfg, ok := app.Configs[ref]
+		if !ok {
+			_ = c.Error(errors.New("unknown config"))
+			return
+		}
+
+		data, err := workouts.GenerateData(db.GetORM(), ref, cfg.PaceMetric)
 		if err != nil {
 			_ = c.Error(err)
 			return

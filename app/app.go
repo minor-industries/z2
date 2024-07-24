@@ -39,7 +39,7 @@ func NewApp(
 	kind string,
 	audioPlayer string,
 ) *App {
-	cfg, ok := configs[kind]
+	cfg, ok := Configs[kind]
 	if !ok {
 		panic("unknown kind")
 	}

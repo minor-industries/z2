@@ -73,7 +73,7 @@ var rowerConfig = Config{
 	Color: "green",
 }
 
-var configs = map[string]Config{
+var Configs = map[string]Config{
 	"bike":  bikeConfig,
 	"rower": rowerConfig,
 }

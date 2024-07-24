@@ -95,7 +95,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 	end := now.With(time.Now()).BeginningOfDay().AddDate(0, 0, 10)
 	for cur := now.MustParse("2024-06-01"); cur.Before(end); cur = cur.AddDate(0, 0, 1) {
 		next := cur.AddDate(0, 0, 1)
-		for query, cfg := range configs {
+		for query, cfg := range Configs {
 			a.db.GetORM().Raw(`
 	        SELECT
         	    COUNT(*) AS count
