@@ -188,7 +188,7 @@ func run() error {
 			return
 		}
 		c.HTML(http.StatusOK, "workouts.html", gin.H{
-			"Title": "Bike",
+			"Title": ref + " workouts",
 			"Data":  data,
 			"Ref":   ref,
 		})
