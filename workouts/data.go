@@ -1,21 +1,14 @@
-package data
+package workouts
 
 import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/data"
 	"github.com/pkg/errors"
-	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 	"math"
-	"os"
-	"strings"
-	"testing"
 	"time"
 )
-
-func TestData(t *testing.T) {
-	require.NoError(t, generateData())
-}
 
 func avg(values []database.Value) float64 {
 	if len(values) == 0 {
@@ -32,40 +25,42 @@ func avg(values []database.Value) float64 {
 	return sum / float64(count)
 }
 
-func generateData() error {
-	errCh := make(chan error)
+const (
+	maxCols = 6
+)
 
-	db, err := database.Get(os.ExpandEnv("$HOME/.z2/z2.db"), errCh)
+type Row struct {
+	Info string
+	Data [][maxCols]string
+}
+
+func GenerateData(orm *gorm.DB) ([]Row, error) {
+	var result []Row
+
+	err := orm.AutoMigrate(&data.Marker{})
 	if err != nil {
-		return errors.Wrap(err, "get db")
+		return nil, errors.Wrap(err, "migrate")
 	}
 
-	orm := db.GetORM()
-
-	err = orm.AutoMigrate(&Marker{})
-	if err != nil {
-		return errors.Wrap(err, "migrate")
-	}
-
-	var markers []Marker
+	var markers []data.Marker
 	tx := orm.Where("ref = ?", "bike").Order("timestamp asc").Find(&markers)
 	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "find")
+		return nil, errors.Wrap(tx.Error, "find")
 	}
 
 	if len(markers)%2 != 0 {
-		return errors.New("uneven number of markers")
+		return nil, errors.New("uneven number of markers")
 	}
 
 	for i, marker := range markers {
 		switch i % 2 {
 		case 0:
 			if marker.Type != "b" {
-				return errors.New("expected b marker")
+				return nil, errors.New("expected b marker")
 			}
 		case 1:
 			if marker.Type != "e" {
-				return errors.New("expected e marker")
+				return nil, errors.New("expected e marker")
 			}
 		}
 	}
@@ -78,32 +73,36 @@ func generateData() error {
 		t1 := time.UnixMilli(e.Timestamp)
 
 		dt := t1.Sub(t0)
-		fmt.Println(
-			t0,
-			dt,
-		)
 
-		if err := computeIntervals(orm, t0, t1, 2, "bike_instant_speed"); err != nil {
-			return errors.Wrap(err, "compute interval")
+		row := Row{
+			Info: fmt.Sprint(t0, dt),
 		}
-		if err := computeIntervals(orm, t0, t1, 1, "heartrate"); err != nil {
-			return errors.Wrap(err, "compute interval")
+
+		if err := computeIntervals(orm, &row, t0, t1, 2, "bike_instant_speed"); err != nil {
+			return nil, errors.Wrap(err, "compute interval")
 		}
+		if err := computeIntervals(orm, &row, t0, t1, 1, "heartrate"); err != nil {
+			return nil, errors.Wrap(err, "compute interval")
+		}
+
+		result = append(result, row)
 	}
 
-	return nil
+	return result, nil
 }
 
 func computeIntervals(
 	orm *gorm.DB,
+	row *Row,
 	t0 time.Time,
 	t1 time.Time,
 	decimalPlaces int,
 	metricName string,
 ) error {
-	var intervals []string
+	var cols [6]string
+
 	interval := 15 * time.Minute
-	for i := 0; ; i++ {
+	for i := 0; i < maxCols; i++ {
 		ti := t0.Add(interval * time.Duration(i))
 		tn := t0.Add(interval * time.Duration(i+1))
 
@@ -124,13 +123,14 @@ func computeIntervals(
 			return errors.Wrap(tx.Error, "find")
 		}
 
-		intervals = append(intervals, fmt.Sprintf("%.*f", decimalPlaces, avg(values)))
+		cols[i] = fmt.Sprintf("%.*f", decimalPlaces, avg(values))
 
 		if tn.Equal(t1) {
 			break
 		}
 	}
 
-	fmt.Println("\t" + strings.Join(intervals, "   "))
+	row.Data = append(row.Data, cols)
+
 	return nil
 }
