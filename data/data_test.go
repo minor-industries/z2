@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 	"math"
 	"os"
 	"strings"
@@ -64,36 +65,46 @@ func TestData(t *testing.T) {
 			dt,
 		)
 
-		var intervals []string
-		interval := 15 * time.Minute
-		for i := 0; ; i++ {
-			ti := t0.Add(interval * time.Duration(i))
-			tn := t0.Add(interval * time.Duration(i+1))
+		computeIntervals(t, orm, t0, t1, 2, "bike_instant_speed")
+		computeIntervals(t, orm, t0, t1, 1, "heartrate")
+	}
+}
 
-			if tn.After(t1) {
-				tn = t1
-			}
+func computeIntervals(
+	t *testing.T,
+	orm *gorm.DB,
+	t0 time.Time,
+	t1 time.Time,
+	decimalPlaces int,
+	metricName string,
+) {
+	var intervals []string
+	interval := 15 * time.Minute
+	for i := 0; ; i++ {
+		ti := t0.Add(interval * time.Duration(i))
+		tn := t0.Add(interval * time.Duration(i+1))
 
-			//fmt.Println(" interval", i, ti, tn.Sub(ti))
-
-			sID := database.HashedID("heartrate")
-
-			var values []database.Value
-			tx := orm.Where(
-				"series_id = ? and timestamp >= ? and timestamp < ?",
-				sID,
-				ti.UnixMilli(),
-				tn.UnixMilli(),
-			).Find(&values)
-			require.NoError(t, tx.Error)
-
-			intervals = append(intervals, fmt.Sprintf("%.1f", avg(values)))
-
-			if tn.Equal(t1) {
-				break
-			}
+		if tn.After(t1) {
+			tn = t1
 		}
 
-		fmt.Println("\t" + strings.Join(intervals, "   "))
+		sID := database.HashedID(metricName)
+
+		var values []database.Value
+		tx := orm.Where(
+			"series_id = ? and timestamp >= ? and timestamp < ?",
+			sID,
+			ti.UnixMilli(),
+			tn.UnixMilli(),
+		).Find(&values)
+		require.NoError(t, tx.Error)
+
+		intervals = append(intervals, fmt.Sprintf("%.*f", decimalPlaces, avg(values)))
+
+		if tn.Equal(t1) {
+			break
+		}
 	}
+
+	fmt.Println("\t" + strings.Join(intervals, "   "))
 }
