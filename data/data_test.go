@@ -3,6 +3,7 @@ package data
 import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 	"math"
@@ -11,6 +12,10 @@ import (
 	"testing"
 	"time"
 )
+
+func TestData(t *testing.T) {
+	require.NoError(t, generateData())
+}
 
 func avg(values []database.Value) float64 {
 	if len(values) == 0 {
@@ -27,28 +32,41 @@ func avg(values []database.Value) float64 {
 	return sum / float64(count)
 }
 
-func TestData(t *testing.T) {
+func generateData() error {
 	errCh := make(chan error)
 
 	db, err := database.Get(os.ExpandEnv("$HOME/.z2/z2.db"), errCh)
-	require.NoError(t, err)
+	if err != nil {
+		return errors.Wrap(err, "get db")
+	}
 
 	orm := db.GetORM()
 
 	err = orm.AutoMigrate(&Marker{})
-	require.NoError(t, err)
+	if err != nil {
+		return errors.Wrap(err, "migrate")
+	}
 
 	var markers []Marker
 	tx := orm.Where("ref = ?", "bike").Order("timestamp asc").Find(&markers)
-	require.NoError(t, tx.Error)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "find")
+	}
 
-	require.True(t, len(markers)%2 == 0)
+	if len(markers)%2 != 0 {
+		return errors.New("uneven number of markers")
+	}
+
 	for i, marker := range markers {
 		switch i % 2 {
 		case 0:
-			require.Equal(t, "b", marker.Type)
+			if marker.Type != "b" {
+				return errors.New("expected b marker")
+			}
 		case 1:
-			require.Equal(t, "e", marker.Type)
+			if marker.Type != "e" {
+				return errors.New("expected e marker")
+			}
 		}
 	}
 
@@ -65,19 +83,24 @@ func TestData(t *testing.T) {
 			dt,
 		)
 
-		computeIntervals(t, orm, t0, t1, 2, "bike_instant_speed")
-		computeIntervals(t, orm, t0, t1, 1, "heartrate")
+		if err := computeIntervals(orm, t0, t1, 2, "bike_instant_speed"); err != nil {
+			return errors.Wrap(err, "compute interval")
+		}
+		if err := computeIntervals(orm, t0, t1, 1, "heartrate"); err != nil {
+			return errors.Wrap(err, "compute interval")
+		}
 	}
+
+	return nil
 }
 
 func computeIntervals(
-	t *testing.T,
 	orm *gorm.DB,
 	t0 time.Time,
 	t1 time.Time,
 	decimalPlaces int,
 	metricName string,
-) {
+) error {
 	var intervals []string
 	interval := 15 * time.Minute
 	for i := 0; ; i++ {
@@ -97,7 +120,9 @@ func computeIntervals(
 			ti.UnixMilli(),
 			tn.UnixMilli(),
 		).Find(&values)
-		require.NoError(t, tx.Error)
+		if tx.Error != nil {
+			return errors.Wrap(tx.Error, "find")
+		}
 
 		intervals = append(intervals, fmt.Sprintf("%.*f", decimalPlaces, avg(values)))
 
@@ -107,4 +132,5 @@ func computeIntervals(
 	}
 
 	fmt.Println("\t" + strings.Join(intervals, "   "))
+	return nil
 }
