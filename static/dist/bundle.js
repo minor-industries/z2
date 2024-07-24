@@ -15430,16 +15430,6 @@ function v4(options, buf, offset) {
 }
 var v4_default = v4;
 
-// dist/analysis.js
-async function saveMarkers(markers) {
-  for (let i = 0; i < markers.length; i++) {
-    const m = markers[i];
-    await AddMarker({
-      marker: m
-    });
-  }
-}
-
 // dist/aggregate.js
 function select(args, i) {
   return {
@@ -15476,21 +15466,14 @@ function deltaT(args, i) {
   return (hi - lo) / 1e3 / 60;
 }
 
-// dist/bike.js
-function setupBikeAnalysis(date) {
-  setupAnalysis({
-    date,
-    ref: "bike",
-    seriesNames: [
-      "bike_avg_speed_long | time-bin",
-      "bike_avg_speed_short | time-bin",
-      "bike_instant_speed_min | time-bin",
-      "bike_instant_speed_max | time-bin",
-      "bike_target_speed | time-bin"
-    ],
-    title: "Avg Speed",
-    ylabel: "speed (km/h)"
-  });
+// dist/analysis.js
+async function saveMarkers(markers) {
+  for (let i = 0; i < markers.length; i++) {
+    const m = markers[i];
+    await AddMarker({
+      marker: m
+    });
+  }
 }
 function setupAnalysis(args) {
   const second = 1e3;
@@ -15615,6 +15598,23 @@ ${dateRange[1]}`;
   });
   document.addEventListener("keydown", (ev) => {
     keyDown(ev);
+  });
+}
+
+// dist/bike.js
+function setupBikeAnalysis(date) {
+  setupAnalysis({
+    date,
+    ref: "bike",
+    seriesNames: [
+      "bike_avg_speed_long | time-bin",
+      "bike_avg_speed_short | time-bin",
+      "bike_instant_speed_min | time-bin",
+      "bike_instant_speed_max | time-bin",
+      "bike_target_speed | time-bin"
+    ],
+    title: "Avg Speed",
+    ylabel: "speed (km/h)"
   });
 }
 
