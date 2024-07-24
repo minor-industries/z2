@@ -1,99 +1,14 @@
 {{ template "header" . }}
 
 <script type="module">
-    import {Graph} from '/static/dist/bundle.js';
-    import {DeleteRange} from "/static/dist/bundle.js";
+    import {setupRowerAnalysis} from "/static/dist/bundle.js";
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const date = params.get('date');
 
     document.addEventListener("DOMContentLoaded", () => {
-        const second = 1000;
-
-        const seriesOpts = {
-            y2: {strokeWidth: 1.0},
-            y3: {strokeWidth: 1.0, color: "red"},
-            y4: {strokeWidth: 1.0, color: "red"},
-            y5: {strokeWidth: 1.0, color: "red"},
-        };
-
-        const url = new URL(window.location.href);
-        const params = new URLSearchParams(url.search);
-        const date = params.get('date');
-
-        const g1 = new Graph(document.getElementById("graphdiv0"), {
-            seriesNames: [
-                "rower_avg_power_long",
-                "rower_avg_power_short",
-                "rower_target_power",
-                "rower_power_min",
-                "rower_power_max",
-            ],
-            title: "Avg Power",
-            ylabel: "power (watts)",
-            windowSize: null,
-            height: 250,
-            maxGapMs: 5 * second,
-            series: seriesOpts,
-            disableScroll: true,
-            date: date,
-        });
-
-        const g2 = new Graph(document.getElementById("graphdiv1"), {
-            seriesNames: [
-                "heartrate | avg 2m triangle",
-                "heartrate"
-            ],
-            title: "Heartrate",
-            ylabel: "bpm",
-            windowSize: null,
-            height: 250,
-            series: seriesOpts,
-            maxGapMs: 5 * second,
-            disableScroll: true,
-            date: date,
-        });
-
-        const graphs = [
-            g1.dygraph,
-            g2.dygraph,
-        ];
-
-        const sync = Dygraph.synchronize(graphs, {
-            selection: true,
-            zoom: true,
-            range: false,
-        });
-
-        const keyDown = ev => {
-            switch (ev.code) {
-                case "KeyD":
-                    const range = graphs[0].xAxisRange();
-                    const dateRange = [new Date(range[0]), new Date(range[1])];
-                    console.log(range);
-
-                    const start = Math.floor(range[0]);
-                    const end = Math.ceil(range[1]);
-                    console.log(start, end);
-
-                    const prompt = `are you sure you want to delete the currently visible range? \n${dateRange[0]}\n${dateRange[1]}`;
-                    const ok = confirm(prompt)
-                    if (ok) {
-                        alert(`deleting ${dateRange}`)
-                        return DeleteRange({
-                            start: start,
-                            end: end
-                        });
-                    }
-                    return;
-                case "KeyK":
-
-
-                default:
-                    return Promise.resolve();
-            }
-        };
-
-        document.addEventListener("keydown", ev => {
-            keyDown(ev);
-        })
+        setupRowerAnalysis(date);
     });
 </script>
 

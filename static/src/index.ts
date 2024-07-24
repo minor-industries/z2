@@ -1,6 +1,7 @@
 import * as calendar from 'calendar'
 import {Graph, synchronize} from "rtgraph";
 import {setupBikeAnalysis} from "./bike";
+import {setupRowerAnalysis} from "./rower";
 
 export * from "./api.js";
 export * from "./rpc.js";
@@ -12,4 +13,5 @@ export {
     Graph,
     synchronize,
     setupBikeAnalysis,
+    setupRowerAnalysis,
 };
