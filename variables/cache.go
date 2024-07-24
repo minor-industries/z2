@@ -7,6 +7,12 @@ import (
 	"sync"
 )
 
+type Variable struct {
+	Name    string
+	Value   float64
+	Present bool
+}
+
 type Cache struct {
 	lock sync.Mutex
 	vars map[string]float64
@@ -40,14 +46,14 @@ func NewCache(db *database.Backend) (*Cache, error) {
 	return cache, nil
 }
 
-func (c *Cache) Get(keys []string) []data.Variable {
+func (c *Cache) Get(keys []string) []Variable {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	var result []data.Variable
+	var result []Variable
 	for _, k := range keys {
 		v, present := c.vars[k]
-		result = append(result, data.Variable{
+		result = append(result, Variable{
 			Name:    k,
 			Value:   v,
 			Present: present,
@@ -57,7 +63,7 @@ func (c *Cache) Get(keys []string) []data.Variable {
 	return result
 }
 
-func (c *Cache) Update(vars []data.Variable) {
+func (c *Cache) Update(vars []Variable) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

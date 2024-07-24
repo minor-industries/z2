@@ -22,10 +22,10 @@ func NewApiServer(db *database.Backend, vars *variables.Cache) *ApiServer {
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
-	vars := make([]data.Variable, len(req.Variables))
+	vars := make([]variables.Variable, len(req.Variables))
 
 	for i, v := range req.Variables {
-		vars[i] = data.Variable{
+		vars[i] = variables.Variable{
 			Name:    v.Name,
 			Value:   v.Value,
 			Present: v.Present,

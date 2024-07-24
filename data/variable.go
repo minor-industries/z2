@@ -1,7 +1,6 @@
 package data
 
 type Variable struct {
-	Name    string
-	Value   float64
-	Present bool
+	Name  string `gorm:"primary_key"`
+	Value float64
 }
