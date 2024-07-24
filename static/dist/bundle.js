@@ -15430,7 +15430,17 @@ function v4(options, buf, offset) {
 }
 var v4_default = v4;
 
-// dist/bike.js
+// dist/analysis.js
+async function saveMarkers(markers) {
+  for (let i = 0; i < markers.length; i++) {
+    const m = markers[i];
+    await AddMarker({
+      marker: m
+    });
+  }
+}
+
+// dist/aggregate.js
 function select(args, i) {
   return {
     lo: args.lo,
@@ -15465,17 +15475,11 @@ function deltaT(args, i) {
   const { lo, hi } = select(args, i);
   return (hi - lo) / 1e3 / 60;
 }
+
+// dist/bike.js
 function setupBikeAnalysis(date) {
   const second = 1e3;
   const markers = [];
-  const saveMarkers = async () => {
-    for (let i = 0; i < markers.length; i++) {
-      const m = markers[i];
-      await AddMarker({
-        marker: m
-      });
-    }
-  };
   const seriesOpts = {
     y2: { strokeWidth: 1 },
     y3: { strokeWidth: 1, color: "red" },
@@ -15589,7 +15593,7 @@ ${dateRange[1]}`;
         return;
       case "KeyS":
         if (confirm("save markers?")) {
-          saveMarkers();
+          saveMarkers(markers);
         }
         return;
       default:

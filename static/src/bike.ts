@@ -2,72 +2,14 @@ import {DrawCallbackArgs, Graph, synchronize} from 'rtgraph';
 import * as api from "./api";
 import {dygraphs} from 'dygraphs'
 import {v4 as uuidv4} from 'uuid';
+import {Marker, saveMarkers} from "./analysis";
+import * as agg from "./aggregate"
 
-function select(args: DrawCallbackArgs, i: number) {
-    return {
-        lo: args.lo,
-        hi: args.hi,
-        i0: args.indices[i][0],
-        i1: args.indices[i][1],
-        Ts: args.series[i].Timestamps,
-        V: args.series[i].Values
-    }
-}
 
-function maxV(args: DrawCallbackArgs, i: number) {
-    let max = Number.MIN_VALUE;
-
-    const {i0, i1, V} = select(args, i);
-
-    for (let i = i0; i < i1; i++) {
-        if (V[i] > max) {
-            max = V[i];
-        }
-    }
-
-    return max === Number.MIN_VALUE ? NaN : max;
-}
-
-function avgV(args: DrawCallbackArgs, i: number) {
-    const {i0, i1, V} = select(args, i);
-
-    let count = 0;
-    let sum = 0;
-
-    for (let i = i0; i < i1; i++) {
-        count++;
-        sum += V[i];
-    }
-
-    return count === 0 ? NaN : sum / count;
-}
-
-function deltaT(args: DrawCallbackArgs, i: number) {
-    const {lo, hi} = select(args, i);
-    return (hi - lo) / 1000.0 / 60.0
-}
-
-export type Marker = {
-    id: string
-    type: string
-    ref: string
-    timestamp: number
-}
-
-// TODO: showModal should be redone
 export function setupBikeAnalysis(date: string) {
     const second = 1000;
 
     const markers: Marker[] = [];
-
-    const saveMarkers = async () => {
-        for (let i = 0; i < markers.length; i++) {
-            const m = markers[i];
-            await api.AddMarker({
-                marker: m,
-            });
-        }
-    };
 
     const seriesOpts = {
         y2: {strokeWidth: 1.0},
@@ -109,9 +51,9 @@ export function setupBikeAnalysis(date: string) {
         date: date,
         drawCallback: (args: DrawCallbackArgs) => {
             console.log(
-                "max Value", maxV(args, 0),
-                "delta t", deltaT(args, 0),
-                "avg HR", avgV(args, 1),
+                "max Value", agg.maxV(args, 0),
+                "delta t", agg.deltaT(args, 0),
+                "avg HR", agg.avgV(args, 1),
             );
         }
     });
@@ -202,7 +144,7 @@ export function setupBikeAnalysis(date: string) {
                 return;
             case "KeyS":
                 if (confirm("save markers?")) {
-                    saveMarkers();
+                    saveMarkers(markers);
                 }
                 return;
             default:
