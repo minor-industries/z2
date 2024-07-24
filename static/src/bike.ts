@@ -13,7 +13,7 @@ export function setupBikeAnalysis(date: string) {
         ],
         title: "Avg Speed",
         ylabel: "speed (km/h)",
-    })
+    });
 }
 
 

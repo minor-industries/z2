@@ -15620,134 +15620,18 @@ function setupBikeAnalysis(date) {
 
 // dist/rower.js
 function setupRowerAnalysis(date) {
-  const second = 1e3;
-  const markers = [];
-  const seriesOpts = {
-    y2: { strokeWidth: 1 },
-    y3: { strokeWidth: 1, color: "red" },
-    y4: { strokeWidth: 1, color: "red" },
-    y5: { strokeWidth: 1, color: "red" }
-  };
-  const g1 = new Graph(document.getElementById("graphdiv0"), {
+  setupAnalysis({
+    date,
+    ref: "rower",
     seriesNames: [
-      "rower_avg_power_long",
-      "rower_avg_power_short",
-      "rower_target_power",
-      "rower_power_min",
-      "rower_power_max"
+      "rower_avg_power_long | time-bin",
+      "rower_avg_power_short | time-bin",
+      "rower_target_power | time-bin",
+      "rower_power_min | time-bin",
+      "rower_power_max | time-bin"
     ],
     title: "Avg Power",
-    ylabel: "power (watts)",
-    windowSize: null,
-    height: 250,
-    maxGapMs: 5 * second,
-    series: seriesOpts,
-    disableScroll: true,
-    date
-  });
-  const g2 = new Graph(document.getElementById("graphdiv1"), {
-    seriesNames: [
-      "heartrate | avg 2m triangle",
-      "heartrate"
-    ],
-    title: "Heartrate",
-    ylabel: "bpm",
-    windowSize: null,
-    height: 250,
-    series: seriesOpts,
-    maxGapMs: 5 * second,
-    disableScroll: true,
-    date,
-    drawCallback: (args) => {
-      console.log("max Value", maxV(args, 0), "delta t", deltaT(args, 0), "avg HR", avgV(args, 1));
-    }
-  });
-  function updateAnnotations() {
-    const annotations2 = markers.map((m) => ({
-      series: "y1",
-      x: m.timestamp,
-      shortText: m.type,
-      text: m.type,
-      // TODO:
-      attachAtBottom: true,
-      dblClickHandler: function(annotation, point, dygraph, event) {
-        console.log(annotation);
-      }
-    }));
-    g1.dygraph.setAnnotations(annotations2);
-    g2.dygraph.setAnnotations(annotations2);
-  }
-  const graphs = [
-    g1.dygraph,
-    g2.dygraph
-  ];
-  g1.dygraph.updateOptions({
-    pointClickCallback: function(e, point) {
-      const markerType = prompt("(b)egin or (e)nd?");
-      switch (markerType) {
-        case "b":
-        case "e":
-          break;
-        case null:
-          return;
-        default:
-          alert("unknown markerType");
-          return;
-      }
-      if (point.xval === void 0) {
-        console.log("no xval");
-        return;
-      }
-      markers.push({
-        id: v4_default(),
-        type: markerType,
-        ref: "rower",
-        timestamp: point.xval
-      });
-      updateAnnotations();
-    }
-  });
-  const sync = synchronizer_default(graphs, {
-    selection: true,
-    zoom: true,
-    range: false
-  });
-  const keyDown = (ev) => {
-    switch (ev.code) {
-      case "KeyD":
-        const range = graphs[0].xAxisRange();
-        const dateRange = [new Date(range[0]), new Date(range[1])];
-        console.log(range);
-        const start = Math.floor(range[0]);
-        const end = Math.ceil(range[1]);
-        console.log(start, end);
-        const prompt2 = `are you sure you want to delete the currently visible range? 
-${dateRange[0]}
-${dateRange[1]}`;
-        const ok = confirm(prompt2);
-        if (ok) {
-          alert(`deleting ${dateRange}`);
-          return DeleteRange({
-            start,
-            end
-          });
-        }
-        return;
-      case "KeyS":
-        if (confirm("save markers?")) {
-          saveMarkers(markers);
-        }
-        return;
-      default:
-        return Promise.resolve();
-    }
-  };
-  LoadMarkers({ date, ref: "rower" }).then((resp) => {
-    markers.push(...resp.markers);
-    updateAnnotations();
-  });
-  document.addEventListener("keydown", (ev) => {
-    keyDown(ev);
+    ylabel: "power (watts)"
   });
 }
 
