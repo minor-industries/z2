@@ -1,0 +1,18 @@
+{{ template "header" . }}
+
+<table class="pure-table pure-table-bordered">
+    {{range .Data}}
+    <tr>
+        <td colspan="6">{{.Info}}</td>
+    </tr>
+    {{range .Data}}
+    <tr>
+        {{range .}}
+        <td>{{.}}</td>
+        {{end}}
+    </tr>
+    {{end}}
+    {{end}}
+</table>
+
+{{ template "footer" . }}

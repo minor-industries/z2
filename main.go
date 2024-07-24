@@ -21,6 +21,7 @@ import (
 	"github.com/minor-industries/z2/source/rower"
 	"github.com/minor-industries/z2/static"
 	"github.com/minor-industries/z2/variables"
+	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
 	webview "github.com/webview/webview_go"
 	"html/template"
@@ -169,6 +170,18 @@ func run() error {
 	router.GET("/bike-presets.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "bike-presets.html", gin.H{
 			"Title": "Bike",
+		})
+	})
+
+	router.GET("/workouts.html", func(c *gin.Context) {
+		data, err := workouts.GenerateData(db.GetORM())
+		if err != nil {
+			_ = c.Error(err)
+			return
+		}
+		c.HTML(http.StatusOK, "workouts.html", gin.H{
+			"Title": "Bike",
+			"Data":  data,
 		})
 	})
 
