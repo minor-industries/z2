@@ -30,6 +30,7 @@ const (
 )
 
 type Row struct {
+	Date string
 	Info string
 	Data [][maxCols]string
 }
@@ -76,6 +77,7 @@ func GenerateData(orm *gorm.DB) ([]Row, error) {
 
 		row := Row{
 			Info: fmt.Sprint(t0, dt),
+			Date: t0.Format("2006-01-02"),
 		}
 
 		if err := computeIntervals(orm, &row, t0, t1, 2, "bike_instant_speed"); err != nil {
