@@ -5,8 +5,31 @@ import {v4 as uuidv4} from 'uuid';
 import {Marker, saveMarkers} from "./analysis";
 import * as agg from "./aggregate"
 
-
 export function setupBikeAnalysis(date: string) {
+    setupAnalysis({
+        date: date,
+        ref: "bike",
+        seriesNames: [
+            "bike_avg_speed_long | time-bin",
+            "bike_avg_speed_short | time-bin",
+            "bike_instant_speed_min | time-bin",
+            "bike_instant_speed_max | time-bin",
+            "bike_target_speed | time-bin",
+        ],
+        title: "Avg Speed",
+        ylabel: "speed (km/h)",
+    })
+}
+
+export type AnalysisArgs = {
+    date: string
+    ref: string
+    seriesNames: string[],
+    title: string,
+    ylabel: string,
+};
+
+export function setupAnalysis(args: AnalysisArgs) {
     const second = 1000;
 
     const markers: Marker[] = [];
@@ -19,13 +42,7 @@ export function setupBikeAnalysis(date: string) {
     }
 
     const g1 = new Graph(document.getElementById("graphdiv0")!, {
-        seriesNames: [
-            "bike_avg_speed_long | time-bin",
-            "bike_avg_speed_short | time-bin",
-            "bike_instant_speed_min | time-bin",
-            "bike_instant_speed_max | time-bin",
-            "bike_target_speed | time-bin",
-        ],
+        seriesNames: args.seriesNames,
         title: "Avg Speed",
         ylabel: "speed (km/h)",
         windowSize: null,
@@ -33,7 +50,7 @@ export function setupBikeAnalysis(date: string) {
         maxGapMs: 5 * second,
         series: seriesOpts,
         disableScroll: true,
-        date: date,
+        date: args.date,
     });
 
     const g2 = new Graph(document.getElementById("graphdiv1")!, {
@@ -48,7 +65,7 @@ export function setupBikeAnalysis(date: string) {
         series: seriesOpts,
         maxGapMs: 5 * second,
         disableScroll: true,
-        date: date,
+        date: args.date,
         drawCallback: (args: DrawCallbackArgs) => {
             console.log(
                 "max Value", agg.maxV(args, 0),
@@ -107,7 +124,7 @@ export function setupBikeAnalysis(date: string) {
             markers.push({
                 id: uuidv4(),
                 type: markerType,
-                ref: "bike",
+                ref: args.ref,
                 timestamp: point.xval,
             });
 
@@ -152,7 +169,7 @@ export function setupBikeAnalysis(date: string) {
         }
     };
 
-    api.LoadMarkers({date: date, ref: "bike"}).then(resp => {
+    api.LoadMarkers({date: args.date, ref: args.ref}).then(resp => {
         markers.push(...resp.markers);
         updateAnnotations();
     })

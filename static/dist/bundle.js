@@ -15478,6 +15478,21 @@ function deltaT(args, i) {
 
 // dist/bike.js
 function setupBikeAnalysis(date) {
+  setupAnalysis({
+    date,
+    ref: "bike",
+    seriesNames: [
+      "bike_avg_speed_long | time-bin",
+      "bike_avg_speed_short | time-bin",
+      "bike_instant_speed_min | time-bin",
+      "bike_instant_speed_max | time-bin",
+      "bike_target_speed | time-bin"
+    ],
+    title: "Avg Speed",
+    ylabel: "speed (km/h)"
+  });
+}
+function setupAnalysis(args) {
   const second = 1e3;
   const markers = [];
   const seriesOpts = {
@@ -15487,13 +15502,7 @@ function setupBikeAnalysis(date) {
     y5: { strokeWidth: 1, color: "red" }
   };
   const g1 = new Graph(document.getElementById("graphdiv0"), {
-    seriesNames: [
-      "bike_avg_speed_long | time-bin",
-      "bike_avg_speed_short | time-bin",
-      "bike_instant_speed_min | time-bin",
-      "bike_instant_speed_max | time-bin",
-      "bike_target_speed | time-bin"
-    ],
+    seriesNames: args.seriesNames,
     title: "Avg Speed",
     ylabel: "speed (km/h)",
     windowSize: null,
@@ -15501,7 +15510,7 @@ function setupBikeAnalysis(date) {
     maxGapMs: 5 * second,
     series: seriesOpts,
     disableScroll: true,
-    date
+    date: args.date
   });
   const g2 = new Graph(document.getElementById("graphdiv1"), {
     seriesNames: [
@@ -15515,9 +15524,9 @@ function setupBikeAnalysis(date) {
     series: seriesOpts,
     maxGapMs: 5 * second,
     disableScroll: true,
-    date,
-    drawCallback: (args) => {
-      console.log("max Value", maxV(args, 0), "delta t", deltaT(args, 0), "avg HR", avgV(args, 1));
+    date: args.date,
+    drawCallback: (args2) => {
+      console.log("max Value", maxV(args2, 0), "delta t", deltaT(args2, 0), "avg HR", avgV(args2, 1));
     }
   });
   function updateAnnotations() {
@@ -15559,7 +15568,7 @@ function setupBikeAnalysis(date) {
       markers.push({
         id: v4_default(),
         type: markerType,
-        ref: "bike",
+        ref: args.ref,
         timestamp: point.xval
       });
       updateAnnotations();
@@ -15600,7 +15609,7 @@ ${dateRange[1]}`;
         return Promise.resolve();
     }
   };
-  LoadMarkers({ date, ref: "bike" }).then((resp) => {
+  LoadMarkers({ date: args.date, ref: args.ref }).then((resp) => {
     markers.push(...resp.markers);
     updateAnnotations();
   });
