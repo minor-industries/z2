@@ -1,10 +1,12 @@
 {{ template "header" . }}
 
+{{ $ref := .Ref }}
+
 <div style="margin: 50px;">
     <table class="pure-table pure-table-bordered">
         {{range .Data}}
         <tr>
-            <td colspan="6"><a href="/data-bike.html?date={{.Date}}">{{.Info}}</a></td>
+            <td colspan="6"><a href="/data-{{$ref}}.html?date={{.Date}}">{{.Info}}</a></td>
         </tr>
         {{range .Data}}
         <tr>
