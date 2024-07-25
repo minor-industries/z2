@@ -88,32 +88,35 @@ type Result struct {
 }
 
 func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventReq) (*calendar.CalendarEventResp, error) {
-	var rows []Result
-
 	var result []*calendar.CalendarResultSet
 
 	end := now.With(time.Now()).BeginningOfDay().AddDate(0, 0, 10)
 	for cur := now.MustParse("2024-06-01"); cur.Before(end); cur = cur.AddDate(0, 0, 1) {
 		next := cur.AddDate(0, 0, 1)
 		for query, cfg := range Configs {
-			a.db.GetORM().Raw(`
-	        SELECT
-        	    COUNT(*) AS count
-        	FROM`+"`values`"+`
-			WHERE series_id = ? and timestamp >= ? and timestamp < ?`,
+			var exists bool
+			err := a.db.GetORM().Raw(`
+	        SELECT EXISTS (
+	            SELECT 1
+	            FROM `+"`values`"+`
+	            WHERE series_id = ? AND timestamp >= ? AND timestamp < ?
+	        )`,
 				database.HashedID(cfg.PaceMetric),
 				cur.UnixMilli(),
 				next.UnixMilli(),
-			).Scan(&rows)
-			for _, row := range rows {
-				if row.Count == 0 {
-					continue
-				}
+			).Scan(&exists).Error
+
+			if err != nil {
+				// Handle error if needed
+				continue
+			}
+
+			if exists {
 				result = append(result, &calendar.CalendarResultSet{
 					Color: cfg.Color,
 					Date:  cur.Format("2006-01-02"),
 					Query: query,
-					Count: int32(row.Count),
+					Count: 1, // Setting count to 1 since we know at least one row exists
 				})
 			}
 		}
