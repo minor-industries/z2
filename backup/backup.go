@@ -13,25 +13,21 @@ import (
 )
 
 func gzipFile(src, dest string) error {
-	// Open the source file for reading
 	srcFile, err := os.Open(src)
 	if err != nil {
 		return errors.Wrap(err, "open source file")
 	}
 	defer srcFile.Close()
 
-	// Create the destination gzip file for writing
 	destFile, err := os.Create(dest)
 	if err != nil {
 		return errors.Wrap(err, "create destination file")
 	}
 	defer destFile.Close()
 
-	// Create a new gzip writer
 	gzipWriter := gzip.NewWriter(destFile)
 	defer gzipWriter.Close()
 
-	// Copy the source file into the gzip writer
 	_, err = io.Copy(gzipWriter, srcFile)
 	if err != nil {
 		return errors.Wrap(err, "copy to gzip")
@@ -40,27 +36,22 @@ func gzipFile(src, dest string) error {
 	return nil
 }
 
-func copyFile(src, dest string) error {
-	// Open the source file for reading
-	srcFile, err := os.Open(src)
-	if err != nil {
-		return errors.Wrap(err, "open source file")
+func removeIfExist(path string) error {
+	if _, err := os.Stat(path); err == nil {
+		if err := os.Remove(path); err != nil {
+			return errors.Wrap(err, "remove existing file")
+		}
 	}
-	defer srcFile.Close()
+	return nil
+}
 
-	// Create the destination file for writing
-	destFile, err := os.Create(dest)
-	if err != nil {
-		return errors.Wrap(err, "create destination file")
+func hardLinkFile(src, dest string) error {
+	if err := removeIfExist(dest); err != nil {
+		return err
 	}
-	defer destFile.Close()
-
-	// Copy the content from the source file to the destination file
-	_, err = io.Copy(destFile, srcFile)
-	if err != nil {
-		return errors.Wrap(err, "copy file")
+	if err := os.Link(src, dest); err != nil {
+		return errors.Wrap(err, "create hard link")
 	}
-
 	return nil
 }
 
@@ -75,7 +66,6 @@ func run() error {
 
 	backupFile := filepath.Join(z2Path, "z2-backup.db")
 
-	// Remove the existing backup file if it exists
 	if _, err := os.Stat(backupFile); err == nil {
 		if err := os.Remove(backupFile); err != nil {
 			return errors.Wrap(err, "remove existing backup file")
@@ -93,28 +83,27 @@ func run() error {
 		return errors.Wrap(err, "mkdir backup path")
 	}
 
-	// Gzip the backup file and place it one folder up from the backups directory
-	gzippedBackupFile := filepath.Join(z2Path, "z2-backup.gz")
+	gzippedBackupFile := filepath.Join(backupPath, "z2-backup.gz")
+	if err := removeIfExist(gzippedBackupFile); err != nil {
+		return errors.Wrap(err, "remove existing gzipped backup file")
+	}
 	if err := gzipFile(backupFile, gzippedBackupFile); err != nil {
 		return errors.Wrap(err, "gzip backup file")
 	}
 
-	// Get the current week number and day of the week number
 	now := time.Now()
 	_, week := now.ISOWeek()
 	dayOfWeek := strings.ToLower(now.Format("Mon"))
 
-	// Define the paths for the rolling backup files with zero-padded week and lowercase abbreviated day names
 	weekBackupFile := filepath.Join(backupPath, fmt.Sprintf("z2-backup-week-%02d.gz", week))
 	dayBackupFile := filepath.Join(backupPath, fmt.Sprintf("z2-backup-%s.gz", dayOfWeek))
 
-	// Copy the gzipped backup file to the rolling backup files
-	if err := copyFile(gzippedBackupFile, weekBackupFile); err != nil {
-		return errors.Wrap(err, "copy week backup")
+	if err := hardLinkFile(gzippedBackupFile, weekBackupFile); err != nil {
+		return errors.Wrap(err, "create hard link for week backup")
 	}
 
-	if err := copyFile(gzippedBackupFile, dayBackupFile); err != nil {
-		return errors.Wrap(err, "copy day backup")
+	if err := hardLinkFile(gzippedBackupFile, dayBackupFile); err != nil {
+		return errors.Wrap(err, "create hard link for day backup")
 	}
 
 	return nil
