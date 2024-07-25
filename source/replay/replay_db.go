@@ -24,7 +24,7 @@ func RunDB(
 	filename string,
 	callback source.MessageCallback,
 ) error {
-	db, err := database.Get(filename, errCh)
+	db, err := database.Get(filename)
 	if err != nil {
 		return errors.Wrap(err, "get replay database")
 	}

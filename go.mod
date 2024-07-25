@@ -12,7 +12,7 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/jinzhu/now v1.1.5
 	github.com/minor-industries/calendar v0.0.2
-	github.com/minor-industries/rtgraph v0.0.14
+	github.com/minor-industries/rtgraph v0.0.15
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
 	github.com/twitchtv/twirp v8.1.3+incompatible

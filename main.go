@@ -89,10 +89,12 @@ func run() error {
 		_ = os.Remove(dbPath)
 	}
 
-	db, err := database.Get(dbPath, errCh)
+	db, err := database.Get(dbPath)
 	if err != nil {
 		return errors.Wrap(err, "get database")
 	}
+
+	go db.RunWriter(errCh)
 
 	if err := db.GetORM().AutoMigrate(
 		&data.Variable{},
