@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"io"
 	"os"
@@ -56,6 +57,15 @@ func hardLinkFile(src, dest string) error {
 }
 
 func run() error {
+	opts, err := cfg.Load(cfg.DefaultConfigPath)
+	if err != nil {
+		return errors.Wrap(err, "load configuration")
+	}
+
+	if opts.BackupPrefix == "" {
+		return errors.New("backup_prefix unset in config file")
+	}
+
 	z2Path := os.ExpandEnv("$HOME/.z2")
 	dbPath := filepath.Join(z2Path, "z2.db")
 
@@ -64,7 +74,9 @@ func run() error {
 		return errors.Wrap(err, "get database")
 	}
 
-	backupFile := filepath.Join(z2Path, "z2-backup.db")
+	prefixed := fmt.Sprintf("z2-backup-%s", opts.BackupPrefix)
+
+	backupFile := filepath.Join(z2Path, prefixed+".db")
 
 	if _, err := os.Stat(backupFile); err == nil {
 		if err := os.Remove(backupFile); err != nil {
@@ -83,7 +95,7 @@ func run() error {
 		return errors.Wrap(err, "mkdir backup path")
 	}
 
-	gzippedBackupFile := filepath.Join(backupPath, "z2-backup.gz")
+	gzippedBackupFile := filepath.Join(backupPath, prefixed+".db.gz")
 	if err := removeIfExist(gzippedBackupFile); err != nil {
 		return errors.Wrap(err, "remove existing gzipped backup file")
 	}
@@ -95,8 +107,8 @@ func run() error {
 	_, week := now.ISOWeek()
 	dayOfWeek := strings.ToLower(now.Format("Mon"))
 
-	weekBackupFile := filepath.Join(backupPath, fmt.Sprintf("z2-backup-week-%02d.gz", week))
-	dayBackupFile := filepath.Join(backupPath, fmt.Sprintf("z2-backup-%s.gz", dayOfWeek))
+	weekBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-week-%02d.db.gz", prefixed, week))
+	dayBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-%s.db.gz", prefixed, dayOfWeek))
 
 	if err := hardLinkFile(gzippedBackupFile, weekBackupFile); err != nil {
 		return errors.Wrap(err, "create hard link for week backup")
@@ -111,7 +123,7 @@ func run() error {
 
 func main() {
 	if err := run(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
 }

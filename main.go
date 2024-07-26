@@ -4,13 +4,13 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/app"
+	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
@@ -30,37 +30,13 @@ import (
 	"path/filepath"
 )
 
-type Config struct {
-	Source            string   `toml:"source"`
-	ReplayDB          string   `toml:"replay_db"`
-	Port              int      `toml:"port"`
-	HeartrateMonitors []string `toml:"heartrate_monitors"`
-	StaticPath        string   `toml:"static_path"`
-	RemoveDB          bool     `toml:"remove_db"`
-	Webview           bool     `toml:"webview"`
-	XRes              int      `toml:"xres"`
-	YRes              int      `toml:"yres"`
-	Scan              bool     `toml:"scan"`
-	Audio             string   `toml:"audio"`
-
-	Devices map[string]string `toml:"devices"`
-}
-
 //go:embed templates/*.html
 var templatesFS embed.FS
 
 func run() error {
-	opts := Config{
-		Port:    8077,
-		Webview: true,
-		XRes:    1132,
-		YRes:    700,
-		Audio:   "browser",
-	}
-
-	cfgFile := os.ExpandEnv("$HOME/.z2/config.toml")
-	if _, err := toml.DecodeFile(cfgFile, &opts); err != nil {
-		return errors.Wrap(err, "read config file")
+	opts, err := cfg.Load(cfg.DefaultConfigPath)
+	if err != nil {
+		return errors.Wrap(err, "load config file")
 	}
 
 	if opts.Scan {
@@ -311,7 +287,7 @@ func run() error {
 		}()
 
 		runWebview(
-			&opts,
+			opts,
 			w,
 			errCh,
 			fmt.Sprintf("http://localhost:%d/%s.html", opts.Port, opts.Source),
@@ -322,7 +298,7 @@ func run() error {
 	}
 }
 
-func getSource(opts Config) (string, source.Source, error) {
+func getSource(opts *cfg.Config) (string, source.Source, error) {
 	switch opts.Source {
 	case "bike", "rower":
 	default:
@@ -345,7 +321,7 @@ func getSource(opts Config) (string, source.Source, error) {
 }
 
 func runWebview(
-	opts *Config,
+	opts *cfg.Config,
 	w webview.WebView,
 	ch chan error,
 	url string,
