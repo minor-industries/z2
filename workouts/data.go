@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func avg(values []database.Value) float64 {
+func avg(values []database.Sample) float64 {
 	if len(values) == 0 {
 		return math.NaN()
 	}
@@ -118,7 +118,7 @@ func computeIntervals(
 
 		sID := database.HashedID(metricName)
 
-		var values []database.Value
+		var values []database.Sample
 		tx := orm.Where(
 			"series_id = ? and timestamp >= ? and timestamp < ?",
 			sID,

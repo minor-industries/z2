@@ -186,20 +186,15 @@ func (app *App) ComputePace() {
 			continue
 		}
 
-		var tooFast, tooSlow, fairway float64
-
 		var newState string
 
 		switch {
 		case avgShort > maxTarget:
 			newState = "too_fast"
-			tooFast = 1.0
 		case avgShort < minTarget:
 			newState = "too_slow"
-			tooSlow = 1.0
 		default:
 			newState = "fairway"
-			fairway = 1.0
 		}
 
 		if state != newState {
@@ -210,10 +205,6 @@ func (app *App) ComputePace() {
 		}
 
 		state = newState
-
-		_ = app.Graph.CreateValue("too_fast", ts, tooFast)
-		_ = app.Graph.CreateValue("too_slow", ts, tooSlow)
-		_ = app.Graph.CreateValue("fairway", ts, fairway)
 	}
 }
 

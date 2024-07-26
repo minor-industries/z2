@@ -75,7 +75,7 @@ func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*
 		return nil, res.Error
 	}
 
-	res = orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Value{})
+	res = orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Sample{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -98,7 +98,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 			err := a.db.GetORM().Raw(`
 	        SELECT EXISTS (
 	            SELECT 1
-	            FROM `+"`values`"+`
+	            FROM samples
 	            WHERE series_id = ? AND timestamp >= ? AND timestamp < ?
 	        )`,
 				database.HashedID(cfg.PaceMetric),
