@@ -3,7 +3,6 @@ package workouts
 import (
 	"fmt"
 	"github.com/minor-industries/rtgraph/database"
-	"github.com/minor-industries/z2/data"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"math"
@@ -42,12 +41,12 @@ func GenerateData(
 ) ([]Row, error) {
 	var result []Row
 
-	err := orm.AutoMigrate(&data.Marker{})
+	err := orm.AutoMigrate(&database.Marker{})
 	if err != nil {
 		return nil, errors.Wrap(err, "migrate")
 	}
 
-	var markers []data.Marker
+	var markers []database.Marker
 	tx := orm.Where("ref = ?", ref).Order("timestamp asc").Find(&markers)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "find")

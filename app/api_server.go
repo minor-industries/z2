@@ -128,7 +128,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.Empty, error) {
 	orm := a.db.GetORM()
 
-	marker := data.Marker{
+	marker := database.Marker{
 		ID:        req.Marker.Id,
 		Type:      req.Marker.Type,
 		Ref:       req.Marker.Ref,
@@ -154,7 +154,7 @@ func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*
 	startOfDay := date
 	endOfDay := date.Add(24 * time.Hour)
 
-	var markers []data.Marker
+	var markers []database.Marker
 	if err := orm.Where(
 		"ref = ? AND timestamp >= ? AND timestamp < ?",
 		req.Ref,

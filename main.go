@@ -75,7 +75,6 @@ func run() error {
 	if err := db.GetORM().AutoMigrate(
 		&data.Variable{},
 		&data.RawValue{},
-		&data.Marker{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
