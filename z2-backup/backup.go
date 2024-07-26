@@ -103,19 +103,21 @@ func run() error {
 		return errors.Wrap(err, "gzip backup file")
 	}
 
-	now := time.Now()
-	_, week := now.ISOWeek()
-	dayOfWeek := strings.ToLower(now.Format("Mon"))
+	if false {
+		now := time.Now()
+		_, week := now.ISOWeek()
+		dayOfWeek := strings.ToLower(now.Format("Mon"))
 
-	weekBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-week-%02d.db.gz", prefixed, week))
-	dayBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-%s.db.gz", prefixed, dayOfWeek))
+		weekBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-week-%02d.db.gz", prefixed, week))
+		dayBackupFile := filepath.Join(backupPath, fmt.Sprintf("%s-%s.db.gz", prefixed, dayOfWeek))
 
-	if err := hardLinkFile(gzippedBackupFile, weekBackupFile); err != nil {
-		return errors.Wrap(err, "create hard link for week backup")
-	}
+		if err := hardLinkFile(gzippedBackupFile, weekBackupFile); err != nil {
+			return errors.Wrap(err, "create hard link for week backup")
+		}
 
-	if err := hardLinkFile(gzippedBackupFile, dayBackupFile); err != nil {
-		return errors.Wrap(err, "create hard link for day backup")
+		if err := hardLinkFile(gzippedBackupFile, dayBackupFile); err != nil {
+			return errors.Wrap(err, "create hard link for day backup")
+		}
 	}
 
 	return nil
