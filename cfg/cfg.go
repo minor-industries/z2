@@ -18,6 +18,7 @@ type Config struct {
 	YRes              int      `toml:"yres"`
 	Scan              bool     `toml:"scan"`
 	Audio             string   `toml:"audio"`
+	WriteRawValues    bool     `toml:"write_raw_values"`
 
 	BackupPrefix string `toml:"backup_prefix"`
 

@@ -17,38 +17,41 @@ type Backends struct {
 	RawValues *database.Backend
 }
 
-type BikeHandler struct {
+type Handler struct {
 	graph    *rtgraph.Graph
 	backends Backends
 	source   source.Source
 	cancel   context.CancelFunc
 	ctx      context.Context
 
-	t0      time.Time
-	lastMsg time.Time
+	t0             time.Time
+	lastMsg        time.Time
+	writeRawValues bool
 }
 
 func NewBikeHandler(
 	graph *rtgraph.Graph,
 	backends Backends,
 	source source.Source,
+	writeRawValues bool,
 	cancel context.CancelFunc,
 	ctx context.Context,
-) (*BikeHandler, error) {
-	h := &BikeHandler{
-		graph:    graph,
-		backends: backends,
-		source:   source,
-		cancel:   cancel,
-		ctx:      ctx,
-		t0:       time.Now(),
-		lastMsg:  time.Time{},
+) (*Handler, error) {
+	h := &Handler{
+		graph:          graph,
+		backends:       backends,
+		source:         source,
+		cancel:         cancel,
+		ctx:            ctx,
+		t0:             time.Now(),
+		lastMsg:        time.Time{},
+		writeRawValues: writeRawValues,
 	}
 
 	return h, nil
 }
 
-func (h *BikeHandler) Handle(
+func (h *Handler) Handle(
 	t time.Time,
 	service bluetooth.UUID,
 	characteristic bluetooth.UUID,
@@ -56,13 +59,15 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	h.backends.RawValues.Insert(&data.RawValue{
-		ID:               database.RandomID(),
-		ServiceID:        service.String(),
-		CharacteristicID: characteristic.String(),
-		Timestamp:        t,
-		Message:          msg,
-	})
+	if h.writeRawValues {
+		h.backends.RawValues.Insert(&data.RawValue{
+			ID:               database.RandomID(),
+			ServiceID:        service.String(),
+			CharacteristicID: characteristic.String(),
+			Timestamp:        t,
+			Message:          msg,
+		})
+	}
 
 	srs := h.source.Convert(source.Message{
 		Timestamp:      t,
@@ -81,7 +86,7 @@ func (h *BikeHandler) Handle(
 	return nil
 }
 
-func (h *BikeHandler) Monitor() {
+func (h *Handler) Monitor() {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
 

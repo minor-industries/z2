@@ -65,6 +65,11 @@ func run() error {
 		}
 	}
 
+	if opts.ReplayDB != "" {
+		// Don't write back raw values if we're replaying raw values
+		opts.WriteRawValues = false
+	}
+
 	gin.SetMode(gin.ReleaseMode)
 
 	if err := backends.RawValues.GetORM().AutoMigrate(
@@ -208,6 +213,7 @@ func run() error {
 		graph,
 		backends,
 		src,
+		opts.WriteRawValues,
 		cancel,
 		ctx,
 	)
@@ -225,6 +231,7 @@ func run() error {
 				graph,
 				backends,
 				hrmSrc,
+				opts.WriteRawValues,
 				cancel,
 				ctx,
 			)
