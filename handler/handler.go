@@ -56,7 +56,7 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	h.backends.Samples.Insert(&data.RawValue{
+	h.backends.RawValues.Insert(&data.RawValue{
 		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),
