@@ -209,7 +209,7 @@ func run() error {
 	}
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
-	mainHandler, err := handler.NewBikeHandler(
+	mainHandler, err := handler.NewHandler(
 		graph,
 		backends,
 		src,
@@ -227,7 +227,7 @@ func run() error {
 		for _, addr := range opts.HeartrateMonitors {
 			addr := addr
 			hrmSrc := &heartrate.Source{}
-			h, err := handler.NewBikeHandler(
+			h, err := handler.NewHandler(
 				graph,
 				backends,
 				hrmSrc,

@@ -29,7 +29,7 @@ type Handler struct {
 	writeRawValues bool
 }
 
-func NewBikeHandler(
+func NewHandler(
 	graph *rtgraph.Graph,
 	backends Backends,
 	source source.Source,
