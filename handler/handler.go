@@ -12,12 +12,17 @@ import (
 	"tinygo.org/x/bluetooth"
 )
 
+type Backends struct {
+	Samples   *database.Backend
+	RawValues *database.Backend
+}
+
 type BikeHandler struct {
-	graph   *rtgraph.Graph
-	backend *database.Backend
-	source  source.Source
-	cancel  context.CancelFunc
-	ctx     context.Context
+	graph    *rtgraph.Graph
+	backends Backends
+	source   source.Source
+	cancel   context.CancelFunc
+	ctx      context.Context
 
 	t0      time.Time
 	lastMsg time.Time
@@ -25,19 +30,19 @@ type BikeHandler struct {
 
 func NewBikeHandler(
 	graph *rtgraph.Graph,
-	backend *database.Backend,
+	backends Backends,
 	source source.Source,
 	cancel context.CancelFunc,
 	ctx context.Context,
 ) (*BikeHandler, error) {
 	h := &BikeHandler{
-		graph:   graph,
-		backend: backend,
-		source:  source,
-		cancel:  cancel,
-		ctx:     ctx,
-		t0:      time.Now(),
-		lastMsg: time.Time{},
+		graph:    graph,
+		backends: backends,
+		source:   source,
+		cancel:   cancel,
+		ctx:      ctx,
+		t0:       time.Now(),
+		lastMsg:  time.Time{},
 	}
 
 	return h, nil
@@ -51,7 +56,7 @@ func (h *BikeHandler) Handle(
 ) error {
 	h.lastMsg = t
 
-	h.backend.Insert(&data.RawValue{
+	h.backends.Samples.Insert(&data.RawValue{
 		ID:               database.RandomID(),
 		ServiceID:        service.String(),
 		CharacteristicID: characteristic.String(),

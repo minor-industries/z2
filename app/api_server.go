@@ -8,17 +8,18 @@ import (
 	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
+	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/variables"
 	"time"
 )
 
 type ApiServer struct {
-	db   *database.Backend
-	vars *variables.Cache
+	vars     *variables.Cache
+	backends handler.Backends
 }
 
-func NewApiServer(db *database.Backend, vars *variables.Cache) *ApiServer {
-	return &ApiServer{db: db, vars: vars}
+func NewApiServer(backends handler.Backends, vars *variables.Cache) *ApiServer {
+	return &ApiServer{backends: backends, vars: vars}
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {
@@ -68,14 +69,12 @@ func showTime(description string, t time.Time) {
 }
 
 func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*api.Empty, error) {
-	orm := a.db.GetORM()
-
-	res := orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&data.RawValue{})
+	res := a.backends.RawValues.GetORM().Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&data.RawValue{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
 
-	res = orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Sample{})
+	res = a.backends.Samples.GetORM().Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Sample{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -95,7 +94,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 		next := cur.AddDate(0, 0, 1)
 		for query, cfg := range Configs {
 			var exists bool
-			err := a.db.GetORM().Raw(`
+			err := a.backends.Samples.GetORM().Raw(`
 	        SELECT EXISTS (
 	            SELECT 1
 	            FROM samples
@@ -126,7 +125,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 }
 
 func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.Empty, error) {
-	orm := a.db.GetORM()
+	orm := a.backends.Samples.GetORM()
 
 	marker := database.Marker{
 		ID:        req.Marker.Id,
@@ -143,7 +142,7 @@ func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.
 }
 
 func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*api.LoadMarkersResp, error) {
-	orm := a.db.GetORM()
+	orm := a.backends.Samples.GetORM()
 
 	// Parse the date string to time.Time
 	date, err := time.Parse("2006-01-02", req.Date)

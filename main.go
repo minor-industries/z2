@@ -39,6 +39,16 @@ func run() error {
 		return errors.Wrap(err, "load config file")
 	}
 
+	errCh := make(chan error)
+
+	backends, err := getBackends(opts)
+	if err != nil {
+		return errors.Wrap(err, "get backends")
+	}
+
+	go backends.Samples.RunWriter(errCh)
+	go backends.RawValues.RunWriter(errCh)
+
 	if opts.Scan {
 		return source.Scan()
 	}
@@ -57,30 +67,20 @@ func run() error {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	errCh := make(chan error)
-
-	dbPath := os.ExpandEnv("$HOME/.z2/z2.db")
-
-	if opts.RemoveDB {
-		_ = os.Remove(dbPath)
-	}
-
-	db, err := database.Get(dbPath)
-	if err != nil {
-		return errors.Wrap(err, "get database")
-	}
-
-	go db.RunWriter(errCh)
-
-	if err := db.GetORM().AutoMigrate(
-		&data.Variable{},
+	if err := backends.RawValues.GetORM().AutoMigrate(
 		&data.RawValue{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
 
+	if err := backends.Samples.GetORM().AutoMigrate(
+		&data.Variable{},
+	); err != nil {
+		return errors.Wrap(err, "automigrate")
+	}
+
 	graph, err := rtgraph.New(
-		db,
+		backends.Samples,
 		errCh,
 		rtgraph.Opts{},
 		[]string{
@@ -106,7 +106,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars, err := variables.NewCache(db)
+	vars, err := variables.NewCache(backends.Samples)
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
@@ -159,7 +159,7 @@ func run() error {
 			return
 		}
 
-		data, err := workouts.GenerateData(db.GetORM(), ref, cfg.PaceMetric)
+		data, err := workouts.GenerateData(backends.Samples.GetORM(), ref, cfg.PaceMetric)
 		if err != nil {
 			_ = c.Error(err)
 			return
@@ -187,7 +187,7 @@ func run() error {
 		c.Status(204)
 	})
 
-	apiHandler := app.NewApiServer(db, vars)
+	apiHandler := app.NewApiServer(backends, vars)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	router.POST(
@@ -206,7 +206,7 @@ func run() error {
 
 	mainHandler, err := handler.NewBikeHandler(
 		graph,
-		db,
+		backends,
 		src,
 		cancel,
 		ctx,
@@ -223,7 +223,7 @@ func run() error {
 			hrmSrc := &heartrate.Source{}
 			h, err := handler.NewBikeHandler(
 				graph,
-				db,
+				backends,
 				hrmSrc,
 				cancel,
 				ctx,
@@ -295,6 +295,39 @@ func run() error {
 	} else {
 		return <-errCh
 	}
+}
+
+func getBackends(opts *cfg.Config) (handler.Backends, error) {
+	backends := handler.Backends{}
+
+	var err error
+
+	backends.Samples, err = getBackend(opts, "$HOME/.z2/z2.db")
+	if err != nil {
+		return handler.Backends{}, errors.Wrap(err, "get backend")
+	}
+
+	backends.RawValues, err = getBackend(opts, "$HOME/.z2/z2-bt.db")
+	if err != nil {
+		return handler.Backends{}, errors.Wrap(err, "get backend")
+	}
+
+	return backends, err
+}
+
+func getBackend(opts *cfg.Config, path string) (*database.Backend, error) {
+	dbPath := os.ExpandEnv(path)
+
+	if opts.RemoveDB {
+		_ = os.Remove(dbPath)
+	}
+
+	db, err := database.Get(dbPath)
+	if err != nil {
+		return nil, errors.Wrap(err, "get database")
+	}
+
+	return db, nil
 }
 
 func getSource(opts *cfg.Config) (string, source.Source, error) {
