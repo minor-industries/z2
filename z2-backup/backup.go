@@ -73,8 +73,8 @@ func run() error {
 	}
 
 	for _, backupCfg := range opts.Backups {
-		//cmd := exec.Command("restic", "init")
-		cmd := exec.Command("restic", "backup", "--host", opts.BackupHost, ".")
+		//cmd := exec.Command(opts.ResticPath, "init")
+		cmd := exec.Command(os.ExpandEnv(opts.ResticPath), "backup", "--host", opts.BackupHost, ".")
 		cmd.Env = append(os.Environ(),
 			"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
 			"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,

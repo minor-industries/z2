@@ -28,19 +28,20 @@ type Config struct {
 	Audio             string   `toml:"audio"`
 	WriteRawValues    bool     `toml:"write_raw_values"`
 
-	BackupHost string `toml:"backup_host"`
-
-	Backups []Backup `toml:"backups"`
+	ResticPath string   `toml:"restic_path"`
+	BackupHost string   `toml:"backup_host"`
+	Backups    []Backup `toml:"backups"`
 
 	Devices map[string]string `toml:"devices"`
 }
 
 var Default = Config{
-	Port:    8077,
-	Webview: true,
-	XRes:    1132,
-	YRes:    700,
-	Audio:   "browser",
+	Port:       8077,
+	Webview:    true,
+	XRes:       1132,
+	YRes:       700,
+	Audio:      "browser",
+	ResticPath: "restic",
 }
 
 const (
