@@ -11,6 +11,7 @@ type Backup struct {
 	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
 	ResticRepository   string `toml:"restic_repository"`
 	ResticPassword     string `toml:"restic_password"`
+	CACertPath         string `toml:"ca_cert_path"`
 }
 
 type Config struct {

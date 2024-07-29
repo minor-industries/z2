@@ -80,6 +80,9 @@ func run() error {
 			"RESTIC_REPOSITORY="+backupCfg.ResticRepository,
 			"RESTIC_PASSWORD="+backupCfg.ResticPassword,
 		)
+		if backupCfg.CACertPath != "" {
+			cmd.Env = append(cmd.Env, "RESTIC_CACERT="+os.ExpandEnv(backupCfg.CACertPath))
+		}
 		cmd.Dir = backupPath
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
