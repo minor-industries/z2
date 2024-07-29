@@ -35,15 +35,15 @@ func run() error {
 		return errors.Wrap(err, "load configuration")
 	}
 
-	if opts.BackupPrefix == "" {
-		return errors.New("backup_prefix unset in config file")
+	if opts.BackupHost == "" {
+		return errors.New("backup_host unset in config file")
 	}
 
 	z2Path := os.ExpandEnv("$HOME/.z2")
 	dbFile := filepath.Join(z2Path, "z2.db")
 	backupPath := filepath.Join(z2Path, "backup")
 
-	prefixed := fmt.Sprintf("z2-backup-%s", opts.BackupPrefix)
+	prefixed := fmt.Sprintf("z2-backup-%s", opts.BackupHost)
 	backupFile := filepath.Join(backupPath, prefixed+".db")
 
 	err = os.MkdirAll(backupPath, 0o750)
@@ -73,7 +73,8 @@ func run() error {
 	}
 
 	for _, backupCfg := range opts.Backups {
-		cmd := exec.Command("restic", "backup", ".")
+		//cmd := exec.Command("restic", "init")
+		cmd := exec.Command("restic", "backup", "--host", opts.BackupHost, ".")
 		cmd.Env = append(os.Environ(),
 			"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
 			"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,

@@ -28,7 +28,7 @@ type Config struct {
 	Audio             string   `toml:"audio"`
 	WriteRawValues    bool     `toml:"write_raw_values"`
 
-	BackupPrefix string `toml:"backup_prefix"`
+	BackupHost string `toml:"backup_host"`
 
 	Backups []Backup `toml:"backups"`
 
