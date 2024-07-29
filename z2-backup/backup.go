@@ -6,6 +6,7 @@ import (
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -55,9 +56,37 @@ func run() error {
 		return errors.Wrap(err, "get database")
 	}
 
+	if _, err := os.Stat(backupFile); err == nil {
+		if err := os.Remove(backupFile); err != nil {
+			return errors.Wrap(err, "remove existing backup file")
+		}
+	}
+
 	tx := db.GetORM().Exec("VACUUM INTO ?", backupFile)
 	if tx.Error != nil {
 		return errors.Wrap(tx.Error, "vacuum into")
+	}
+
+	if len(opts.Backups) == 0 {
+		fmt.Println("no backup configs found!")
+		return nil
+	}
+
+	for _, backupCfg := range opts.Backups {
+		cmd := exec.Command("restic", "backup", ".")
+		cmd.Env = append(os.Environ(),
+			"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
+			"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,
+			"RESTIC_REPOSITORY="+backupCfg.ResticRepository,
+			"RESTIC_PASSWORD="+backupCfg.ResticPassword,
+		)
+		cmd.Dir = backupPath
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			return errors.Wrap(err, "run restic")
+		}
 	}
 
 	return nil

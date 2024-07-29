@@ -6,6 +6,13 @@ import (
 	"os"
 )
 
+type Backup struct {
+	AwsAccessKeyId     string `toml:"aws_access_key_id"`
+	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
+	ResticRepository   string `toml:"restic_repository"`
+	ResticPassword     string `toml:"restic_password"`
+}
+
 type Config struct {
 	Source            string   `toml:"source"`
 	ReplayDB          string   `toml:"replay_db"`
@@ -21,6 +28,8 @@ type Config struct {
 	WriteRawValues    bool     `toml:"write_raw_values"`
 
 	BackupPrefix string `toml:"backup_prefix"`
+
+	Backups []Backup `toml:"backups"`
 
 	Devices map[string]string `toml:"devices"`
 }
