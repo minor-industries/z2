@@ -8,7 +8,7 @@ import (
 	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
@@ -322,14 +322,14 @@ func getBackends(opts *cfg.Config) (handler.Backends, error) {
 	return backends, err
 }
 
-func getBackend(opts *cfg.Config, path string) (*database.Backend, error) {
+func getBackend(opts *cfg.Config, path string) (*sqlite.Backend, error) {
 	dbPath := os.ExpandEnv(path)
 
 	if opts.RemoveDB {
 		_ = os.Remove(dbPath)
 	}
 
-	db, err := database.Get(dbPath)
+	db, err := sqlite.Get(dbPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "get database")
 	}

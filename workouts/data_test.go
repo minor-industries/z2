@@ -2,7 +2,6 @@ package workouts
 
 import (
 	"fmt"
-	"github.com/minor-industries/rtgraph/database"
 	"github.com/stretchr/testify/require"
 	"os"
 	"strings"

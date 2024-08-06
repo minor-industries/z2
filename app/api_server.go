@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/now"
 	"github.com/minor-industries/calendar/gen/go/calendar"
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
@@ -74,7 +74,7 @@ func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*
 		return nil, res.Error
 	}
 
-	res = a.backends.Samples.GetORM().Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&database.Sample{})
+	res = a.backends.Samples.GetORM().Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&sqlite.Sample{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -100,7 +100,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 	            FROM samples
 	            WHERE series_id = ? AND timestamp >= ? AND timestamp < ?
 	        )`,
-				database.HashedID(cfg.PaceMetric),
+				sqlite.HashedID(cfg.PaceMetric),
 				cur.UnixMilli(),
 				next.UnixMilli(),
 			).Scan(&exists).Error
@@ -127,7 +127,7 @@ func (a *ApiServer) GetEvents(ctx context.Context, req *calendar.CalendarEventRe
 func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.Empty, error) {
 	orm := a.backends.Samples.GetORM()
 
-	marker := database.Marker{
+	marker := sqlite.Marker{
 		ID:        req.Marker.Id,
 		Type:      req.Marker.Type,
 		Ref:       req.Marker.Ref,
@@ -153,7 +153,7 @@ func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*
 	startOfDay := date
 	endOfDay := date.Add(24 * time.Hour)
 
-	var markers []database.Marker
+	var markers []sqlite.Marker
 	if err := orm.Where(
 		"ref = ? AND timestamp >= ? AND timestamp < ?",
 		req.Ref,

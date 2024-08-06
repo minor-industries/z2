@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/rtgraph/schema"
 	"github.com/stretchr/testify/require"
 	"os"

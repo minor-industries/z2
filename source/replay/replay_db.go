@@ -2,7 +2,7 @@ package replay
 
 import (
 	"context"
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
@@ -24,7 +24,7 @@ func RunDB(
 	filename string,
 	callback source.MessageCallback,
 ) error {
-	db, err := database.Get(filename)
+	db, err := sqlite.Get(filename)
 	if err != nil {
 		return errors.Wrap(err, "get replay database")
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/minor-industries/rtgraph/database"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"os"

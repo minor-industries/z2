@@ -2,14 +2,14 @@ package workouts
 
 import (
 	"fmt"
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"math"
 	"time"
 )
 
-func avg(values []database.Sample) float64 {
+func avg(values []sqlite.Sample) float64 {
 	if len(values) == 0 {
 		return math.NaN()
 	}
@@ -41,12 +41,12 @@ func GenerateData(
 ) ([]Row, error) {
 	var result []Row
 
-	err := orm.AutoMigrate(&database.Marker{})
+	err := orm.AutoMigrate(&sqlite.Marker{})
 	if err != nil {
 		return nil, errors.Wrap(err, "migrate")
 	}
 
-	var markers []database.Marker
+	var markers []sqlite.Marker
 	tx := orm.Where("ref = ?", ref).Order("timestamp asc").Find(&markers)
 	if tx.Error != nil {
 		return nil, errors.Wrap(tx.Error, "find")
@@ -115,9 +115,9 @@ func computeIntervals(
 			tn = t1
 		}
 
-		sID := database.HashedID(metricName)
+		sID := sqlite.HashedID(metricName)
 
-		var values []database.Sample
+		var values []sqlite.Sample
 		tx := orm.Where(
 			"series_id = ? and timestamp >= ? and timestamp < ?",
 			sID,

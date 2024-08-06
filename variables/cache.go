@@ -1,7 +1,7 @@
 package variables
 
 import (
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/data"
 	"github.com/pkg/errors"
 	"sync"
@@ -16,10 +16,10 @@ type Variable struct {
 type Cache struct {
 	lock sync.Mutex
 	vars map[string]float64
-	db   *database.Backend
+	db   *sqlite.Backend
 }
 
-func NewCache(db *database.Backend) (*Cache, error) {
+func NewCache(db *sqlite.Backend) (*Cache, error) {
 	cache := &Cache{
 		db: db,
 		vars: map[string]float64{

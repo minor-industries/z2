@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/minor-industries/rtgraph"
-	"github.com/minor-industries/rtgraph/database"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
@@ -13,8 +13,8 @@ import (
 )
 
 type Backends struct {
-	Samples   *database.Backend
-	RawValues *database.Backend
+	Samples   *sqlite.Backend
+	RawValues *sqlite.Backend
 }
 
 type Handler struct {
@@ -61,7 +61,7 @@ func (h *Handler) Handle(
 
 	if h.writeRawValues {
 		h.backends.RawValues.Insert(&data.RawValue{
-			ID:               database.RandomID(),
+			ID:               sqlite.RandomID(),
 			ServiceID:        service.String(),
 			CharacteristicID: characteristic.String(),
 			Timestamp:        t,
