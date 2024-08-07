@@ -3,7 +3,6 @@ package rower
 import (
 	"github.com/minor-industries/z2/source"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
 var (
@@ -13,14 +12,6 @@ var (
 	ch2 = source.UUID("CE060032-43E5-11E4-916C-0800200C9A66")
 	ch3 = source.UUID("CE060036-43E5-11E4-916C-0800200C9A66")
 )
-
-func mustParseUUID(s string) bluetooth.UUID {
-	uuid, err := bluetooth.ParseUUID(s)
-	if err != nil {
-		panic(err)
-	}
-	return uuid
-}
 
 type rowerSource struct {
 	status Status

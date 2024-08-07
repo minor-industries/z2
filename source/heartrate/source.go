@@ -2,7 +2,6 @@ package heartrate
 
 import (
 	"github.com/minor-industries/z2/source"
-	"tinygo.org/x/bluetooth"
 )
 
 type Source struct{}
@@ -25,13 +24,9 @@ func (s *Source) Convert(msg source.Message) []source.Value {
 }
 
 func (s *Source) Services() []source.UUID {
-	return []source.UUID{
-		source.UUID(bluetooth.ServiceUUIDHeartRate.String()),
-	}
+	return []source.UUID{"0000180d-0000-1000-8000-00805f9b34fb"}
 }
 
 func (s *Source) Characteristics() []source.UUID {
-	return []source.UUID{
-		source.UUID(bluetooth.CharacteristicUUIDHeartRateMeasurement.String()),
-	}
+	return []source.UUID{"00002a37-0000-1000-8000-00805f9b34fb"}
 }

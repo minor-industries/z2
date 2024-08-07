@@ -4,7 +4,6 @@ import (
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike/parser"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
 var t0 time.Time
@@ -16,15 +15,11 @@ func init() {
 type BikeSource struct{}
 
 func (b *BikeSource) Services() []source.UUID {
-	return []source.UUID{
-		source.UUID(bluetooth.ServiceUUIDFitnessMachine.String()),
-	}
+	return []source.UUID{"00001826-0000-1000-8000-00805f9b34fb"}
 }
 
 func (b *BikeSource) Characteristics() []source.UUID {
-	return []source.UUID{
-		source.UUID(bluetooth.CharacteristicUUIDIndoorBikeData.String()),
-	}
+	return []source.UUID{"00002ad2-0000-1000-8000-00805f9b34fb"}
 }
 
 func (b *BikeSource) Convert(msg source.Message) []source.Value {
