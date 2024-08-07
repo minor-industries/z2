@@ -68,8 +68,8 @@ func Run(
 			}
 			if err := callback(
 				now,
-				bluetooth.ServiceUUIDFitnessMachine,
-				bluetooth.CharacteristicUUIDIndoorBikeData,
+				source.UUID(bluetooth.ServiceUUIDFitnessMachine.String()),
+				source.UUID(bluetooth.CharacteristicUUIDIndoorBikeData.String()),
 				line.value,
 			); err != nil {
 				// something seems "off" here

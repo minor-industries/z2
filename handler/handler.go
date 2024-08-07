@@ -9,7 +9,6 @@ import (
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
 type Backends struct {
@@ -53,8 +52,8 @@ func NewHandler(
 
 func (h *Handler) Handle(
 	t time.Time,
-	service bluetooth.UUID,
-	characteristic bluetooth.UUID,
+	service source.UUID,
+	characteristic source.UUID,
 	msg []byte,
 ) error {
 	h.lastMsg = t
@@ -62,8 +61,8 @@ func (h *Handler) Handle(
 	if h.writeRawValues {
 		h.backends.RawValues.Insert(&data.RawValue{
 			ID:               sqlite.RandomID(),
-			ServiceID:        service.String(),
-			CharacteristicID: characteristic.String(),
+			ServiceID:        string(service),
+			CharacteristicID: string(characteristic),
 			Timestamp:        t,
 			Message:          msg,
 		})

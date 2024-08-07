@@ -7,11 +7,11 @@ import (
 )
 
 var (
-	sv1 = mustParseUUID("ce060030-43e5-11e4-916c-0800200c9a66")
+	sv1 = source.UUID("ce060030-43e5-11e4-916c-0800200c9a66")
 
-	ch1 = mustParseUUID("CE060031-43E5-11E4-916C-0800200C9A66")
-	ch2 = mustParseUUID("CE060032-43E5-11E4-916C-0800200C9A66")
-	ch3 = mustParseUUID("CE060036-43E5-11E4-916C-0800200C9A66")
+	ch1 = source.UUID("CE060031-43E5-11E4-916C-0800200C9A66")
+	ch2 = source.UUID("CE060032-43E5-11E4-916C-0800200C9A66")
+	ch3 = source.UUID("CE060036-43E5-11E4-916C-0800200C9A66")
 )
 
 func mustParseUUID(s string) bluetooth.UUID {
@@ -30,12 +30,12 @@ func NewRowerSource() source.Source {
 	return &rowerSource{}
 }
 
-func (r *rowerSource) Services() []bluetooth.UUID {
-	return []bluetooth.UUID{sv1}
+func (r *rowerSource) Services() []source.UUID {
+	return []source.UUID{sv1}
 }
 
-func (r *rowerSource) Characteristics() []bluetooth.UUID {
-	return []bluetooth.UUID{ch1, ch2, ch3}
+func (r *rowerSource) Characteristics() []source.UUID {
+	return []source.UUID{ch1, ch2, ch3}
 }
 
 func (r *rowerSource) Convert(msg source.Message) []source.Value {

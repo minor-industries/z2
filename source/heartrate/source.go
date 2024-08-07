@@ -24,14 +24,14 @@ func (s *Source) Convert(msg source.Message) []source.Value {
 	}}
 }
 
-func (s *Source) Services() []bluetooth.UUID {
-	return []bluetooth.UUID{
-		bluetooth.ServiceUUIDHeartRate,
+func (s *Source) Services() []source.UUID {
+	return []source.UUID{
+		source.UUID(bluetooth.ServiceUUIDHeartRate.String()),
 	}
 }
 
-func (s *Source) Characteristics() []bluetooth.UUID {
-	return []bluetooth.UUID{
-		bluetooth.CharacteristicUUIDHeartRateMeasurement,
+func (s *Source) Characteristics() []source.UUID {
+	return []source.UUID{
+		source.UUID(bluetooth.CharacteristicUUIDHeartRateMeasurement.String()),
 	}
 }

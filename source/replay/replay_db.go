@@ -55,8 +55,8 @@ func RunDB(
 			}
 			if err := callback(
 				now,
-				mustParseUUID(row.ServiceID),
-				mustParseUUID(row.CharacteristicID),
+				source.UUID(row.ServiceID),
+				source.UUID(row.CharacteristicID),
 				row.Message,
 			); err != nil {
 				// something seems "off" here

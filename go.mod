@@ -16,6 +16,7 @@ require (
 	github.com/minor-industries/calendar v0.0.2
 	github.com/minor-industries/rtgraph v0.0.0-00010101000000-000000000000
 	github.com/pkg/errors v0.9.1
+	github.com/samber/lo v1.46.0
 	github.com/stretchr/testify v1.9.0
 	github.com/twitchtv/twirp v8.1.3+incompatible
 	github.com/webview/webview_go v0.0.0-20240220051247-56f456ca3a43
@@ -75,7 +76,7 @@ require (
 	golang.org/x/exp v0.0.0-20230728194245-b0cb94b80691 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.22.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect

@@ -15,12 +15,16 @@ func init() {
 
 type BikeSource struct{}
 
-func (b *BikeSource) Services() []bluetooth.UUID {
-	return []bluetooth.UUID{bluetooth.ServiceUUIDFitnessMachine}
+func (b *BikeSource) Services() []source.UUID {
+	return []source.UUID{
+		source.UUID(bluetooth.ServiceUUIDFitnessMachine.String()),
+	}
 }
 
-func (b *BikeSource) Characteristics() []bluetooth.UUID {
-	return []bluetooth.UUID{bluetooth.CharacteristicUUIDIndoorBikeData}
+func (b *BikeSource) Characteristics() []source.UUID {
+	return []source.UUID{
+		source.UUID(bluetooth.CharacteristicUUIDIndoorBikeData.String()),
+	}
 }
 
 func (b *BikeSource) Convert(msg source.Message) []source.Value {

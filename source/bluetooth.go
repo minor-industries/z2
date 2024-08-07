@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,15 +14,15 @@ import (
 
 type MessageCallback func(
 	t time.Time,
-	service bluetooth.UUID,
-	characteristic bluetooth.UUID,
+	service UUID,
+	characteristic UUID,
 	msg []byte,
 ) error
 
 type Message struct {
 	Timestamp      time.Time
-	Service        bluetooth.UUID
-	Characteristic bluetooth.UUID
+	Service        UUID
+	Characteristic UUID
 	Msg            []byte
 }
 
@@ -31,10 +32,20 @@ type Value struct {
 	Value     float64
 }
 
+type UUID string
+
+func mustParseUUID(s UUID) bluetooth.UUID {
+	uuid, err := bluetooth.ParseUUID(string(s))
+	if err != nil {
+		panic(err)
+	}
+	return uuid
+}
+
 type Source interface {
 	Convert(msg Message) []Value
-	Services() []bluetooth.UUID
-	Characteristics() []bluetooth.UUID
+	Services() []UUID
+	Characteristics() []UUID
 }
 
 var enableOnce sync.Once
@@ -84,7 +95,9 @@ func Run(
 	}
 
 	fmt.Println("discovering services/characteristics")
-	srvcs, err := device.DiscoverServices(src.Services())
+	srvcs, err := device.DiscoverServices(lo.Map(src.Services(), func(item UUID, _ int) bluetooth.UUID {
+		return mustParseUUID(item)
+	}))
 	if err != nil {
 		return errors.Wrap(err, "discover services")
 	}
@@ -93,7 +106,9 @@ func Run(
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
-		chars, err := srvc.DiscoverCharacteristics(src.Characteristics())
+		chars, err := srvc.DiscoverCharacteristics(lo.Map(src.Characteristics(), func(item UUID, _ int) bluetooth.UUID {
+			return mustParseUUID(item)
+		}))
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -114,7 +129,7 @@ func Run(
 				svUUID := srvc.UUID()
 				chUUID := char.UUID()
 				if err := char.EnableNotifications(func(buf []byte) {
-					err := messageCallback(time.Now(), svUUID, chUUID, buf)
+					err := messageCallback(time.Now(), UUID(svUUID.String()), UUID(chUUID.String()), buf)
 					if err != nil {
 						errCh <- errors.Wrap(err, "callback")
 					}
