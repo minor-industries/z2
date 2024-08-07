@@ -6,6 +6,8 @@ import (
 	"github.com/minor-industries/rtgraph/database/inmem"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
+	"syscall/js"
+	"time"
 )
 
 func run() error {
@@ -43,7 +45,18 @@ func run() error {
 		return errors.Wrap(err, "new rtgraph")
 	}
 
+	js.Global()
+
 	fmt.Println(graph)
+
+	if err := graph.CreateValue(
+		"some_metric",
+		time.Now(),
+		1.73,
+	); err != nil {
+		return (err)
+	}
+
 	return nil
 }
 
