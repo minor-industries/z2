@@ -1,3 +1,5 @@
+//go:build !wasm
+
 package source
 
 import (
@@ -11,5 +13,4 @@ func TestUUIDs(t *testing.T) {
 	fmt.Println(bluetooth.CharacteristicUUIDHeartRateMeasurement.String())
 	fmt.Println(bluetooth.ServiceUUIDFitnessMachine.String())
 	fmt.Println(bluetooth.CharacteristicUUIDIndoorBikeData.String())
-
 }
