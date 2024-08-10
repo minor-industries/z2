@@ -84,7 +84,7 @@
 
 
 <script type="module">
-    import {Graph} from './static/dist/bundle.js';
+    import {Graph, decode} from './static/dist/bundle.js';
     import {runWasm} from "./startup.js";
 
     runWasm();
@@ -114,17 +114,14 @@
             connect: false,
         });
 
-        setInterval(() => {
-            g.update([{
-                Pos: 0,
-                Timestamps: [new Date().getTime()],
-                Values: [65.0 + 2 * Math.random()],
-            }]);
-            createValue("test", (new Date()).getTime(), 65.5);
-        }, 1000);
+        subscribe(data => {
+            // console.log("subscribe callback:", data);
+            const msg = decode(data);
+            // console.log(msg);
 
-        subscribe((...args) => {
-            console.log("subscribe callback:", args);
+            if (msg.rows !== undefined) {
+                g.update(msg.rows)
+            }
         });
     });
 </script>

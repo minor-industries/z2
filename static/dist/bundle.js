@@ -13856,11 +13856,11 @@ function utf8Decode(bytes, inputOffset, byteLength) {
 var ExtData = (
   /** @class */
   /* @__PURE__ */ function() {
-    function ExtData2(type, data) {
+    function ExtData3(type, data) {
       this.type = type;
       this.data = data;
     }
-    return ExtData2;
+    return ExtData3;
   }()
 );
 
@@ -13887,19 +13887,19 @@ var __extends = /* @__PURE__ */ function() {
 var DecodeError = (
   /** @class */
   function(_super) {
-    __extends(DecodeError2, _super);
-    function DecodeError2(message) {
+    __extends(DecodeError3, _super);
+    function DecodeError3(message) {
       var _this = _super.call(this, message) || this;
-      var proto = Object.create(DecodeError2.prototype);
+      var proto = Object.create(DecodeError3.prototype);
       Object.setPrototypeOf(_this, proto);
       Object.defineProperty(_this, "name", {
         configurable: true,
         enumerable: false,
-        value: DecodeError2.name
+        value: DecodeError3.name
       });
       return _this;
     }
-    return DecodeError2;
+    return DecodeError3;
   }(Error)
 );
 
@@ -14007,25 +14007,25 @@ var timestampExtension = {
 var ExtensionCodec = (
   /** @class */
   function() {
-    function ExtensionCodec2() {
+    function ExtensionCodec3() {
       this.builtInEncoders = [];
       this.builtInDecoders = [];
       this.encoders = [];
       this.decoders = [];
       this.register(timestampExtension);
     }
-    ExtensionCodec2.prototype.register = function(_a) {
-      var type = _a.type, encode = _a.encode, decode2 = _a.decode;
+    ExtensionCodec3.prototype.register = function(_a) {
+      var type = _a.type, encode = _a.encode, decode3 = _a.decode;
       if (type >= 0) {
         this.encoders[type] = encode;
-        this.decoders[type] = decode2;
+        this.decoders[type] = decode3;
       } else {
         var index = 1 + type;
         this.builtInEncoders[index] = encode;
-        this.builtInDecoders[index] = decode2;
+        this.builtInDecoders[index] = decode3;
       }
     };
-    ExtensionCodec2.prototype.tryToEncode = function(object, context) {
+    ExtensionCodec3.prototype.tryToEncode = function(object, context) {
       for (var i = 0; i < this.builtInEncoders.length; i++) {
         var encodeExt = this.builtInEncoders[i];
         if (encodeExt != null) {
@@ -14051,7 +14051,7 @@ var ExtensionCodec = (
       }
       return null;
     };
-    ExtensionCodec2.prototype.decode = function(data, type, context) {
+    ExtensionCodec3.prototype.decode = function(data, type, context) {
       var decodeExt = type < 0 ? this.builtInDecoders[-1 - type] : this.decoders[type];
       if (decodeExt) {
         return decodeExt(data, type, context);
@@ -14059,8 +14059,8 @@ var ExtensionCodec = (
         return new ExtData(type, data);
       }
     };
-    ExtensionCodec2.defaultCodec = new ExtensionCodec2();
-    return ExtensionCodec2;
+    ExtensionCodec3.defaultCodec = new ExtensionCodec3();
+    return ExtensionCodec3;
   }()
 );
 
@@ -14095,7 +14095,7 @@ var DEFAULT_MAX_LENGTH_PER_KEY = 16;
 var CachedKeyDecoder = (
   /** @class */
   function() {
-    function CachedKeyDecoder2(maxKeyLength, maxLengthPerKey) {
+    function CachedKeyDecoder3(maxKeyLength, maxLengthPerKey) {
       if (maxKeyLength === void 0) {
         maxKeyLength = DEFAULT_MAX_KEY_LENGTH;
       }
@@ -14111,10 +14111,10 @@ var CachedKeyDecoder = (
         this.caches.push([]);
       }
     }
-    CachedKeyDecoder2.prototype.canBeCached = function(byteLength) {
+    CachedKeyDecoder3.prototype.canBeCached = function(byteLength) {
       return byteLength > 0 && byteLength <= this.maxKeyLength;
     };
-    CachedKeyDecoder2.prototype.find = function(bytes, inputOffset, byteLength) {
+    CachedKeyDecoder3.prototype.find = function(bytes, inputOffset, byteLength) {
       var records = this.caches[byteLength - 1];
       FIND_CHUNK: for (var _i = 0, records_1 = records; _i < records_1.length; _i++) {
         var record = records_1[_i];
@@ -14128,7 +14128,7 @@ var CachedKeyDecoder = (
       }
       return null;
     };
-    CachedKeyDecoder2.prototype.store = function(bytes, value) {
+    CachedKeyDecoder3.prototype.store = function(bytes, value) {
       var records = this.caches[bytes.length - 1];
       var record = { bytes, str: value };
       if (records.length >= this.maxLengthPerKey) {
@@ -14137,7 +14137,7 @@ var CachedKeyDecoder = (
         records.push(record);
       }
     };
-    CachedKeyDecoder2.prototype.decode = function(bytes, inputOffset, byteLength) {
+    CachedKeyDecoder3.prototype.decode = function(bytes, inputOffset, byteLength) {
       var cachedValue = this.find(bytes, inputOffset, byteLength);
       if (cachedValue != null) {
         this.hit++;
@@ -14149,7 +14149,7 @@ var CachedKeyDecoder = (
       this.store(slicedCopyOfBytes, str);
       return str;
     };
-    return CachedKeyDecoder2;
+    return CachedKeyDecoder3;
   }()
 );
 
@@ -14327,7 +14327,7 @@ var sharedCachedKeyDecoder = new CachedKeyDecoder();
 var Decoder = (
   /** @class */
   function() {
-    function Decoder2(options) {
+    function Decoder3(options) {
       var _a, _b, _c, _d, _e, _f, _g;
       this.totalPos = 0;
       this.pos = 0;
@@ -14345,17 +14345,17 @@ var Decoder = (
       this.maxExtLength = (_g = options === null || options === void 0 ? void 0 : options.maxExtLength) !== null && _g !== void 0 ? _g : UINT32_MAX;
       this.keyDecoder = (options === null || options === void 0 ? void 0 : options.keyDecoder) !== void 0 ? options.keyDecoder : sharedCachedKeyDecoder;
     }
-    Decoder2.prototype.reinitializeState = function() {
+    Decoder3.prototype.reinitializeState = function() {
       this.totalPos = 0;
       this.headByte = HEAD_BYTE_REQUIRED;
       this.stack.length = 0;
     };
-    Decoder2.prototype.setBuffer = function(buffer) {
+    Decoder3.prototype.setBuffer = function(buffer) {
       this.bytes = ensureUint8Array(buffer);
       this.view = createDataView(this.bytes);
       this.pos = 0;
     };
-    Decoder2.prototype.appendBuffer = function(buffer) {
+    Decoder3.prototype.appendBuffer = function(buffer) {
       if (this.headByte === HEAD_BYTE_REQUIRED && !this.hasRemaining(1)) {
         this.setBuffer(buffer);
       } else {
@@ -14367,14 +14367,14 @@ var Decoder = (
         this.setBuffer(newBuffer);
       }
     };
-    Decoder2.prototype.hasRemaining = function(size) {
+    Decoder3.prototype.hasRemaining = function(size) {
       return this.view.byteLength - this.pos >= size;
     };
-    Decoder2.prototype.createExtraByteError = function(posToShow) {
+    Decoder3.prototype.createExtraByteError = function(posToShow) {
       var _a = this, view = _a.view, pos = _a.pos;
       return new RangeError("Extra ".concat(view.byteLength - pos, " of ").concat(view.byteLength, " byte(s) found at buffer[").concat(posToShow, "]"));
     };
-    Decoder2.prototype.decode = function(buffer) {
+    Decoder3.prototype.decode = function(buffer) {
       this.reinitializeState();
       this.setBuffer(buffer);
       var object = this.doDecodeSync();
@@ -14383,7 +14383,7 @@ var Decoder = (
       }
       return object;
     };
-    Decoder2.prototype.decodeMulti = function(buffer) {
+    Decoder3.prototype.decodeMulti = function(buffer) {
       return __generator(this, function(_a) {
         switch (_a.label) {
           case 0:
@@ -14404,7 +14404,7 @@ var Decoder = (
         }
       });
     };
-    Decoder2.prototype.decodeAsync = function(stream) {
+    Decoder3.prototype.decodeAsync = function(stream) {
       var _a, stream_1, stream_1_1;
       var _b, e_1, _c, _d;
       return __awaiter(this, void 0, void 0, function() {
@@ -14484,13 +14484,13 @@ var Decoder = (
         });
       });
     };
-    Decoder2.prototype.decodeArrayStream = function(stream) {
+    Decoder3.prototype.decodeArrayStream = function(stream) {
       return this.decodeMultiAsync(stream, true);
     };
-    Decoder2.prototype.decodeStream = function(stream) {
+    Decoder3.prototype.decodeStream = function(stream) {
       return this.decodeMultiAsync(stream, false);
     };
-    Decoder2.prototype.decodeMultiAsync = function(stream, isArray) {
+    Decoder3.prototype.decodeMultiAsync = function(stream, isArray) {
       return __asyncGenerator(this, arguments, function decodeMultiAsync_1() {
         var isArrayHeaderRequired, arrayItemsLeft, _a, stream_2, stream_2_1, buffer, e_2, e_3_1;
         var _b, e_3, _c, _d;
@@ -14592,7 +14592,7 @@ var Decoder = (
         });
       });
     };
-    Decoder2.prototype.doDecodeSync = function() {
+    Decoder3.prototype.doDecodeSync = function() {
       DECODE: while (true) {
         var headByte = this.readHeadByte();
         var object = void 0;
@@ -14772,16 +14772,16 @@ var Decoder = (
         return object;
       }
     };
-    Decoder2.prototype.readHeadByte = function() {
+    Decoder3.prototype.readHeadByte = function() {
       if (this.headByte === HEAD_BYTE_REQUIRED) {
         this.headByte = this.readU8();
       }
       return this.headByte;
     };
-    Decoder2.prototype.complete = function() {
+    Decoder3.prototype.complete = function() {
       this.headByte = HEAD_BYTE_REQUIRED;
     };
-    Decoder2.prototype.readArraySize = function() {
+    Decoder3.prototype.readArraySize = function() {
       var headByte = this.readHeadByte();
       switch (headByte) {
         case 220:
@@ -14797,7 +14797,7 @@ var Decoder = (
         }
       }
     };
-    Decoder2.prototype.pushMapState = function(size) {
+    Decoder3.prototype.pushMapState = function(size) {
       if (size > this.maxMapLength) {
         throw new DecodeError("Max length exceeded: map length (".concat(size, ") > maxMapLengthLength (").concat(this.maxMapLength, ")"));
       }
@@ -14809,7 +14809,7 @@ var Decoder = (
         map: {}
       });
     };
-    Decoder2.prototype.pushArrayState = function(size) {
+    Decoder3.prototype.pushArrayState = function(size) {
       if (size > this.maxArrayLength) {
         throw new DecodeError("Max length exceeded: array length (".concat(size, ") > maxArrayLength (").concat(this.maxArrayLength, ")"));
       }
@@ -14820,7 +14820,7 @@ var Decoder = (
         position: 0
       });
     };
-    Decoder2.prototype.decodeUtf8String = function(byteLength, headerOffset) {
+    Decoder3.prototype.decodeUtf8String = function(byteLength, headerOffset) {
       var _a;
       if (byteLength > this.maxStrLength) {
         throw new DecodeError("Max length exceeded: UTF-8 byte length (".concat(byteLength, ") > maxStrLength (").concat(this.maxStrLength, ")"));
@@ -14838,14 +14838,14 @@ var Decoder = (
       this.pos += headerOffset + byteLength;
       return object;
     };
-    Decoder2.prototype.stateIsMapKey = function() {
+    Decoder3.prototype.stateIsMapKey = function() {
       if (this.stack.length > 0) {
         var state = this.stack[this.stack.length - 1];
         return state.type === STATE_MAP_KEY;
       }
       return false;
     };
-    Decoder2.prototype.decodeBinary = function(byteLength, headOffset) {
+    Decoder3.prototype.decodeBinary = function(byteLength, headOffset) {
       if (byteLength > this.maxBinLength) {
         throw new DecodeError("Max length exceeded: bin length (".concat(byteLength, ") > maxBinLength (").concat(this.maxBinLength, ")"));
       }
@@ -14857,7 +14857,7 @@ var Decoder = (
       this.pos += headOffset + byteLength;
       return object;
     };
-    Decoder2.prototype.decodeExtension = function(size, headOffset) {
+    Decoder3.prototype.decodeExtension = function(size, headOffset) {
       if (size > this.maxExtLength) {
         throw new DecodeError("Max length exceeded: ext length (".concat(size, ") > maxExtLength (").concat(this.maxExtLength, ")"));
       }
@@ -14869,76 +14869,76 @@ var Decoder = (
       );
       return this.extensionCodec.decode(data, extType, this.context);
     };
-    Decoder2.prototype.lookU8 = function() {
+    Decoder3.prototype.lookU8 = function() {
       return this.view.getUint8(this.pos);
     };
-    Decoder2.prototype.lookU16 = function() {
+    Decoder3.prototype.lookU16 = function() {
       return this.view.getUint16(this.pos);
     };
-    Decoder2.prototype.lookU32 = function() {
+    Decoder3.prototype.lookU32 = function() {
       return this.view.getUint32(this.pos);
     };
-    Decoder2.prototype.readU8 = function() {
+    Decoder3.prototype.readU8 = function() {
       var value = this.view.getUint8(this.pos);
       this.pos++;
       return value;
     };
-    Decoder2.prototype.readI8 = function() {
+    Decoder3.prototype.readI8 = function() {
       var value = this.view.getInt8(this.pos);
       this.pos++;
       return value;
     };
-    Decoder2.prototype.readU16 = function() {
+    Decoder3.prototype.readU16 = function() {
       var value = this.view.getUint16(this.pos);
       this.pos += 2;
       return value;
     };
-    Decoder2.prototype.readI16 = function() {
+    Decoder3.prototype.readI16 = function() {
       var value = this.view.getInt16(this.pos);
       this.pos += 2;
       return value;
     };
-    Decoder2.prototype.readU32 = function() {
+    Decoder3.prototype.readU32 = function() {
       var value = this.view.getUint32(this.pos);
       this.pos += 4;
       return value;
     };
-    Decoder2.prototype.readI32 = function() {
+    Decoder3.prototype.readI32 = function() {
       var value = this.view.getInt32(this.pos);
       this.pos += 4;
       return value;
     };
-    Decoder2.prototype.readU64 = function() {
+    Decoder3.prototype.readU64 = function() {
       var value = getUint64(this.view, this.pos);
       this.pos += 8;
       return value;
     };
-    Decoder2.prototype.readI64 = function() {
+    Decoder3.prototype.readI64 = function() {
       var value = getInt64(this.view, this.pos);
       this.pos += 8;
       return value;
     };
-    Decoder2.prototype.readU64AsBigInt = function() {
+    Decoder3.prototype.readU64AsBigInt = function() {
       var value = this.view.getBigUint64(this.pos);
       this.pos += 8;
       return value;
     };
-    Decoder2.prototype.readI64AsBigInt = function() {
+    Decoder3.prototype.readI64AsBigInt = function() {
       var value = this.view.getBigInt64(this.pos);
       this.pos += 8;
       return value;
     };
-    Decoder2.prototype.readF32 = function() {
+    Decoder3.prototype.readF32 = function() {
       var value = this.view.getFloat32(this.pos);
       this.pos += 4;
       return value;
     };
-    Decoder2.prototype.readF64 = function() {
+    Decoder3.prototype.readF64 = function() {
       var value = this.view.getFloat64(this.pos);
       this.pos += 8;
       return value;
     };
-    return Decoder2;
+    return Decoder3;
   }()
 );
 
@@ -15642,6 +15642,1159 @@ function setupRowerAnalysis(date) {
   });
 }
 
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/utf8.mjs
+var sharedTextEncoder2 = new TextEncoder();
+var CHUNK_SIZE2 = 4096;
+function utf8DecodeJs2(bytes, inputOffset, byteLength) {
+  var offset = inputOffset;
+  var end = offset + byteLength;
+  var units = [];
+  var result = "";
+  while (offset < end) {
+    var byte1 = bytes[offset++];
+    if ((byte1 & 128) === 0) {
+      units.push(byte1);
+    } else if ((byte1 & 224) === 192) {
+      var byte2 = bytes[offset++] & 63;
+      units.push((byte1 & 31) << 6 | byte2);
+    } else if ((byte1 & 240) === 224) {
+      var byte2 = bytes[offset++] & 63;
+      var byte3 = bytes[offset++] & 63;
+      units.push((byte1 & 31) << 12 | byte2 << 6 | byte3);
+    } else if ((byte1 & 248) === 240) {
+      var byte2 = bytes[offset++] & 63;
+      var byte3 = bytes[offset++] & 63;
+      var byte4 = bytes[offset++] & 63;
+      var unit = (byte1 & 7) << 18 | byte2 << 12 | byte3 << 6 | byte4;
+      if (unit > 65535) {
+        unit -= 65536;
+        units.push(unit >>> 10 & 1023 | 55296);
+        unit = 56320 | unit & 1023;
+      }
+      units.push(unit);
+    } else {
+      units.push(byte1);
+    }
+    if (units.length >= CHUNK_SIZE2) {
+      result += String.fromCharCode.apply(String, units);
+      units.length = 0;
+    }
+  }
+  if (units.length > 0) {
+    result += String.fromCharCode.apply(String, units);
+  }
+  return result;
+}
+var sharedTextDecoder2 = new TextDecoder();
+var TEXT_DECODER_THRESHOLD2 = 200;
+function utf8DecodeTD2(bytes, inputOffset, byteLength) {
+  var stringBytes = bytes.subarray(inputOffset, inputOffset + byteLength);
+  return sharedTextDecoder2.decode(stringBytes);
+}
+function utf8Decode2(bytes, inputOffset, byteLength) {
+  if (byteLength > TEXT_DECODER_THRESHOLD2) {
+    return utf8DecodeTD2(bytes, inputOffset, byteLength);
+  } else {
+    return utf8DecodeJs2(bytes, inputOffset, byteLength);
+  }
+}
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/ExtData.mjs
+var ExtData2 = (
+  /** @class */
+  /* @__PURE__ */ function() {
+    function ExtData3(type, data) {
+      this.type = type;
+      this.data = data;
+    }
+    return ExtData3;
+  }()
+);
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/DecodeError.mjs
+var __extends2 = /* @__PURE__ */ function() {
+  var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
+      d2.__proto__ = b2;
+    } || function(d2, b2) {
+      for (var p in b2) if (Object.prototype.hasOwnProperty.call(b2, p)) d2[p] = b2[p];
+    };
+    return extendStatics(d, b);
+  };
+  return function(d, b) {
+    if (typeof b !== "function" && b !== null)
+      throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+var DecodeError2 = (
+  /** @class */
+  function(_super) {
+    __extends2(DecodeError3, _super);
+    function DecodeError3(message) {
+      var _this = _super.call(this, message) || this;
+      var proto = Object.create(DecodeError3.prototype);
+      Object.setPrototypeOf(_this, proto);
+      Object.defineProperty(_this, "name", {
+        configurable: true,
+        enumerable: false,
+        value: DecodeError3.name
+      });
+      return _this;
+    }
+    return DecodeError3;
+  }(Error)
+);
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/int.mjs
+var UINT32_MAX2 = 4294967295;
+function setInt642(view, offset, value) {
+  var high = Math.floor(value / 4294967296);
+  var low = value;
+  view.setUint32(offset, high);
+  view.setUint32(offset + 4, low);
+}
+function getInt642(view, offset) {
+  var high = view.getInt32(offset);
+  var low = view.getUint32(offset + 4);
+  return high * 4294967296 + low;
+}
+function getUint642(view, offset) {
+  var high = view.getUint32(offset);
+  var low = view.getUint32(offset + 4);
+  return high * 4294967296 + low;
+}
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/timestamp.mjs
+var EXT_TIMESTAMP2 = -1;
+var TIMESTAMP32_MAX_SEC2 = 4294967296 - 1;
+var TIMESTAMP64_MAX_SEC2 = 17179869184 - 1;
+function encodeTimeSpecToTimestamp2(_a) {
+  var sec = _a.sec, nsec = _a.nsec;
+  if (sec >= 0 && nsec >= 0 && sec <= TIMESTAMP64_MAX_SEC2) {
+    if (nsec === 0 && sec <= TIMESTAMP32_MAX_SEC2) {
+      var rv = new Uint8Array(4);
+      var view = new DataView(rv.buffer);
+      view.setUint32(0, sec);
+      return rv;
+    } else {
+      var secHigh = sec / 4294967296;
+      var secLow = sec & 4294967295;
+      var rv = new Uint8Array(8);
+      var view = new DataView(rv.buffer);
+      view.setUint32(0, nsec << 2 | secHigh & 3);
+      view.setUint32(4, secLow);
+      return rv;
+    }
+  } else {
+    var rv = new Uint8Array(12);
+    var view = new DataView(rv.buffer);
+    view.setUint32(0, nsec);
+    setInt642(view, 4, sec);
+    return rv;
+  }
+}
+function encodeDateToTimeSpec2(date) {
+  var msec = date.getTime();
+  var sec = Math.floor(msec / 1e3);
+  var nsec = (msec - sec * 1e3) * 1e6;
+  var nsecInSec = Math.floor(nsec / 1e9);
+  return {
+    sec: sec + nsecInSec,
+    nsec: nsec - nsecInSec * 1e9
+  };
+}
+function encodeTimestampExtension2(object) {
+  if (object instanceof Date) {
+    var timeSpec = encodeDateToTimeSpec2(object);
+    return encodeTimeSpecToTimestamp2(timeSpec);
+  } else {
+    return null;
+  }
+}
+function decodeTimestampToTimeSpec2(data) {
+  var view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+  switch (data.byteLength) {
+    case 4: {
+      var sec = view.getUint32(0);
+      var nsec = 0;
+      return { sec, nsec };
+    }
+    case 8: {
+      var nsec30AndSecHigh2 = view.getUint32(0);
+      var secLow32 = view.getUint32(4);
+      var sec = (nsec30AndSecHigh2 & 3) * 4294967296 + secLow32;
+      var nsec = nsec30AndSecHigh2 >>> 2;
+      return { sec, nsec };
+    }
+    case 12: {
+      var sec = getInt642(view, 4);
+      var nsec = view.getUint32(0);
+      return { sec, nsec };
+    }
+    default:
+      throw new DecodeError2("Unrecognized data size for timestamp (expected 4, 8, or 12): ".concat(data.length));
+  }
+}
+function decodeTimestampExtension2(data) {
+  var timeSpec = decodeTimestampToTimeSpec2(data);
+  return new Date(timeSpec.sec * 1e3 + timeSpec.nsec / 1e6);
+}
+var timestampExtension2 = {
+  type: EXT_TIMESTAMP2,
+  encode: encodeTimestampExtension2,
+  decode: decodeTimestampExtension2
+};
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/ExtensionCodec.mjs
+var ExtensionCodec2 = (
+  /** @class */
+  function() {
+    function ExtensionCodec3() {
+      this.builtInEncoders = [];
+      this.builtInDecoders = [];
+      this.encoders = [];
+      this.decoders = [];
+      this.register(timestampExtension2);
+    }
+    ExtensionCodec3.prototype.register = function(_a) {
+      var type = _a.type, encode = _a.encode, decode3 = _a.decode;
+      if (type >= 0) {
+        this.encoders[type] = encode;
+        this.decoders[type] = decode3;
+      } else {
+        var index = 1 + type;
+        this.builtInEncoders[index] = encode;
+        this.builtInDecoders[index] = decode3;
+      }
+    };
+    ExtensionCodec3.prototype.tryToEncode = function(object, context) {
+      for (var i = 0; i < this.builtInEncoders.length; i++) {
+        var encodeExt = this.builtInEncoders[i];
+        if (encodeExt != null) {
+          var data = encodeExt(object, context);
+          if (data != null) {
+            var type = -1 - i;
+            return new ExtData2(type, data);
+          }
+        }
+      }
+      for (var i = 0; i < this.encoders.length; i++) {
+        var encodeExt = this.encoders[i];
+        if (encodeExt != null) {
+          var data = encodeExt(object, context);
+          if (data != null) {
+            var type = i;
+            return new ExtData2(type, data);
+          }
+        }
+      }
+      if (object instanceof ExtData2) {
+        return object;
+      }
+      return null;
+    };
+    ExtensionCodec3.prototype.decode = function(data, type, context) {
+      var decodeExt = type < 0 ? this.builtInDecoders[-1 - type] : this.decoders[type];
+      if (decodeExt) {
+        return decodeExt(data, type, context);
+      } else {
+        return new ExtData2(type, data);
+      }
+    };
+    ExtensionCodec3.defaultCodec = new ExtensionCodec3();
+    return ExtensionCodec3;
+  }()
+);
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/typedArrays.mjs
+function ensureUint8Array2(buffer) {
+  if (buffer instanceof Uint8Array) {
+    return buffer;
+  } else if (ArrayBuffer.isView(buffer)) {
+    return new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+  } else if (buffer instanceof ArrayBuffer) {
+    return new Uint8Array(buffer);
+  } else {
+    return Uint8Array.from(buffer);
+  }
+}
+function createDataView2(buffer) {
+  if (buffer instanceof ArrayBuffer) {
+    return new DataView(buffer);
+  }
+  var bufferView = ensureUint8Array2(buffer);
+  return new DataView(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength);
+}
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/prettyByte.mjs
+function prettyByte2(byte) {
+  return "".concat(byte < 0 ? "-" : "", "0x").concat(Math.abs(byte).toString(16).padStart(2, "0"));
+}
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/CachedKeyDecoder.mjs
+var DEFAULT_MAX_KEY_LENGTH2 = 16;
+var DEFAULT_MAX_LENGTH_PER_KEY2 = 16;
+var CachedKeyDecoder2 = (
+  /** @class */
+  function() {
+    function CachedKeyDecoder3(maxKeyLength, maxLengthPerKey) {
+      if (maxKeyLength === void 0) {
+        maxKeyLength = DEFAULT_MAX_KEY_LENGTH2;
+      }
+      if (maxLengthPerKey === void 0) {
+        maxLengthPerKey = DEFAULT_MAX_LENGTH_PER_KEY2;
+      }
+      this.maxKeyLength = maxKeyLength;
+      this.maxLengthPerKey = maxLengthPerKey;
+      this.hit = 0;
+      this.miss = 0;
+      this.caches = [];
+      for (var i = 0; i < this.maxKeyLength; i++) {
+        this.caches.push([]);
+      }
+    }
+    CachedKeyDecoder3.prototype.canBeCached = function(byteLength) {
+      return byteLength > 0 && byteLength <= this.maxKeyLength;
+    };
+    CachedKeyDecoder3.prototype.find = function(bytes, inputOffset, byteLength) {
+      var records = this.caches[byteLength - 1];
+      FIND_CHUNK: for (var _i = 0, records_1 = records; _i < records_1.length; _i++) {
+        var record = records_1[_i];
+        var recordBytes = record.bytes;
+        for (var j = 0; j < byteLength; j++) {
+          if (recordBytes[j] !== bytes[inputOffset + j]) {
+            continue FIND_CHUNK;
+          }
+        }
+        return record.str;
+      }
+      return null;
+    };
+    CachedKeyDecoder3.prototype.store = function(bytes, value) {
+      var records = this.caches[bytes.length - 1];
+      var record = { bytes, str: value };
+      if (records.length >= this.maxLengthPerKey) {
+        records[Math.random() * records.length | 0] = record;
+      } else {
+        records.push(record);
+      }
+    };
+    CachedKeyDecoder3.prototype.decode = function(bytes, inputOffset, byteLength) {
+      var cachedValue = this.find(bytes, inputOffset, byteLength);
+      if (cachedValue != null) {
+        this.hit++;
+        return cachedValue;
+      }
+      this.miss++;
+      var str = utf8DecodeJs2(bytes, inputOffset, byteLength);
+      var slicedCopyOfBytes = Uint8Array.prototype.slice.call(bytes, inputOffset, inputOffset + byteLength);
+      this.store(slicedCopyOfBytes, str);
+      return str;
+    };
+    return CachedKeyDecoder3;
+  }()
+);
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/Decoder.mjs
+var __awaiter2 = function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve) {
+      resolve(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var __generator2 = function(thisArg, body) {
+  var _ = { label: 0, sent: function() {
+    if (t[0] & 1) throw t[1];
+    return t[1];
+  }, trys: [], ops: [] }, f, y, t, g;
+  return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+    return this;
+  }), g;
+  function verb(n) {
+    return function(v) {
+      return step([n, v]);
+    };
+  }
+  function step(op) {
+    if (f) throw new TypeError("Generator is already executing.");
+    while (g && (g = 0, op[0] && (_ = 0)), _) try {
+      if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+      if (y = 0, t) op = [op[0] & 2, t.value];
+      switch (op[0]) {
+        case 0:
+        case 1:
+          t = op;
+          break;
+        case 4:
+          _.label++;
+          return { value: op[1], done: false };
+        case 5:
+          _.label++;
+          y = op[1];
+          op = [0];
+          continue;
+        case 7:
+          op = _.ops.pop();
+          _.trys.pop();
+          continue;
+        default:
+          if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+            _ = 0;
+            continue;
+          }
+          if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+            _.label = op[1];
+            break;
+          }
+          if (op[0] === 6 && _.label < t[1]) {
+            _.label = t[1];
+            t = op;
+            break;
+          }
+          if (t && _.label < t[2]) {
+            _.label = t[2];
+            _.ops.push(op);
+            break;
+          }
+          if (t[2]) _.ops.pop();
+          _.trys.pop();
+          continue;
+      }
+      op = body.call(thisArg, _);
+    } catch (e) {
+      op = [6, e];
+      y = 0;
+    } finally {
+      f = t = 0;
+    }
+    if (op[0] & 5) throw op[1];
+    return { value: op[0] ? op[1] : void 0, done: true };
+  }
+};
+var __asyncValues2 = function(o) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var m = o[Symbol.asyncIterator], i;
+  return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i);
+  function verb(n) {
+    i[n] = o[n] && function(v) {
+      return new Promise(function(resolve, reject) {
+        v = o[n](v), settle(resolve, reject, v.done, v.value);
+      });
+    };
+  }
+  function settle(resolve, reject, d, v) {
+    Promise.resolve(v).then(function(v2) {
+      resolve({ value: v2, done: d });
+    }, reject);
+  }
+};
+var __await2 = function(v) {
+  return this instanceof __await2 ? (this.v = v, this) : new __await2(v);
+};
+var __asyncGenerator2 = function(thisArg, _arguments, generator) {
+  if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+  var g = generator.apply(thisArg, _arguments || []), i, q = [];
+  return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function() {
+    return this;
+  }, i;
+  function verb(n) {
+    if (g[n]) i[n] = function(v) {
+      return new Promise(function(a, b) {
+        q.push([n, v, a, b]) > 1 || resume(n, v);
+      });
+    };
+  }
+  function resume(n, v) {
+    try {
+      step(g[n](v));
+    } catch (e) {
+      settle(q[0][3], e);
+    }
+  }
+  function step(r) {
+    r.value instanceof __await2 ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);
+  }
+  function fulfill(value) {
+    resume("next", value);
+  }
+  function reject(value) {
+    resume("throw", value);
+  }
+  function settle(f, v) {
+    if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]);
+  }
+};
+var STATE_ARRAY2 = "array";
+var STATE_MAP_KEY2 = "map_key";
+var STATE_MAP_VALUE2 = "map_value";
+var isValidMapKeyType2 = function(key) {
+  return typeof key === "string" || typeof key === "number";
+};
+var HEAD_BYTE_REQUIRED2 = -1;
+var EMPTY_VIEW2 = new DataView(new ArrayBuffer(0));
+var EMPTY_BYTES2 = new Uint8Array(EMPTY_VIEW2.buffer);
+try {
+  EMPTY_VIEW2.getInt8(0);
+} catch (e) {
+  if (!(e instanceof RangeError)) {
+    throw new Error("This module is not supported in the current JavaScript engine because DataView does not throw RangeError on out-of-bounds access");
+  }
+}
+var DataViewIndexOutOfBoundsError2 = RangeError;
+var MORE_DATA2 = new DataViewIndexOutOfBoundsError2("Insufficient data");
+var sharedCachedKeyDecoder2 = new CachedKeyDecoder2();
+var Decoder2 = (
+  /** @class */
+  function() {
+    function Decoder3(options) {
+      var _a, _b, _c, _d, _e, _f, _g;
+      this.totalPos = 0;
+      this.pos = 0;
+      this.view = EMPTY_VIEW2;
+      this.bytes = EMPTY_BYTES2;
+      this.headByte = HEAD_BYTE_REQUIRED2;
+      this.stack = [];
+      this.extensionCodec = (_a = options === null || options === void 0 ? void 0 : options.extensionCodec) !== null && _a !== void 0 ? _a : ExtensionCodec2.defaultCodec;
+      this.context = options === null || options === void 0 ? void 0 : options.context;
+      this.useBigInt64 = (_b = options === null || options === void 0 ? void 0 : options.useBigInt64) !== null && _b !== void 0 ? _b : false;
+      this.maxStrLength = (_c = options === null || options === void 0 ? void 0 : options.maxStrLength) !== null && _c !== void 0 ? _c : UINT32_MAX2;
+      this.maxBinLength = (_d = options === null || options === void 0 ? void 0 : options.maxBinLength) !== null && _d !== void 0 ? _d : UINT32_MAX2;
+      this.maxArrayLength = (_e = options === null || options === void 0 ? void 0 : options.maxArrayLength) !== null && _e !== void 0 ? _e : UINT32_MAX2;
+      this.maxMapLength = (_f = options === null || options === void 0 ? void 0 : options.maxMapLength) !== null && _f !== void 0 ? _f : UINT32_MAX2;
+      this.maxExtLength = (_g = options === null || options === void 0 ? void 0 : options.maxExtLength) !== null && _g !== void 0 ? _g : UINT32_MAX2;
+      this.keyDecoder = (options === null || options === void 0 ? void 0 : options.keyDecoder) !== void 0 ? options.keyDecoder : sharedCachedKeyDecoder2;
+    }
+    Decoder3.prototype.reinitializeState = function() {
+      this.totalPos = 0;
+      this.headByte = HEAD_BYTE_REQUIRED2;
+      this.stack.length = 0;
+    };
+    Decoder3.prototype.setBuffer = function(buffer) {
+      this.bytes = ensureUint8Array2(buffer);
+      this.view = createDataView2(this.bytes);
+      this.pos = 0;
+    };
+    Decoder3.prototype.appendBuffer = function(buffer) {
+      if (this.headByte === HEAD_BYTE_REQUIRED2 && !this.hasRemaining(1)) {
+        this.setBuffer(buffer);
+      } else {
+        var remainingData = this.bytes.subarray(this.pos);
+        var newData = ensureUint8Array2(buffer);
+        var newBuffer = new Uint8Array(remainingData.length + newData.length);
+        newBuffer.set(remainingData);
+        newBuffer.set(newData, remainingData.length);
+        this.setBuffer(newBuffer);
+      }
+    };
+    Decoder3.prototype.hasRemaining = function(size) {
+      return this.view.byteLength - this.pos >= size;
+    };
+    Decoder3.prototype.createExtraByteError = function(posToShow) {
+      var _a = this, view = _a.view, pos = _a.pos;
+      return new RangeError("Extra ".concat(view.byteLength - pos, " of ").concat(view.byteLength, " byte(s) found at buffer[").concat(posToShow, "]"));
+    };
+    Decoder3.prototype.decode = function(buffer) {
+      this.reinitializeState();
+      this.setBuffer(buffer);
+      var object = this.doDecodeSync();
+      if (this.hasRemaining(1)) {
+        throw this.createExtraByteError(this.pos);
+      }
+      return object;
+    };
+    Decoder3.prototype.decodeMulti = function(buffer) {
+      return __generator2(this, function(_a) {
+        switch (_a.label) {
+          case 0:
+            this.reinitializeState();
+            this.setBuffer(buffer);
+            _a.label = 1;
+          case 1:
+            if (!this.hasRemaining(1)) return [3, 3];
+            return [4, this.doDecodeSync()];
+          case 2:
+            _a.sent();
+            return [3, 1];
+          case 3:
+            return [
+              2
+              /*return*/
+            ];
+        }
+      });
+    };
+    Decoder3.prototype.decodeAsync = function(stream) {
+      var _a, stream_1, stream_1_1;
+      var _b, e_1, _c, _d;
+      return __awaiter2(this, void 0, void 0, function() {
+        var decoded, object, buffer, e_1_1, _e, headByte, pos, totalPos;
+        return __generator2(this, function(_f) {
+          switch (_f.label) {
+            case 0:
+              decoded = false;
+              _f.label = 1;
+            case 1:
+              _f.trys.push([1, 6, 7, 12]);
+              _a = true, stream_1 = __asyncValues2(stream);
+              _f.label = 2;
+            case 2:
+              return [4, stream_1.next()];
+            case 3:
+              if (!(stream_1_1 = _f.sent(), _b = stream_1_1.done, !_b)) return [3, 5];
+              _d = stream_1_1.value;
+              _a = false;
+              try {
+                buffer = _d;
+                if (decoded) {
+                  throw this.createExtraByteError(this.totalPos);
+                }
+                this.appendBuffer(buffer);
+                try {
+                  object = this.doDecodeSync();
+                  decoded = true;
+                } catch (e) {
+                  if (!(e instanceof DataViewIndexOutOfBoundsError2)) {
+                    throw e;
+                  }
+                }
+                this.totalPos += this.pos;
+              } finally {
+                _a = true;
+              }
+              _f.label = 4;
+            case 4:
+              return [3, 2];
+            case 5:
+              return [3, 12];
+            case 6:
+              e_1_1 = _f.sent();
+              e_1 = { error: e_1_1 };
+              return [3, 12];
+            case 7:
+              _f.trys.push([7, , 10, 11]);
+              if (!(!_a && !_b && (_c = stream_1.return))) return [3, 9];
+              return [4, _c.call(stream_1)];
+            case 8:
+              _f.sent();
+              _f.label = 9;
+            case 9:
+              return [3, 11];
+            case 10:
+              if (e_1) throw e_1.error;
+              return [
+                7
+                /*endfinally*/
+              ];
+            case 11:
+              return [
+                7
+                /*endfinally*/
+              ];
+            case 12:
+              if (decoded) {
+                if (this.hasRemaining(1)) {
+                  throw this.createExtraByteError(this.totalPos);
+                }
+                return [2, object];
+              }
+              _e = this, headByte = _e.headByte, pos = _e.pos, totalPos = _e.totalPos;
+              throw new RangeError("Insufficient data in parsing ".concat(prettyByte2(headByte), " at ").concat(totalPos, " (").concat(pos, " in the current buffer)"));
+          }
+        });
+      });
+    };
+    Decoder3.prototype.decodeArrayStream = function(stream) {
+      return this.decodeMultiAsync(stream, true);
+    };
+    Decoder3.prototype.decodeStream = function(stream) {
+      return this.decodeMultiAsync(stream, false);
+    };
+    Decoder3.prototype.decodeMultiAsync = function(stream, isArray) {
+      return __asyncGenerator2(this, arguments, function decodeMultiAsync_1() {
+        var isArrayHeaderRequired, arrayItemsLeft, _a, stream_2, stream_2_1, buffer, e_2, e_3_1;
+        var _b, e_3, _c, _d;
+        return __generator2(this, function(_e) {
+          switch (_e.label) {
+            case 0:
+              isArrayHeaderRequired = isArray;
+              arrayItemsLeft = -1;
+              _e.label = 1;
+            case 1:
+              _e.trys.push([1, 15, 16, 21]);
+              _a = true, stream_2 = __asyncValues2(stream);
+              _e.label = 2;
+            case 2:
+              return [4, __await2(stream_2.next())];
+            case 3:
+              if (!(stream_2_1 = _e.sent(), _b = stream_2_1.done, !_b)) return [3, 14];
+              _d = stream_2_1.value;
+              _a = false;
+              _e.label = 4;
+            case 4:
+              _e.trys.push([4, , 12, 13]);
+              buffer = _d;
+              if (isArray && arrayItemsLeft === 0) {
+                throw this.createExtraByteError(this.totalPos);
+              }
+              this.appendBuffer(buffer);
+              if (isArrayHeaderRequired) {
+                arrayItemsLeft = this.readArraySize();
+                isArrayHeaderRequired = false;
+                this.complete();
+              }
+              _e.label = 5;
+            case 5:
+              _e.trys.push([5, 10, , 11]);
+              _e.label = 6;
+            case 6:
+              if (false) return [3, 9];
+              return [4, __await2(this.doDecodeSync())];
+            case 7:
+              return [4, _e.sent()];
+            case 8:
+              _e.sent();
+              if (--arrayItemsLeft === 0) {
+                return [3, 9];
+              }
+              return [3, 6];
+            case 9:
+              return [3, 11];
+            case 10:
+              e_2 = _e.sent();
+              if (!(e_2 instanceof DataViewIndexOutOfBoundsError2)) {
+                throw e_2;
+              }
+              return [3, 11];
+            case 11:
+              this.totalPos += this.pos;
+              return [3, 13];
+            case 12:
+              _a = true;
+              return [
+                7
+                /*endfinally*/
+              ];
+            case 13:
+              return [3, 2];
+            case 14:
+              return [3, 21];
+            case 15:
+              e_3_1 = _e.sent();
+              e_3 = { error: e_3_1 };
+              return [3, 21];
+            case 16:
+              _e.trys.push([16, , 19, 20]);
+              if (!(!_a && !_b && (_c = stream_2.return))) return [3, 18];
+              return [4, __await2(_c.call(stream_2))];
+            case 17:
+              _e.sent();
+              _e.label = 18;
+            case 18:
+              return [3, 20];
+            case 19:
+              if (e_3) throw e_3.error;
+              return [
+                7
+                /*endfinally*/
+              ];
+            case 20:
+              return [
+                7
+                /*endfinally*/
+              ];
+            case 21:
+              return [
+                2
+                /*return*/
+              ];
+          }
+        });
+      });
+    };
+    Decoder3.prototype.doDecodeSync = function() {
+      DECODE: while (true) {
+        var headByte = this.readHeadByte();
+        var object = void 0;
+        if (headByte >= 224) {
+          object = headByte - 256;
+        } else if (headByte < 192) {
+          if (headByte < 128) {
+            object = headByte;
+          } else if (headByte < 144) {
+            var size = headByte - 128;
+            if (size !== 0) {
+              this.pushMapState(size);
+              this.complete();
+              continue DECODE;
+            } else {
+              object = {};
+            }
+          } else if (headByte < 160) {
+            var size = headByte - 144;
+            if (size !== 0) {
+              this.pushArrayState(size);
+              this.complete();
+              continue DECODE;
+            } else {
+              object = [];
+            }
+          } else {
+            var byteLength = headByte - 160;
+            object = this.decodeUtf8String(byteLength, 0);
+          }
+        } else if (headByte === 192) {
+          object = null;
+        } else if (headByte === 194) {
+          object = false;
+        } else if (headByte === 195) {
+          object = true;
+        } else if (headByte === 202) {
+          object = this.readF32();
+        } else if (headByte === 203) {
+          object = this.readF64();
+        } else if (headByte === 204) {
+          object = this.readU8();
+        } else if (headByte === 205) {
+          object = this.readU16();
+        } else if (headByte === 206) {
+          object = this.readU32();
+        } else if (headByte === 207) {
+          if (this.useBigInt64) {
+            object = this.readU64AsBigInt();
+          } else {
+            object = this.readU64();
+          }
+        } else if (headByte === 208) {
+          object = this.readI8();
+        } else if (headByte === 209) {
+          object = this.readI16();
+        } else if (headByte === 210) {
+          object = this.readI32();
+        } else if (headByte === 211) {
+          if (this.useBigInt64) {
+            object = this.readI64AsBigInt();
+          } else {
+            object = this.readI64();
+          }
+        } else if (headByte === 217) {
+          var byteLength = this.lookU8();
+          object = this.decodeUtf8String(byteLength, 1);
+        } else if (headByte === 218) {
+          var byteLength = this.lookU16();
+          object = this.decodeUtf8String(byteLength, 2);
+        } else if (headByte === 219) {
+          var byteLength = this.lookU32();
+          object = this.decodeUtf8String(byteLength, 4);
+        } else if (headByte === 220) {
+          var size = this.readU16();
+          if (size !== 0) {
+            this.pushArrayState(size);
+            this.complete();
+            continue DECODE;
+          } else {
+            object = [];
+          }
+        } else if (headByte === 221) {
+          var size = this.readU32();
+          if (size !== 0) {
+            this.pushArrayState(size);
+            this.complete();
+            continue DECODE;
+          } else {
+            object = [];
+          }
+        } else if (headByte === 222) {
+          var size = this.readU16();
+          if (size !== 0) {
+            this.pushMapState(size);
+            this.complete();
+            continue DECODE;
+          } else {
+            object = {};
+          }
+        } else if (headByte === 223) {
+          var size = this.readU32();
+          if (size !== 0) {
+            this.pushMapState(size);
+            this.complete();
+            continue DECODE;
+          } else {
+            object = {};
+          }
+        } else if (headByte === 196) {
+          var size = this.lookU8();
+          object = this.decodeBinary(size, 1);
+        } else if (headByte === 197) {
+          var size = this.lookU16();
+          object = this.decodeBinary(size, 2);
+        } else if (headByte === 198) {
+          var size = this.lookU32();
+          object = this.decodeBinary(size, 4);
+        } else if (headByte === 212) {
+          object = this.decodeExtension(1, 0);
+        } else if (headByte === 213) {
+          object = this.decodeExtension(2, 0);
+        } else if (headByte === 214) {
+          object = this.decodeExtension(4, 0);
+        } else if (headByte === 215) {
+          object = this.decodeExtension(8, 0);
+        } else if (headByte === 216) {
+          object = this.decodeExtension(16, 0);
+        } else if (headByte === 199) {
+          var size = this.lookU8();
+          object = this.decodeExtension(size, 1);
+        } else if (headByte === 200) {
+          var size = this.lookU16();
+          object = this.decodeExtension(size, 2);
+        } else if (headByte === 201) {
+          var size = this.lookU32();
+          object = this.decodeExtension(size, 4);
+        } else {
+          throw new DecodeError2("Unrecognized type byte: ".concat(prettyByte2(headByte)));
+        }
+        this.complete();
+        var stack = this.stack;
+        while (stack.length > 0) {
+          var state = stack[stack.length - 1];
+          if (state.type === STATE_ARRAY2) {
+            state.array[state.position] = object;
+            state.position++;
+            if (state.position === state.size) {
+              stack.pop();
+              object = state.array;
+            } else {
+              continue DECODE;
+            }
+          } else if (state.type === STATE_MAP_KEY2) {
+            if (!isValidMapKeyType2(object)) {
+              throw new DecodeError2("The type of key must be string or number but " + typeof object);
+            }
+            if (object === "__proto__") {
+              throw new DecodeError2("The key __proto__ is not allowed");
+            }
+            state.key = object;
+            state.type = STATE_MAP_VALUE2;
+            continue DECODE;
+          } else {
+            state.map[state.key] = object;
+            state.readCount++;
+            if (state.readCount === state.size) {
+              stack.pop();
+              object = state.map;
+            } else {
+              state.key = null;
+              state.type = STATE_MAP_KEY2;
+              continue DECODE;
+            }
+          }
+        }
+        return object;
+      }
+    };
+    Decoder3.prototype.readHeadByte = function() {
+      if (this.headByte === HEAD_BYTE_REQUIRED2) {
+        this.headByte = this.readU8();
+      }
+      return this.headByte;
+    };
+    Decoder3.prototype.complete = function() {
+      this.headByte = HEAD_BYTE_REQUIRED2;
+    };
+    Decoder3.prototype.readArraySize = function() {
+      var headByte = this.readHeadByte();
+      switch (headByte) {
+        case 220:
+          return this.readU16();
+        case 221:
+          return this.readU32();
+        default: {
+          if (headByte < 160) {
+            return headByte - 144;
+          } else {
+            throw new DecodeError2("Unrecognized array type byte: ".concat(prettyByte2(headByte)));
+          }
+        }
+      }
+    };
+    Decoder3.prototype.pushMapState = function(size) {
+      if (size > this.maxMapLength) {
+        throw new DecodeError2("Max length exceeded: map length (".concat(size, ") > maxMapLengthLength (").concat(this.maxMapLength, ")"));
+      }
+      this.stack.push({
+        type: STATE_MAP_KEY2,
+        size,
+        key: null,
+        readCount: 0,
+        map: {}
+      });
+    };
+    Decoder3.prototype.pushArrayState = function(size) {
+      if (size > this.maxArrayLength) {
+        throw new DecodeError2("Max length exceeded: array length (".concat(size, ") > maxArrayLength (").concat(this.maxArrayLength, ")"));
+      }
+      this.stack.push({
+        type: STATE_ARRAY2,
+        size,
+        array: new Array(size),
+        position: 0
+      });
+    };
+    Decoder3.prototype.decodeUtf8String = function(byteLength, headerOffset) {
+      var _a;
+      if (byteLength > this.maxStrLength) {
+        throw new DecodeError2("Max length exceeded: UTF-8 byte length (".concat(byteLength, ") > maxStrLength (").concat(this.maxStrLength, ")"));
+      }
+      if (this.bytes.byteLength < this.pos + headerOffset + byteLength) {
+        throw MORE_DATA2;
+      }
+      var offset = this.pos + headerOffset;
+      var object;
+      if (this.stateIsMapKey() && ((_a = this.keyDecoder) === null || _a === void 0 ? void 0 : _a.canBeCached(byteLength))) {
+        object = this.keyDecoder.decode(this.bytes, offset, byteLength);
+      } else {
+        object = utf8Decode2(this.bytes, offset, byteLength);
+      }
+      this.pos += headerOffset + byteLength;
+      return object;
+    };
+    Decoder3.prototype.stateIsMapKey = function() {
+      if (this.stack.length > 0) {
+        var state = this.stack[this.stack.length - 1];
+        return state.type === STATE_MAP_KEY2;
+      }
+      return false;
+    };
+    Decoder3.prototype.decodeBinary = function(byteLength, headOffset) {
+      if (byteLength > this.maxBinLength) {
+        throw new DecodeError2("Max length exceeded: bin length (".concat(byteLength, ") > maxBinLength (").concat(this.maxBinLength, ")"));
+      }
+      if (!this.hasRemaining(byteLength + headOffset)) {
+        throw MORE_DATA2;
+      }
+      var offset = this.pos + headOffset;
+      var object = this.bytes.subarray(offset, offset + byteLength);
+      this.pos += headOffset + byteLength;
+      return object;
+    };
+    Decoder3.prototype.decodeExtension = function(size, headOffset) {
+      if (size > this.maxExtLength) {
+        throw new DecodeError2("Max length exceeded: ext length (".concat(size, ") > maxExtLength (").concat(this.maxExtLength, ")"));
+      }
+      var extType = this.view.getInt8(this.pos + headOffset);
+      var data = this.decodeBinary(
+        size,
+        headOffset + 1
+        /* extType */
+      );
+      return this.extensionCodec.decode(data, extType, this.context);
+    };
+    Decoder3.prototype.lookU8 = function() {
+      return this.view.getUint8(this.pos);
+    };
+    Decoder3.prototype.lookU16 = function() {
+      return this.view.getUint16(this.pos);
+    };
+    Decoder3.prototype.lookU32 = function() {
+      return this.view.getUint32(this.pos);
+    };
+    Decoder3.prototype.readU8 = function() {
+      var value = this.view.getUint8(this.pos);
+      this.pos++;
+      return value;
+    };
+    Decoder3.prototype.readI8 = function() {
+      var value = this.view.getInt8(this.pos);
+      this.pos++;
+      return value;
+    };
+    Decoder3.prototype.readU16 = function() {
+      var value = this.view.getUint16(this.pos);
+      this.pos += 2;
+      return value;
+    };
+    Decoder3.prototype.readI16 = function() {
+      var value = this.view.getInt16(this.pos);
+      this.pos += 2;
+      return value;
+    };
+    Decoder3.prototype.readU32 = function() {
+      var value = this.view.getUint32(this.pos);
+      this.pos += 4;
+      return value;
+    };
+    Decoder3.prototype.readI32 = function() {
+      var value = this.view.getInt32(this.pos);
+      this.pos += 4;
+      return value;
+    };
+    Decoder3.prototype.readU64 = function() {
+      var value = getUint642(this.view, this.pos);
+      this.pos += 8;
+      return value;
+    };
+    Decoder3.prototype.readI64 = function() {
+      var value = getInt642(this.view, this.pos);
+      this.pos += 8;
+      return value;
+    };
+    Decoder3.prototype.readU64AsBigInt = function() {
+      var value = this.view.getBigUint64(this.pos);
+      this.pos += 8;
+      return value;
+    };
+    Decoder3.prototype.readI64AsBigInt = function() {
+      var value = this.view.getBigInt64(this.pos);
+      this.pos += 8;
+      return value;
+    };
+    Decoder3.prototype.readF32 = function() {
+      var value = this.view.getFloat32(this.pos);
+      this.pos += 4;
+      return value;
+    };
+    Decoder3.prototype.readF64 = function() {
+      var value = this.view.getFloat64(this.pos);
+      this.pos += 8;
+      return value;
+    };
+    return Decoder3;
+  }()
+);
+
+// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/decode.mjs
+function decode2(buffer, options) {
+  var decoder = new Decoder2(options);
+  return decoder.decode(buffer);
+}
+
 // dist/bumper-control.js
 var BumperControl = class {
   constructor(config) {
@@ -15899,6 +17052,7 @@ export {
   UpdateVariables,
   dist_exports as calendar,
   createPresetControls,
+  decode2 as decode,
   registerPresets,
   rpc2 as rpc,
   setupBikeAnalysis,
