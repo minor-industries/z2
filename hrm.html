@@ -122,6 +122,10 @@
             }]);
             createValue("test", (new Date()).getTime(), 65.5);
         }, 1000);
+
+        subscribe((...args) => {
+            console.log("subscribe callback:", args);
+        });
     });
 </script>
 

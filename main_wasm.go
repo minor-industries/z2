@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database/inmem"
+	"github.com/minor-industries/rtgraph/messages"
+	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"syscall/js"
@@ -53,6 +55,28 @@ func run() error {
 		}
 
 		return js.Undefined()
+	}))
+
+	js.Global().Set("subscribe", js.FuncOf(func(this js.Value, args []js.Value) any {
+		now := time.Now()
+		msgs := make(chan *messages.Data)
+		go graph.Subscribe(&subscription.Request{
+			Series:      []string{"heartrate"},
+			WindowSize:  0,
+			LastPointMs: 0,
+			Date:        "",
+		}, now, msgs)
+
+		callback := args[0]
+
+		go func() {
+			for msg := range msgs {
+				fmt.Println(msg)
+				callback.Invoke()
+			}
+		}()
+
+		return js.Null()
 	}))
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
