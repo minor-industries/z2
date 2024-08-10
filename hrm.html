@@ -85,8 +85,13 @@
 
 <script type="module">
     import {Graph} from './static/dist/bundle.js';
+    import {runWasm} from "./startup.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
+    runWasm();
+
+    document.addEventListener("wasmReady", () => {
+        console.log("WASM is ready!");
+
         const second = 1000;
         const minute = second * 60;
         const seriesOpts = {
@@ -115,10 +120,9 @@
                 Timestamps: [new Date().getTime()],
                 Values: [65.0 + 2 * Math.random()],
             }]);
+            createValue("test", (new Date()).getTime(), 65.5);
         }, 1000);
     });
-
-
 </script>
 
 <div class="pure-g">

@@ -29,9 +29,7 @@ func run() error {
 		Backups:           nil,
 		Devices:           nil,
 	}
-
-	fmt.Println(opts)
-
+	_ = opts
 	errCh := make(chan error)
 
 	var err error
@@ -47,17 +45,25 @@ func run() error {
 
 	js.Global()
 
-	fmt.Println(graph)
+	js.Global().Set("createValue", js.FuncOf(func(this js.Value, args []js.Value) any {
+		seriesName := args[0].String()
+		ts := time.UnixMilli(int64(args[1].Int()))
+		value := args[2].Float()
 
-	if err := graph.CreateValue(
-		"some_metric",
-		time.Now(),
-		1.73,
-	); err != nil {
-		return (err)
-	}
+		fmt.Println("createValue", seriesName, ts, value)
 
-	return nil
+		if err := graph.CreateValue(seriesName, ts, value); err != nil {
+			panic(errors.Wrap(err, "create value"))
+		}
+
+		return js.Undefined()
+	}))
+	fmt.Println("registered", "createValue")
+
+	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
+	js.Global().Get("document").Call("dispatchEvent", eventInit)
+
+	select {}
 }
 
 func main() {

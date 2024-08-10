@@ -1,6 +1,6 @@
 import './wasm_exec.js';
 
-async function runWasm() {
+export async function runWasm() {
     const go = new Go();
 
     const response = await fetch('z2.wasm');
@@ -9,5 +9,3 @@ async function runWasm() {
     const instance = await WebAssembly.instantiate(module, go.importObject);
     await go.run(instance);
 }
-
-await runWasm();
