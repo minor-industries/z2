@@ -8,6 +8,7 @@ import (
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
+	"math/rand"
 	"syscall/js"
 	"time"
 )
@@ -70,9 +71,16 @@ func run() error {
 		callback := args[0]
 
 		go func() {
-			for msg := range msgs {
-				fmt.Println(msg)
-				callback.Invoke()
+			for data := range msgs {
+				binmsg, err := data.MarshalMsg(nil)
+				if err != nil {
+					panic(err)
+				}
+
+				uint8Array := js.Global().Get("Uint8Array").New(len(binmsg))
+				js.CopyBytesToJS(uint8Array, binmsg)
+
+				callback.Invoke(uint8Array)
 			}
 		}()
 
@@ -81,6 +89,17 @@ func run() error {
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
+
+	go func() {
+		ticker := time.NewTicker(time.Second)
+
+		for t := range ticker.C {
+			err := graph.CreateValue("heartrate", t, 70+2*rand.Float64())
+			if err != nil {
+				panic(err)
+			}
+		}
+	}()
 
 	select {}
 }
