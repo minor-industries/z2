@@ -13,6 +13,7 @@ import (
 )
 
 func run() error {
+	fmt.Println("in wasm run()")
 	opts := cfg.Config{
 		Source:            "bike",
 		ReplayDB:          "",
@@ -33,6 +34,9 @@ func run() error {
 	}
 	_ = opts
 	errCh := make(chan error)
+
+	dbManager := js.Global().Get("dbManager")
+	fmt.Println(dbManager.String())
 
 	var err error
 	graph, err := rtgraph.New(
