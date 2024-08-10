@@ -43,14 +43,10 @@ func run() error {
 		return errors.Wrap(err, "new rtgraph")
 	}
 
-	js.Global()
-
 	js.Global().Set("createValue", js.FuncOf(func(this js.Value, args []js.Value) any {
 		seriesName := args[0].String()
 		ts := time.UnixMilli(int64(args[1].Int()))
 		value := args[2].Float()
-
-		fmt.Println("createValue", seriesName, ts, value)
 
 		if err := graph.CreateValue(seriesName, ts, value); err != nil {
 			panic(errors.Wrap(err, "create value"))
@@ -58,7 +54,6 @@ func run() error {
 
 		return js.Undefined()
 	}))
-	fmt.Println("registered", "createValue")
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
