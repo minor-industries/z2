@@ -8,7 +8,6 @@ import (
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
-	"math/rand"
 	"syscall/js"
 	"time"
 )
@@ -89,17 +88,6 @@ func run() error {
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
-
-	go func() {
-		ticker := time.NewTicker(time.Second)
-
-		for t := range ticker.C {
-			err := graph.CreateValue("heartrate", t, 70+2*rand.Float64())
-			if err != nil {
-				panic(err)
-			}
-		}
-	}()
 
 	select {}
 }
