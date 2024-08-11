@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
-	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
+	"github.com/minor-industries/z2/capacitor_sqlite"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"syscall/js"
