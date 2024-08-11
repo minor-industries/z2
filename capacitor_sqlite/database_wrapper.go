@@ -21,27 +21,23 @@ func NewDatabaseManagerWrapper(dbManager js.Value) (*DatabaseManagerWrapper, err
 }
 
 func (dmw *DatabaseManagerWrapper) LoadDataWindow(seriesName string, start time.Time) (schema.Series, error) {
-	promise := dmw.dbManager.Call("loadDataWindow", seriesName, start.Unix())
+	promise := dmw.dbManager.Call("loadDataWindow", seriesName, start.UnixMilli())
 
 	dbResult := await(promise)
-	if !dbResult.Truthy() {
-		return schema.Series{}, fmt.Errorf("failed to load data window")
+	fmt.Println("DB Result received:", dbResult)
+
+	if dbResult.IsUndefined() || dbResult.Type() != js.TypeObject {
+		return schema.Series{}, fmt.Errorf("failed to load data window: result is undefined or not an object")
 	}
 
-	rows := dbResult.Get("rows")
-	fmt.Println("Rows received:", rows)
-
-	if rows.IsUndefined() || rows.Type() != js.TypeObject {
-		return schema.Series{}, fmt.Errorf("rows is undefined or not an object")
-	}
-
+	// Assuming dbResult is an array
 	result := schema.Series{
 		SeriesName: seriesName,
 	}
-	result.Values = make([]schema.Value, rows.Length())
+	result.Values = make([]schema.Value, dbResult.Length())
 
-	for i := 0; i < rows.Length(); i++ {
-		row := rows.Index(i)
+	for i := 0; i < dbResult.Length(); i++ {
+		row := dbResult.Index(i)
 		result.Values[i] = schema.Value{
 			Timestamp: time.UnixMilli(int64(row.Get("Timestamp").Int())),
 			Value:     row.Get("Value").Float(),
@@ -73,7 +69,7 @@ func (dmw *DatabaseManagerWrapper) CreateSeries(seriesNames []string) error {
 }
 
 func (dmw *DatabaseManagerWrapper) InsertValue(seriesName string, timestamp time.Time, value float64) error {
-	promise := dmw.dbManager.Call("insertValue", seriesName, timestamp.Unix(), value)
+	promise := dmw.dbManager.Call("insertValue", seriesName, timestamp.UnixMilli(), value)
 
 	result := await(promise)
 	if !result.Truthy() {
