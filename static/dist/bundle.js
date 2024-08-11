@@ -15104,6 +15104,15 @@ var Graph = class {
     const lastPoint = data[data.length - 1];
     return lastPoint[0].getTime();
   }
+  subscriptionRequest() {
+    let lastPointMs = this.getLastTimestamp();
+    return {
+      series: this.opts.seriesNames,
+      windowSize: this.windowSize || 0,
+      lastPointMs,
+      date: this.opts.date
+    };
+  }
   connect() {
     const url = `ws://${window.location.hostname}:${window.location.port}/rtgraph/ws`;
     const ws = new WebSocket(url);
@@ -15127,14 +15136,7 @@ var Graph = class {
     ws.onopen = (event) => {
       setTimeout(() => {
         let lastPointMs = this.getLastTimestamp();
-        ws.send(JSON.stringify({
-          series: this.opts.seriesNames,
-          windowSize: this.windowSize || 0,
-          lastPointMs,
-          maxGapMs: this.opts.maxGapMs || 60 * 1e3,
-          // 60 seconds in ms
-          date: this.opts.date
-        }));
+        ws.send(JSON.stringify(this.subscriptionRequest()));
       });
     };
     ws.onerror = (err) => {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/messages"
@@ -68,14 +69,16 @@ func run() error {
 	js.Global().Set("subscribe", js.FuncOf(func(this js.Value, args []js.Value) any {
 		now := time.Now()
 		msgs := make(chan *messages.Data)
-		go graph.Subscribe(&subscription.Request{
-			Series:      []string{"heartrate"},
-			WindowSize:  0,
-			LastPointMs: 0,
-			Date:        "",
-		}, now, msgs)
 
-		callback := args[0]
+		req := subscription.Request{}
+		err := json.Unmarshal([]byte(args[0].String()), &req)
+		if err != nil {
+			panic(errors.Wrap(err, "unmarshal"))
+		}
+
+		go graph.Subscribe(&req, now, msgs)
+
+		callback := args[1]
 
 		go func() {
 			for data := range msgs {
