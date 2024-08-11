@@ -14,6 +14,7 @@ github.com/cloudwego/base64x v0.1.4 h1:jwCgWpFanWmN8xoIUHa2rtzmkd5J2plF/dnLS6Xd/
 github.com/cloudwego/base64x v0.1.4/go.mod h1:0zlkT4Wn5C6NdauXdJRhSKRlJvmclQ1hhJgA0rcu/8w=
 github.com/cloudwego/iasm v0.2.0 h1:1KNIy1I1H9hNNFEEH3DVnI4UujN+1zjpuk6gwHLTssg=
 github.com/cloudwego/iasm v0.2.0/go.mod h1:8rXZaNYT2n95jn+zTI1sDr+IgcD2GVs0nlbbQPiEFhY=
+github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -80,12 +81,12 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/minor-industries/calendar v0.0.2 h1:z0HSSbS/dC4NktGuWPNYtV7/EMhjaN9nLB0nVxMGIyY=
 github.com/minor-industries/calendar v0.0.2/go.mod h1:ObostlqefZmRtphanxopvWSVW2dhQ2KiJCqC5jZvQZc=
-github.com/minor-industries/platform v0.0.3 h1:DdVgTQL7DmO4RTtASLSopuPsHvdcKISG0TMekPxDOrc=
-github.com/minor-industries/platform v0.0.3/go.mod h1:nkESvK2vUWSKXkTARDVLlAw6TesN3/FCwcWj2L3bDlY=
-github.com/minor-industries/rtgraph v0.0.17-0.20240807032516-3af4d5d26fc3 h1:A0IuKr53Tf3c1Jx+RgPoTQiYDBVWeSqLJLDODs+Ourg=
-github.com/minor-industries/rtgraph v0.0.17-0.20240807032516-3af4d5d26fc3/go.mod h1:DCeplMmELVj4HbtNEB5g7UKYZYVqQsMhsf70lf55HKU=
-github.com/minor-industries/rtgraph v0.0.17-0.20240811035600-628b6593585e h1:N435CA8pQwdQh19nI9gOjYXEZl1uk2cdCmNTxRbsHQA=
-github.com/minor-industries/rtgraph v0.0.17-0.20240811035600-628b6593585e/go.mod h1:DCeplMmELVj4HbtNEB5g7UKYZYVqQsMhsf70lf55HKU=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811042435-176d972756f7 h1:FF7gmR23BmYs12jyM2FNz4qsJTamYJ1/8upDg3T/lW0=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811042435-176d972756f7/go.mod h1:DCeplMmELVj4HbtNEB5g7UKYZYVqQsMhsf70lf55HKU=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811045515-5a2bec623825 h1:LJI5CjMjPsEEJOL4z5JF84R4PAEeAW+M6fa+QSZaTjQ=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811045515-5a2bec623825/go.mod h1:1eBfl6W0lshhFeQY8cFePg2lT5uWswD7VZOvbalCqDQ=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811050412-701e327b12b9 h1:iZLcGtI3/rllsxEpsaC+jsT1ga9srp4cwLO8KQz8pi0=
+github.com/minor-industries/rtgraph v0.0.18-0.20240811050412-701e327b12b9/go.mod h1:1eBfl6W0lshhFeQY8cFePg2lT5uWswD7VZOvbalCqDQ=
 github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w8PVh93nsPXa1VrQ6jlwL5oN8l14QlcNfg=
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
@@ -150,8 +151,6 @@ github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65E
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/webview/webview_go v0.0.0-20240220051247-56f456ca3a43 h1:PwbNdNumoKba+ZgrE6ZpSluJfNJfyMuqwVyUB5+iLDI=
 github.com/webview/webview_go v0.0.0-20240220051247-56f456ca3a43/go.mod h1:yE65LFCeWf4kyWD5re+h4XNvOHJEXOCOuJZ4v8l5sgk=
-go.uber.org/atomic v1.11.0 h1:ZvwS0R+56ePWxUNi+Atn9dWONBPp/AUETXlHW0DxSjE=
-go.uber.org/atomic v1.11.0/go.mod h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.8.0 h1:3wRIsP3pM4yUptoR96otTUOXI367OS0+c9eeRi9doIc=
 golang.org/x/arch v0.8.0/go.mod h1:FEVrYAQjsQXMVJ1nsMoVVXPZg6p2JE2mx8psSWTDQys=

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
-	"github.com/minor-industries/rtgraph/database/inmem"
+	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/cfg"
@@ -38,9 +38,13 @@ func run() error {
 	dbManager := js.Global().Get("dbManager")
 	fmt.Println(dbManager.String())
 
-	var err error
+	db, err := capacitor_sqlite.NewDatabaseManagerWrapper(dbManager)
+	if err != nil {
+		return errors.Wrap(err, "new db manager")
+	}
+
 	graph, err := rtgraph.New(
-		inmem.NewBackend(),
+		db,
 		errCh,
 		rtgraph.Opts{},
 		[]string{},
