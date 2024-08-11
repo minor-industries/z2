@@ -69,6 +69,7 @@ func (dmw *DatabaseManagerWrapper) CreateSeries(seriesNames []string) error {
 }
 
 func (dmw *DatabaseManagerWrapper) InsertValue(seriesName string, timestamp time.Time, value float64) error {
+	fmt.Println("insertValue", seriesName, timestamp.UnixMilli(), value)
 	promise := dmw.dbManager.Call("insertValue", seriesName, timestamp.UnixMilli(), value)
 
 	result := await(promise)
