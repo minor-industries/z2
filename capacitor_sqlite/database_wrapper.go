@@ -36,7 +36,7 @@ func (dmw *DatabaseManagerWrapper) LoadDataWindow(seriesName string, start time.
 	promise := dmw.dbManager.Call("loadDataWindow", seriesName, start.UnixMilli())
 
 	dbResult := await(promise)
-	fmt.Println("DB Result received:", dbResult.Length())
+	//fmt.Println("DB Result received:", dbResult.Length())
 
 	if dbResult.IsUndefined() || dbResult.Type() != js.TypeObject {
 		return schema.Series{}, fmt.Errorf("failed to load data window: result is undefined or not an object")
@@ -83,16 +83,16 @@ func (dmw *DatabaseManagerWrapper) CreateSeries(seriesNames []string) error {
 }
 
 func (dmw *DatabaseManagerWrapper) InsertValue(seriesName string, timestamp time.Time, value float64) error {
-	fmt.Println("insertValue", seriesName, timestamp.UnixMilli(), value)
+	//fmt.Println("insertValue", seriesName, timestamp.UnixMilli(), value)
 	promise := dmw.dbManager.Call("insertValue", seriesName, timestamp.UnixMilli(), value)
 
 	result := await(promise)
 	if !result.Truthy() {
-		fmt.Println("dmw: failed to insert value")
+		//fmt.Println("dmw: failed to insert value")
 		return fmt.Errorf("failed to insert value")
 	}
 
-	fmt.Println("dmw: inserted value")
+	//fmt.Println("dmw: inserted value")
 	return nil
 }
 
