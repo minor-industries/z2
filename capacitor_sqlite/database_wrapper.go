@@ -20,11 +20,23 @@ func NewDatabaseManagerWrapper(dbManager js.Value) (*DatabaseManagerWrapper, err
 	return &DatabaseManagerWrapper{dbManager: dbManager}, nil
 }
 
+func printKeys(jsObject js.Value) {
+	// Get the keys of the object
+	keys := js.Global().Get("Object").Call("keys", jsObject)
+
+	// Iterate over the keys and print them
+	for i := 0; i < keys.Length(); i++ {
+		key := keys.Index(i).String()
+		value := jsObject.Get(key)
+		fmt.Printf("Key: %s, Value: %v\n", key, value)
+	}
+}
+
 func (dmw *DatabaseManagerWrapper) LoadDataWindow(seriesName string, start time.Time) (schema.Series, error) {
 	promise := dmw.dbManager.Call("loadDataWindow", seriesName, start.UnixMilli())
 
 	dbResult := await(promise)
-	fmt.Println("DB Result received:", dbResult)
+	fmt.Println("DB Result received:", dbResult.Length())
 
 	if dbResult.IsUndefined() || dbResult.Type() != js.TypeObject {
 		return schema.Series{}, fmt.Errorf("failed to load data window: result is undefined or not an object")
@@ -38,9 +50,11 @@ func (dmw *DatabaseManagerWrapper) LoadDataWindow(seriesName string, start time.
 
 	for i := 0; i < dbResult.Length(); i++ {
 		row := dbResult.Index(i)
+		//printKeys(row)
+
 		result.Values[i] = schema.Value{
-			Timestamp: time.UnixMilli(int64(row.Get("Timestamp").Int())),
-			Value:     row.Get("Value").Float(),
+			Timestamp: time.UnixMilli(int64(row.Get("timestamp").Int())),
+			Value:     row.Get("value").Float(),
 		}
 	}
 
@@ -74,9 +88,11 @@ func (dmw *DatabaseManagerWrapper) InsertValue(seriesName string, timestamp time
 
 	result := await(promise)
 	if !result.Truthy() {
+		fmt.Println("dmw: failed to insert value")
 		return fmt.Errorf("failed to insert value")
 	}
 
+	fmt.Println("dmw: inserted value")
 	return nil
 }
 
