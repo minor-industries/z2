@@ -12,7 +12,7 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/jinzhu/now v1.1.5
 	github.com/minor-industries/calendar v0.0.2
-	github.com/minor-industries/rtgraph v0.0.17-0.20240807032516-3af4d5d26fc3
+	github.com/minor-industries/rtgraph v0.0.17-0.20240811035600-628b6593585e
 	github.com/pkg/errors v0.9.1
 	github.com/samber/lo v1.46.0
 	github.com/stretchr/testify v1.9.0

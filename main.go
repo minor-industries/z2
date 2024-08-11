@@ -25,6 +25,7 @@ import (
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	webview "github.com/webview/webview_go"
 	"html/template"
 	"net/http"
@@ -122,7 +123,21 @@ func run() error {
 	go br.Start()
 
 	z2App := app.NewApp(graph, vars, br, opts.Source, opts.Audio)
-	router := graph.GetEngine()
+
+	router := gin.New()
+	router.Use(gin.Recovery())
+	skipLogging := []string{"/metrics"}
+	router.Use(gin.LoggerWithWriter(gin.DefaultWriter, skipLogging...))
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
+	router.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(204)
+	})
+
+	router.GET("/", func(c *gin.Context) {
+		c.Redirect(http.StatusMovedPermanently, "/static/index.html")
+	})
+
+	graph.SetupServer(router.Group("/rtgraph"))
 
 	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*"))
 	router.SetHTMLTemplate(tmpl)
@@ -186,14 +201,6 @@ func run() error {
 		router.StaticFS("/static", http.FS(static.FS))
 	}
 
-	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/static/index.html")
-	})
-
-	router.GET("/favicon.ico", func(c *gin.Context) {
-		c.Status(204)
-	})
-
 	apiHandler := app.NewApiServer(backends, vars)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
@@ -256,7 +263,7 @@ func run() error {
 	}
 
 	go func() {
-		errCh <- graph.RunServer(fmt.Sprintf("0.0.0.0:%d", opts.Port))
+		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
 	go func() {
