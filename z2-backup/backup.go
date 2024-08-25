@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"os"
@@ -50,7 +51,7 @@ func run() error {
 		return errors.Wrap(err, "mkdir backup path")
 	}
 
-	db, err := database.Get(dbFile)
+	db, err := sqlite.Get(dbFile)
 	if err != nil {
 		return errors.Wrap(err, "get database")
 	}
