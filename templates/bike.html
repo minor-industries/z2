@@ -48,12 +48,12 @@
 
         new Graph(document.getElementById("graphdiv2"), {
             seriesNames: [
-                "bike_instant_power | gt 150 | avg 30s triangle",
-                "bike_instant_power"
+                "heartrate | gt 0 | avg 2m triangle",
+                "heartrate | gt 0"
             ],
-            title: "Power: {value}",
-            ylabel: "power (watts)",
-            windowSize: minute,
+            title: "Heartrate: {value}",
+            ylabel: "bpm",
+            windowSize: 2 * minute,
             height: 250,
             series: seriesOpts,
             maxGapMs: 5 * second
@@ -76,7 +76,7 @@
 
         new Graph(document.getElementById("graphdiv4"), {
             seriesNames: [
-                "heartrate | gt 0 | avg 2m triangle",
+                "heartrate | gt 0 | avg 15m triangle",
                 "heartrate | gt 0"
             ],
             title: "Heartrate: {value}",
