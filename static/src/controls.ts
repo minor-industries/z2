@@ -1,5 +1,4 @@
 import {BumperControl} from "./bumper-control.js";
-import {ReadVariables, ReadVariablesResp} from "./api.js";
 import {ApiClient} from "./api_client";
 
 export function setupControls(
@@ -31,7 +30,7 @@ function setupBikeControls(
         fixed: 2
     });
 
-    const bc2 = new BumperControl(apiClient,{
+    const bc2 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Max Drift %',
         variableName: `bike_max_drift_pct${suffix}`,
@@ -40,7 +39,7 @@ function setupBikeControls(
         fixed: 1
     });
 
-    const bc3 = new BumperControl(apiClient,{
+    const bc3 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Max Error %',
         variableName: `bike_allowed_error_pct${suffix}`,
@@ -123,6 +122,7 @@ const variableLists: VariableLists = {
 }
 
 export async function registerPresets(
+    apiClient: ApiClient,
     controls: BumperControl[],
     kind: string,
 ): Promise<void> {
@@ -133,7 +133,7 @@ export async function registerPresets(
             const variables = variableLists[kind];
 
             const presetNames = variables.map(name => `${name}${suffix}`);
-            const resp: ReadVariablesResp = await ReadVariables({variables: presetNames});
+            const resp = await apiClient.ReadVariables({variables: presetNames});
 
             const controlVariables = variables.slice(0, -1);
 

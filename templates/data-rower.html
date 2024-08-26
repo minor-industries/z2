@@ -1,14 +1,14 @@
 {{ template "header" . }}
 
 <script type="module">
-    import {setupRowerAnalysis} from "/static/dist/z2-bundle.js";
+    import {DefaultApiClient, setupRowerAnalysis} from "/static/dist/z2-bundle.js";
 
     const url = new URL(window.location.href);
     const params = new URLSearchParams(url.search);
     const date = params.get('date');
 
     document.addEventListener("DOMContentLoaded", () => {
-        setupRowerAnalysis(date);
+        setupRowerAnalysis(new DefaultApiClient(), date);
     });
 </script>
 

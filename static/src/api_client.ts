@@ -1,15 +1,50 @@
 import {rpc} from "./rpc.js";
 
-import {
-    AddMarkerReq,
-    DeleteRangeReq,
-    Empty,
-    LoadMarkersReq,
-    LoadMarkersResp,
-    ReadVariablesReq,
-    ReadVariablesResp,
-    UpdateVariablesReq
-} from "./api";
+export type Marker = {
+    id: string;
+    type: string;
+    ref: string;
+    timestamp: number;
+};
+
+export interface AddMarkerReq {
+    marker: Marker;
+}
+
+export interface DeleteRangeReq {
+    start: number;
+    end: number;
+}
+
+export interface Variable {
+    name: string;
+    value: number;
+    present: boolean;
+}
+
+export interface UpdateVariablesReq {
+    variables: Variable[];
+}
+
+export interface ReadVariablesReq {
+    variables: string[];
+}
+
+export interface ReadVariablesResp {
+    variables: Variable[];
+}
+
+export interface LoadMarkersReq {
+    ref: string;
+    date: string; // Date in the format "2024-01-02"
+}
+
+export interface LoadMarkersResp {
+    markers: Marker[];
+}
+
+export type Empty = {};
+
 
 export interface ApiClient {
     AddMarker(req: AddMarkerReq): Promise<Empty>;

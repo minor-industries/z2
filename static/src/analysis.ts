@@ -1,8 +1,8 @@
 import {DrawCallbackArgs, Graph, synchronize} from 'rtgraph';
-import * as api from "./api";
 import {dygraphs} from 'dygraphs'
 import {v4 as uuidv4} from 'uuid';
 import * as agg from "./aggregate"
+import {ApiClient} from "./api_client";
 
 
 export type Marker = {
@@ -12,10 +12,10 @@ export type Marker = {
     timestamp: number
 }
 
-export async function saveMarkers(markers: Marker[]) {
+export async function saveMarkers(apiClient: ApiClient, markers: Marker[]) {
     for (let i = 0; i < markers.length; i++) {
         const m = markers[i];
-        await api.AddMarker({
+        await apiClient.AddMarker({
             marker: m,
         });
     }
@@ -29,7 +29,7 @@ export type AnalysisArgs = {
     ylabel: string,
 };
 
-export function setupAnalysis(args: AnalysisArgs) {
+export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
     const second = 1000;
 
     const markers: Marker[] = [];
@@ -138,7 +138,7 @@ export function setupAnalysis(args: AnalysisArgs) {
         range: false,
     });
 
-    const keyDown = (ev: KeyboardEvent) => {
+    const keyDown = async (ev: KeyboardEvent) => {
         switch (ev.code) {
             case "KeyD":
                 const range = (graphs[0] as any).xAxisRange();
@@ -153,7 +153,7 @@ export function setupAnalysis(args: AnalysisArgs) {
                 const ok = confirm(prompt)
                 if (ok) {
                     alert(`deleting ${dateRange}`)
-                    return api.DeleteRange({
+                    return apiClient.DeleteRange({
                         start: start,
                         end: end,
                     });
@@ -161,7 +161,7 @@ export function setupAnalysis(args: AnalysisArgs) {
                 return;
             case "KeyS":
                 if (confirm("save markers?")) {
-                    saveMarkers(markers);
+                    await saveMarkers(apiClient, markers);
                 }
                 return;
             default:
@@ -169,7 +169,7 @@ export function setupAnalysis(args: AnalysisArgs) {
         }
     };
 
-    api.LoadMarkers({date: args.date, ref: args.ref}).then(resp => {
+    apiClient.LoadMarkers({date: args.date, ref: args.ref}).then(resp => {
         markers.push(...resp.markers);
         updateAnnotations();
     })

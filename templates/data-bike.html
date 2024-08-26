@@ -1,14 +1,14 @@
 {{ template "header" . }}
 
 <script type="module">
-    import {setupBikeAnalysis} from "/static/dist/z2-bundle.js";
+    import {DefaultApiClient, setupBikeAnalysis} from "/static/dist/z2-bundle.js";
 
     const url = new URL(window.location.href);
     const params = new URLSearchParams(url.search);
     const date = params.get('date');
 
     document.addEventListener("DOMContentLoaded", () => {
-        setupBikeAnalysis(date);
+        setupBikeAnalysis(new DefaultApiClient(), date);
     });
 </script>
 

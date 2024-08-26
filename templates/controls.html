@@ -44,8 +44,9 @@
     import {registerPresets, setupControls, DefaultApiClient} from "/static/dist/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", () => {
-        const controls = setupControls(new DefaultApiClient(), 'controls-container', "{{.}}");
-        registerPresets(controls, "{{.}}");
+        const apiClient = new DefaultApiClient();
+        const controls = setupControls(apiClient, 'controls-container', "{{.}}");
+        registerPresets(apiClient, controls, "{{.}}");
     });
 </script>
 
