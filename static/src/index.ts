@@ -4,6 +4,9 @@ import {setupBikeAnalysis} from "./bike";
 import {setupRowerAnalysis} from "./rower";
 import {decode} from "@msgpack/msgpack"
 
+//@ts-ignore
+import {runWasm} from "./startup.js";
+
 export * from "./api.js";
 export * from "./rpc.js";
 export * from "./bumper-control.js";
@@ -16,4 +19,5 @@ export {
     setupBikeAnalysis,
     setupRowerAnalysis,
     decode,
+    runWasm,
 };

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bike</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="static/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="static/rtgraph.css"/>
+
+    <link rel="stylesheet" type="text/css" href="static/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="static/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="static/purecss/grids-responsive-min.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/bumper-control.css">
+</head>
+<body>
+
+<h1>HRM</h1>
+
+<audio id="sound-fast">
+    <source src="/static/sounds/fast.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sound-slow">
+    <source src="/static/sounds/slow.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="sound-fairway">
+    <source src="/static/sounds/fairway.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    let i = 0;
+    const sounds = ["sound-fairway", "sound-slow", "sound-fast"]
+
+    function playSound() {
+        i %= sounds.length;
+        const audio = document.getElementById(sounds[i]);
+        i++;
+        audio.play();
+    }
+</script>
+
+<div id="controls-container" class="pure-g">
+    <div class="bumper-container pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
+        <button class="pure-button pure-button-primary" style="margin: 2px;" onclick="playSound()">
+            Sound
+        </button>
+
+        <button id="presetA" class="pure-button pure-button-primary" style="margin: 2px;">A</button>
+        <button id="presetB" class="pure-button pure-button-primary" style="margin: 2px;">B</button>
+        <button id="presetC" class="pure-button pure-button-primary" style="margin: 2px;">C</button>
+        <button id="presetD" class="pure-button pure-button-primary" style="margin: 2px;">D</button>
+        <span id="timerDisplay" style="margin-left: 10px; font-size: 1.5em;">00:00</span>
+    </div>
+
+
+</div>
+
+<script type="module">
+    import {registerPresets, setupControls} from "./static/dist/bundle.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const controls = setupControls('controls-container', "bike");
+        registerPresets(controls, "bike");
+    });
+</script>
+
+
+<script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+        const es = new EventSource('/events');
+
+        es.onmessage = (event) => {
+            console.log("event:", event.data)
+
+            const audio = document.getElementById(`sound-${event.data}`);
+            audio.play();
+        };
+    });
+</script>
+
+
+<script type="module">
+    import {Graph} from './static/dist/bundle.js';
+    import {runWasm, runApp} from "./bundle.js";
+    import {DatabaseManager, decode} from './bundle.js';
+
+    (async () => {
+        console.log("in async setup");
+        try {
+            window.dbManager = new DatabaseManager("z2")
+            await window.dbManager.init();
+            await window.dbManager.initializeDatabase();
+            // await window.dbManager.db.run("delete from samples");
+            // await window.dbManager.db.run("delete from series");
+        } catch (e) {
+            console.log(`error setting up database manager: ${e}`)
+        }
+        console.log("db init");
+
+        const wasmDonePromise = runWasm();
+
+        document.addEventListener("wasmReady", async () => {
+            console.log("WASM is ready!");
+
+            await runApp();
+
+            const second = 1000;
+            const minute = second * 60;
+            const seriesOpts = {
+                y2: {strokeWidth: 1.0},
+                y3: {strokeWidth: 1.0, color: "red"},
+                y4: {strokeWidth: 1.0, color: "red"},
+            }
+
+            { // g1
+                const g = new Graph(document.getElementById("graphdiv1"), {
+                    seriesNames: [
+                        "heartrate | gt 0 | avg 2m triangle",
+                        "heartrate | gt 0"
+                    ],
+                    title: "Heartrate: {value}",
+                    ylabel: "bpm",
+                    windowSize: 2 * minute,
+                    height: 250,
+                    series: seriesOpts,
+                    maxGapMs: 5 * second,
+                    connect: false,
+                });
+
+                const req = g.subscriptionRequest()
+                console.log(req);
+
+                subscribe(JSON.stringify(req), data => {
+                    // console.log("subscribe callback:", data);
+                    const msg = decode(data);
+                    // console.log(msg);
+
+                    if (msg.rows !== undefined) {
+                        g.update(msg.rows)
+                    }
+                });
+            }
+
+            { // g2
+                const g = new Graph(document.getElementById("graphdiv2"), {
+                    seriesNames: [
+                        "heartrate | gt 0 | avg 15m triangle",
+                        "heartrate | gt 0"
+                    ],
+                    title: "Heartrate: {value}",
+                    ylabel: "bpm",
+                    windowSize: 15 * minute,
+                    height: 250,
+                    series: seriesOpts,
+                    maxGapMs: 5 * second,
+                    connect: false,
+                });
+
+                const req = g.subscriptionRequest()
+                console.log(req);
+
+                subscribe(JSON.stringify(req), data => {
+                    // console.log("subscribe callback:", data);
+                    const msg = decode(data);
+                    // console.log(msg);
+
+                    if (msg.rows !== undefined) {
+                        g.update(msg.rows)
+                    }
+                });
+            }
+        });
+    })();
+</script>
+
+<div class="pure-g">
+    <div class="pure-u-1 pure-u-sm-3-3">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
+    </div>
+    <div class="pure-u-1 pure-u-sm-3-3">
+        <div id="graphdiv2" class="rtgraph-graph"></div>
+    </div>
+</div>
+
+<p>heart rate: <span id="hr"></span></p>
+
+</body>
+</html>
+

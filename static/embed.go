@@ -5,5 +5,5 @@ import (
 )
 
 //go:embed *.html *.css sounds/*.mp3
-//go:embed dist/bundle.js
+//go:embed dist/z2-bundle.js
 var FS embed.FS
