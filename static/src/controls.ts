@@ -1,25 +1,28 @@
 import {BumperControl} from "./bumper-control.js";
 import {ReadVariables, ReadVariablesResp} from "./api.js";
+import {ApiClient} from "./api_client";
 
 export function setupControls(
+    apiClient: ApiClient,
     containerId: string,
     kind: string,
     suffix = ""
 ): BumperControl[] {
     if (kind === "bike") {
-        return setupBikeControls(containerId, suffix);
+        return setupBikeControls(apiClient, containerId, suffix);
     } else if (kind === "rower") {
-        return setupRowerControls(containerId, suffix);
+        return setupRowerControls(apiClient, containerId, suffix);
     }
 
     throw new Error(`unknown kind: ${kind}`);
 }
 
 function setupBikeControls(
+    apiClient: ApiClient,
     containerId: string,
     suffix: string,
 ): BumperControl[] {
-    const bc1 = new BumperControl({
+    const bc1 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Target Speed',
         variableName: `bike_target_speed${suffix}`,
@@ -28,7 +31,7 @@ function setupBikeControls(
         fixed: 2
     });
 
-    const bc2 = new BumperControl({
+    const bc2 = new BumperControl(apiClient,{
         containerId: containerId,
         label: 'Max Drift %',
         variableName: `bike_max_drift_pct${suffix}`,
@@ -37,7 +40,7 @@ function setupBikeControls(
         fixed: 1
     });
 
-    const bc3 = new BumperControl({
+    const bc3 = new BumperControl(apiClient,{
         containerId: containerId,
         label: 'Max Error %',
         variableName: `bike_allowed_error_pct${suffix}`,
@@ -50,10 +53,11 @@ function setupBikeControls(
 }
 
 function setupRowerControls(
+    apiClient: ApiClient,
     containerId: string,
     suffix: string,
 ): BumperControl[] {
-    const bc1 = new BumperControl({
+    const bc1 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Target Power',
         variableName: `rower_target_power${suffix}`,
@@ -62,7 +66,7 @@ function setupRowerControls(
         fixed: 1
     });
 
-    const bc2 = new BumperControl({
+    const bc2 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Max Drift %',
         variableName: `rower_max_drift_pct${suffix}`,
@@ -71,7 +75,7 @@ function setupRowerControls(
         fixed: 1
     });
 
-    const bc3 = new BumperControl({
+    const bc3 = new BumperControl(apiClient, {
         containerId: containerId,
         label: 'Max Error %',
         variableName: `rower_allowed_error_pct${suffix}`,
@@ -83,14 +87,14 @@ function setupRowerControls(
     return [bc1, bc2, bc3];
 }
 
-export function createPresetControls(kind: string): void {
+export function createPresetControls(apiClient: ApiClient, kind: string): void {
     ["A", "B", "C", "D"].forEach(v => {
         const containerId = `preset_${v}`;
         const suffix = `_${v}`;
 
-        setupControls(containerId, kind, suffix);
+        setupControls(apiClient, containerId, kind, suffix);
 
-        new BumperControl({
+        new BumperControl(apiClient, {
             containerId: containerId,
             label: 'Timer (seconds)',
             variableName: `${kind}_preset_timer${suffix}`,

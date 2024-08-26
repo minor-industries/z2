@@ -7,6 +7,7 @@
         align-items: center;
         height: 100%;
     }
+
     .spaced-container {
         margin-bottom: 20px; /* Adjust the value as needed */
     }
@@ -29,10 +30,10 @@
 {{ template "preset" "D" }}
 
 <script type="module">
-    import {createPresetControls} from '/static/dist/z2-bundle.js';
+    import {createPresetControls, DefaultApiClient} from '/static/dist/z2-bundle.js';
 
     document.addEventListener("DOMContentLoaded", () => {
-        createPresetControls("bike");
+        createPresetControls(new DefaultApiClient(), "bike");
     });
 </script>
 

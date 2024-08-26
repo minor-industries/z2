@@ -3,6 +3,7 @@ import {Graph, synchronize} from "rtgraph";
 import {setupBikeAnalysis} from "./bike";
 import {setupRowerAnalysis} from "./rower";
 import {decode} from "@msgpack/msgpack"
+import {DefaultApiClient} from "./api_client";
 
 //@ts-ignore
 import {runWasm} from "./startup.js";
@@ -20,4 +21,5 @@ export {
     setupRowerAnalysis,
     decode,
     runWasm,
+    DefaultApiClient,
 };

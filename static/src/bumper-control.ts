@@ -1,4 +1,4 @@
-import { ReadVariables, ReadVariablesReq, ReadVariablesResp, UpdateVariables, UpdateVariablesReq } from './api.js';
+import {ApiClient} from "./api_client";
 
 interface BumperControlConfig {
     containerId: string;
@@ -22,8 +22,10 @@ export class BumperControl {
     private readonly minValue?: number;
     private readonly defaultValue: number;
     private display!: HTMLInputElement;
+    private apiClient: ApiClient;
 
-    constructor(config: BumperControlConfig) {
+    constructor(apiClient: ApiClient, config: BumperControlConfig) {
+        this.apiClient = apiClient;
         const containerElement = document.getElementById(config.containerId);
         if (!containerElement) {
             throw new Error(`Container with id ${config.containerId} not found`);
@@ -68,11 +70,9 @@ export class BumperControl {
 
     private async fetchInitialValue(): Promise<void> {
         try {
-            const req: ReadVariablesReq = {
+            const resp = await this.apiClient.ReadVariables({
                 variables: [this.variableName]
-            };
-
-            const resp: ReadVariablesResp = await ReadVariables(req);
+            });
             const variable = resp.variables.find(v => v.name === this.variableName);
             if (variable && variable.present) {
                 this.value = variable.value;
@@ -121,15 +121,13 @@ export class BumperControl {
 
     private async updateValueBackend(): Promise<void> {
         try {
-            const req: UpdateVariablesReq = {
+            await this.apiClient.UpdateVariables({
                 variables: [{
                     name: this.variableName,
                     value: this.value,
                     present: true
                 }]
-            };
-
-            await UpdateVariables(req);
+            });
             console.log('Value updated successfully');
         } catch (error) {
             console.error('Error updating value:', error);

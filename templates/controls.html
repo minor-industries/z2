@@ -41,10 +41,10 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls} from "/static/dist/z2-bundle.js";
+    import {registerPresets, setupControls, DefaultApiClient} from "/static/dist/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", () => {
-        const controls = setupControls('controls-container', "{{.}}");
+        const controls = setupControls(new DefaultApiClient(), 'controls-container', "{{.}}");
         registerPresets(controls, "{{.}}");
     });
 </script>
