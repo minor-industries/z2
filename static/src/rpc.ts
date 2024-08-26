@@ -3,24 +3,24 @@ interface TwirpError {
     msg: string
 }
 
-export function rpc(
+export async function rpc(
     service: string,
     method: string,
     req: any,
 ) {
-    return fetch(`/twirp/${service}/${method}`, {
+    const response = await fetch(`/twirp/${service}/${method}`, {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(req),
-    }).then(response => {
-        if (!response.ok) {
-            return response.json().then((body: TwirpError) => {
-                const msg = `rpc error: http code=${response.status}; code=${body.code}; msg=${body.msg};`;
-                return Promise.reject(Error(msg));
-            })
-        }
-        return response.json();
-    })
+    });
+
+    if (!response.ok) {
+        const body: TwirpError = await response.json();
+        const msg = `rpc error: http code=${response.status}; code=${body.code}; msg=${body.msg};`;
+        throw new Error(msg);
+    }
+
+    return response.json();
 }
