@@ -115,7 +115,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars, err := variables.NewCache(backends.Samples)
+	vars, err := variables.NewCache(variables.NewSQLiteStorage(backends.Samples.GetORM()))
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
