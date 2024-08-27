@@ -221,7 +221,7 @@ func run() error {
 
 	mainHandler, err := handler.NewHandler(
 		graph,
-		backends,
+		backends.RawValues,
 		src,
 		opts.WriteRawValues,
 		cancel,
@@ -239,7 +239,7 @@ func run() error {
 			hrmSrc := &heartrate.Source{}
 			h, err := handler.NewHandler(
 				graph,
-				backends,
+				backends.RawValues,
 				hrmSrc,
 				opts.WriteRawValues,
 				cancel,

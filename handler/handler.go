@@ -17,11 +17,11 @@ type Backends struct {
 }
 
 type Handler struct {
-	graph    *rtgraph.Graph
-	backends Backends
-	source   source.Source
-	cancel   context.CancelFunc
-	ctx      context.Context
+	graph     *rtgraph.Graph
+	rawValues *sqlite.Backend
+	source    source.Source
+	cancel    context.CancelFunc
+	ctx       context.Context
 
 	t0             time.Time
 	lastMsg        time.Time
@@ -30,15 +30,15 @@ type Handler struct {
 
 func NewHandler(
 	graph *rtgraph.Graph,
-	backends Backends,
+	rawValues *sqlite.Backend,
 	source source.Source,
 	writeRawValues bool,
 	cancel context.CancelFunc,
 	ctx context.Context,
-) (*Handler, error) {
-	h := &Handler{
+) *Handler {
+	return &Handler{
 		graph:          graph,
-		backends:       backends,
+		rawValues:      rawValues,
 		source:         source,
 		cancel:         cancel,
 		ctx:            ctx,
@@ -46,8 +46,6 @@ func NewHandler(
 		lastMsg:        time.Time{},
 		writeRawValues: writeRawValues,
 	}
-
-	return h, nil
 }
 
 func (h *Handler) Handle(
@@ -59,7 +57,7 @@ func (h *Handler) Handle(
 	h.lastMsg = t
 
 	if h.writeRawValues {
-		h.backends.RawValues.Insert(&data.RawValue{
+		h.rawValues.Insert(&data.RawValue{
 			ID:               sqlite.RandomID(),
 			ServiceID:        string(service),
 			CharacteristicID: string(characteristic),

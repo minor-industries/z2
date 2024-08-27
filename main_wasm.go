@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/minor-industries/rtgraph"
@@ -10,6 +11,7 @@ import (
 	"github.com/minor-industries/z2/capacitor_sqlite"
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
@@ -57,6 +59,19 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new rtgraph")
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	btHandler := handler2.NewHandler(
+		graph,
+		nil,
+		&heartrate.Source{},
+		opts.WriteRawValues,
+		cancel,
+		ctx,
+	)
+
+	wasm.HandleBTMsg(btHandler)
 
 	js.Global().Set("createValue", js.FuncOf(func(this js.Value, args []js.Value) any {
 		seriesName := args[0].String()
