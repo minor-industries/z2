@@ -60,11 +60,12 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls} from "./dist/z2-bundle.js";
+    import {registerPresets, setupControls, DefaultApiClient} from "./dist/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", () => {
-        const controls = setupControls('controls-container', "bike");
-        registerPresets(controls, "bike");
+        const apiClient = new DefaultApiClient();
+        const controls = setupControls(apiClient, 'controls-container', "bike");
+        registerPresets(apiClient, controls, "bike");
     });
 </script>
 
@@ -85,8 +86,8 @@
 
 <script type="module">
     import {Graph} from './dist/z2-bundle.js';
-    import {runWasm, runApp} from "./dist/z2-bundle.js";
-    import {DatabaseManager, decode} from './dist/z2-bundle.js';
+    import {runWasm} from "./dist/z2-bundle.js";
+    import {decode} from './dist/z2-bundle.js';
 
     (async () => {
         console.log("in async setup");
@@ -100,13 +101,16 @@
             console.log(`error setting up database manager: ${e}`)
         }
         console.log("db init");
+        window.dbManager = {
+            async loadDataWindow() {}
+        }; // TODO
 
-        const wasmDonePromise = runWasm();
+        const wasmDonePromise = runWasm("/static/dist/z2.wasm");
 
         document.addEventListener("wasmReady", async () => {
             console.log("WASM is ready!");
 
-            await runApp();
+            // await runApp();
 
             const second = 1000;
             const minute = second * 60;
