@@ -15,7 +15,7 @@ export type Marker = {
 export async function saveMarkers(apiClient: ApiClient, markers: Marker[]) {
     for (let i = 0; i < markers.length; i++) {
         const m = markers[i];
-        await apiClient.AddMarker({
+        await apiClient.addMarker({
             marker: m,
         });
     }
@@ -153,7 +153,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
                 const ok = confirm(prompt)
                 if (ok) {
                     alert(`deleting ${dateRange}`)
-                    return apiClient.DeleteRange({
+                    return apiClient.deleteRange({
                         start: start,
                         end: end,
                     });
@@ -169,7 +169,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
         }
     };
 
-    apiClient.LoadMarkers({date: args.date, ref: args.ref}).then(resp => {
+    apiClient.loadMarkers({date: args.date, ref: args.ref}).then(resp => {
         markers.push(...resp.markers);
         updateAnnotations();
     })

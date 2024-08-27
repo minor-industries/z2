@@ -62,9 +62,9 @@
 <script type="module">
     import {registerPresets, setupControls, DefaultApiClient} from "./dist/z2-bundle.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("wasmReady", () => {
         const apiClient = new DefaultApiClient();
-        const controls = setupControls(apiClient, 'controls-container', "bike");
+        const controls = setupControls(window.apiWasm, 'controls-container', "bike");
         registerPresets(apiClient, controls, "bike");
     });
 </script>
@@ -102,7 +102,8 @@
         }
         console.log("db init");
         window.dbManager = {
-            async loadDataWindow() {}
+            async loadDataWindow() {
+            }
         }; // TODO
 
         const wasmDonePromise = runWasm("/static/dist/z2.wasm");

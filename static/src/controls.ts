@@ -133,7 +133,7 @@ export async function registerPresets(
             const variables = variableLists[kind];
 
             const presetNames = variables.map(name => `${name}${suffix}`);
-            const resp = await apiClient.ReadVariables({variables: presetNames});
+            const resp = await apiClient.readVariables({variables: presetNames});
 
             const controlVariables = variables.slice(0, -1);
 

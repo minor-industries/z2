@@ -70,7 +70,7 @@ export class BumperControl {
 
     private async fetchInitialValue(): Promise<void> {
         try {
-            const resp = await this.apiClient.ReadVariables({
+            const resp = await this.apiClient.readVariables({
                 variables: [this.variableName]
             });
             const variable = resp.variables.find(v => v.name === this.variableName);
@@ -121,7 +121,7 @@ export class BumperControl {
 
     private async updateValueBackend(): Promise<void> {
         try {
-            await this.apiClient.UpdateVariables({
+            await this.apiClient.updateVariables({
                 variables: [{
                     name: this.variableName,
                     value: this.value,
