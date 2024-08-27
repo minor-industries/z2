@@ -12,6 +12,7 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
+	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
@@ -201,7 +202,7 @@ func run() error {
 		router.StaticFS("/static", http.FS(static.FS))
 	}
 
-	apiHandler := app.NewApiServer(backends, vars)
+	apiHandler := handler2.NewApiServer(backends, vars)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	router.POST(
