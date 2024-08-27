@@ -22,7 +22,7 @@ import (
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/source/rower"
-	"github.com/minor-industries/z2/static"
+	"github.com/minor-industries/z2/static/dist"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
@@ -135,7 +135,7 @@ func run() error {
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/static/index.html")
+		c.Redirect(http.StatusMovedPermanently, "/dist/index.html")
 	})
 
 	graph.SetupServer(router.Group("/rtgraph"))
@@ -197,9 +197,9 @@ func run() error {
 	setupSse(br, router)
 
 	if opts.StaticPath != "" {
-		router.Static("/static", opts.StaticPath)
+		router.Static("/dist", opts.StaticPath)
 	} else {
-		router.StaticFS("/static", http.FS(static.FS))
+		router.StaticFS("/dist", http.FS(dist.FS))
 	}
 
 	apiHandler := handler2.NewApiServer(backends, vars)

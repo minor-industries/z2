@@ -106,7 +106,7 @@
             }
         }; // TODO
 
-        const wasmDonePromise = runWasm("/static/dist/z2.wasm");
+        const wasmDonePromise = runWasm("/dist/z2.wasm");
 
         document.addEventListener("wasmReady", async () => {
             console.log("WASM is ready!");
