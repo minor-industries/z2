@@ -60,7 +60,7 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls, DefaultApiClient} from "./dist/z2-bundle.js";
+    import {registerPresets, setupControls, DefaultApiClient} from "/dist/z2-bundle.js";
 
     document.addEventListener("wasmReady", () => {
         const apiClient = new DefaultApiClient();
@@ -85,9 +85,9 @@
 
 
 <script type="module">
-    import {Graph} from './dist/z2-bundle.js';
-    import {runWasm} from "./dist/z2-bundle.js";
-    import {decode} from './dist/z2-bundle.js';
+    import {Graph} from '/dist/z2-bundle.js';
+    import {runWasm} from "/dist/z2-bundle.js";
+    import {decode} from '/dist/z2-bundle.js';
 
     (async () => {
         console.log("in async setup");
@@ -106,7 +106,7 @@
             }
         }; // TODO
 
-        const wasmDonePromise = runWasm("/dist/z2.wasm");
+        const wasmDonePromise = runWasm("./z2.wasm");
 
         document.addEventListener("wasmReady", async () => {
             console.log("WASM is ready!");
