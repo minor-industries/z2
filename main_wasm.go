@@ -8,6 +8,7 @@ import (
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/capacitor_sqlite"
 	"github.com/minor-industries/z2/cfg"
+	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
 	"syscall/js"
 	"time"
@@ -96,6 +97,9 @@ func run() error {
 
 		return js.Null()
 	}))
+
+	apiWasm := wasm.NewApiWasm(&wasm.Handler{})
+	wasm.Register("apiWasm", apiWasm)
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
