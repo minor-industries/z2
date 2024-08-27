@@ -1,11 +1,15 @@
 package variables
 
 import (
-	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/data"
 	"github.com/pkg/errors"
 	"sync"
 )
+
+type Storage interface {
+	Load() ([]data.Variable, error)
+	Save(value *data.Variable) error
+}
 
 type Variable struct {
 	Name    string
@@ -16,10 +20,10 @@ type Variable struct {
 type Cache struct {
 	lock sync.Mutex
 	vars map[string]float64
-	db   *sqlite.Backend
+	db   Storage
 }
 
-func NewCache(db *sqlite.Backend) (*Cache, error) {
+func NewCache(db Storage) (*Cache, error) {
 	cache := &Cache{
 		db: db,
 		vars: map[string]float64{
@@ -34,10 +38,9 @@ func NewCache(db *sqlite.Backend) (*Cache, error) {
 		},
 	}
 
-	var rows []data.Variable
-	tx := db.GetORM().Find(&rows)
-	if tx.Error != nil {
-		return nil, errors.Wrap(tx.Error, "find rows")
+	rows, err := db.Load()
+	if err != nil {
+		return nil, errors.Wrap(err, "load rows")
 	}
 
 	for _, row := range rows {
@@ -71,7 +74,8 @@ func (c *Cache) Update(vars []Variable) {
 		if v.Present {
 			c.vars[v.Name] = v.Value
 
-			c.db.Save(&data.Variable{
+			// TODO: errors?
+			_ = c.db.Save(&data.Variable{
 				Name:  v.Name,
 				Value: v.Value,
 			})

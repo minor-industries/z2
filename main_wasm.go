@@ -6,8 +6,11 @@ import (
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
+	"github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/capacitor_sqlite"
 	"github.com/minor-industries/z2/cfg"
+	handler2 "github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
 	"syscall/js"
@@ -98,13 +101,22 @@ func run() error {
 		return js.Null()
 	}))
 
-	apiWasm := wasm.NewApiWasm(&wasm.Handler{})
+	vars, err := variables.NewCache(&variables.NullStorage{})
+	noErr(err)
+
+	apiWasm := wasm.NewApiWasm(handler.NewApiServer(handler2.Backends{}, vars))
 	wasm.Register("apiWasm", apiWasm)
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
 
 	select {}
+}
+
+func noErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
