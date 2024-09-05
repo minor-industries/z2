@@ -312,12 +312,12 @@ func getBackends(opts *cfg.Config) (handler.Backends, error) {
 
 	var err error
 
-	backends.Samples, err = getBackend(opts, "$HOME/.z2/z2.db")
+	backends.Samples, err = getBackend(opts)
 	if err != nil {
 		return handler.Backends{}, errors.Wrap(err, "get backend")
 	}
 
-	backends.RawValues, err = getBackend(opts, "$HOME/.z2/z2-bt.db")
+	backends.RawValues, err = getBackend(opts)
 	if err != nil {
 		return handler.Backends{}, errors.Wrap(err, "get backend")
 	}
@@ -325,8 +325,8 @@ func getBackends(opts *cfg.Config) (handler.Backends, error) {
 	return backends, err
 }
 
-func getBackend(opts *cfg.Config, path string) (*sqlite.Backend, error) {
-	dbPath := os.ExpandEnv(path)
+func getBackend(opts *cfg.Config) (*sqlite.Backend, error) {
+	dbPath := os.ExpandEnv(opts.DBPath)
 
 	if opts.RemoveDB {
 		_ = os.Remove(dbPath)

@@ -15,6 +15,7 @@ type Backup struct {
 }
 
 type Config struct {
+	DBPath            string   `toml:"db_path"`
 	Source            string   `toml:"source"`
 	ReplayDB          string   `toml:"replay_db"`
 	Port              int      `toml:"port"`
@@ -36,6 +37,7 @@ type Config struct {
 }
 
 var Default = Config{
+	DBPath:     "$HOME/.z2/z2.db",
 	Port:       8077,
 	Webview:    true,
 	XRes:       1132,
