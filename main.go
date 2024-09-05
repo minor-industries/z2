@@ -219,7 +219,7 @@ func run() error {
 	}
 	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
-	mainHandler, err := handler.NewHandler(
+	mainHandler := handler.NewHandler(
 		graph,
 		backends.RawValues,
 		src,
@@ -227,9 +227,6 @@ func run() error {
 		cancel,
 		ctx,
 	)
-	if err != nil {
-		return errors.Wrap(err, "new handler")
-	}
 	go mainHandler.Monitor()
 
 	setupHRMs := func() {
@@ -237,7 +234,7 @@ func run() error {
 		for _, addr := range opts.HeartrateMonitors {
 			addr := addr
 			hrmSrc := &heartrate.Source{}
-			h, err := handler.NewHandler(
+			h := handler.NewHandler(
 				graph,
 				backends.RawValues,
 				hrmSrc,
@@ -245,10 +242,6 @@ func run() error {
 				cancel,
 				ctx,
 			)
-			if err != nil {
-				errCh <- errors.Wrap(err, "new handler")
-				return
-			}
 
 			go func() {
 				errCh <- source.Run(
