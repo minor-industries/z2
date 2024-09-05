@@ -45,8 +45,8 @@ func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.
 func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*api.LoadMarkersResp, error) {
 	orm := a.backends.Samples.GetORM()
 
-	// Parse the date string to time.Time
-	date, err := time.Parse("2006-01-02", req.Date)
+	// TODO: this should handle more than just time.Local
+	date, err := time.ParseInLocation("2006-01-02", req.Date, time.Local)
 	if err != nil {
 		return nil, err
 	}
