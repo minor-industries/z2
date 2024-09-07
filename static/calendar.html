@@ -9,13 +9,14 @@
     <script type="module">
         import {calendar} from "/dist/z2-bundle.js";
 
-        const {addEvent, GetEvents, renderYear} = calendar;
+        const {addEvent, DefaultApiClient, renderYear} = calendar;
+        const apiClient = new DefaultApiClient();
 
         document.addEventListener("DOMContentLoaded", async () => {
             const year = renderYear(2024);
             document.body.appendChild(year);
 
-            const resp = await GetEvents({
+            const resp = await apiClient.getEvents({
                 view: "default" //TODO
             });
             console.log(resp);
