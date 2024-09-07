@@ -1,21 +1,7 @@
-import {ApiClient, DefaultApiClient} from "./api_client";
-import * as calendar from "calendar";
-
-declare global {
-    interface Window {
-        Capacitor?: any;  // Adjust as per actual Capacitor type if needed
-    }
-}
+import {ApiClient} from "./api_client";
+import * as calendar from 'calendar';
 
 export interface Env {
-    apiClient: ApiClient
+    apiClient: ApiClient,
     calendarClient: calendar.ApiClient
 }
-
-export async function getWebEnv(): Promise<Env> {
-    return {
-        apiClient: new DefaultApiClient(),
-        calendarClient: new calendar.DefaultApiClient()
-    };
-}
-

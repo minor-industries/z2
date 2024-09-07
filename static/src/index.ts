@@ -4,7 +4,7 @@ import {setupBikeAnalysis} from "./bike";
 import {setupRowerAnalysis} from "./rower";
 import {decode} from "@msgpack/msgpack"
 import {DefaultApiClient} from "./api_client";
-import {Env, getWebEnv} from "./env"
+import {Env} from "./env"
 
 //@ts-ignore
 import {runWasm} from "./startup.js";
@@ -22,5 +22,4 @@ export {
     runWasm,
     DefaultApiClient,
     Env,
-    getWebEnv,
 };

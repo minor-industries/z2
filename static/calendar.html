@@ -7,11 +7,12 @@
     <link href="/dist/purecss/pure-min.css" rel="stylesheet" type="text/css">
     <link href="/dist/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
     <script type="module">
-        import {calendar, getWebEnv} from "/dist/z2-bundle.js";
+        import {calendar} from "/dist/z2-bundle.js";
+        import {getEnv} from "/env.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
             const {addEvent, renderYear} = calendar;
-            const env = await getWebEnv();
+            const env = await getEnv();
             const year = renderYear(2024);
             document.body.appendChild(year);
 
