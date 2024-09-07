@@ -17,7 +17,9 @@ func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*
 		return nil, res.Error
 	}
 
-	res = a.backends.Samples.GetORM().Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&sqlite.Sample{})
+	orm := a.backends.Samples.(*sqlite.Backend).GetORM() // TODO
+
+	res = orm.Where("timestamp >= ? and timestamp <= ?", req.Start, req.End).Delete(&sqlite.Sample{})
 	if res.Error != nil {
 		return nil, res.Error
 	}
@@ -26,7 +28,7 @@ func (a *ApiServer) DeleteRange(ctx context.Context, req *api.DeleteRangeReq) (*
 }
 
 func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.Empty, error) {
-	orm := a.backends.Samples.GetORM()
+	orm := a.backends.Samples.(*sqlite.Backend).GetORM() // TODO
 
 	marker := sqlite.Marker{
 		ID:        req.Marker.Id,
@@ -43,7 +45,7 @@ func (a *ApiServer) AddMarker(ctx context.Context, req *api.AddMarkerReq) (*api.
 }
 
 func (a *ApiServer) LoadMarkers(ctx context.Context, req *api.LoadMarkersReq) (*api.LoadMarkersResp, error) {
-	orm := a.backends.Samples.GetORM()
+	orm := a.backends.Samples.(*sqlite.Backend).GetORM() // TODO
 
 	// TODO: this should handle more than just time.Local
 	date, err := time.ParseInLocation("2006-01-02", req.Date, time.Local)

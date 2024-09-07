@@ -50,7 +50,9 @@ func run() error {
 		return errors.Wrap(err, "get backends")
 	}
 
-	go backends.Samples.RunWriter(errCh)
+	samples := backends.Samples.(*sqlite.Backend) // TODO
+
+	go samples.RunWriter(errCh)
 	go backends.RawValues.RunWriter(errCh)
 
 	if opts.Scan {
@@ -82,7 +84,7 @@ func run() error {
 		return errors.Wrap(err, "automigrate")
 	}
 
-	if err := backends.Samples.GetORM().AutoMigrate(
+	if err := samples.GetORM().AutoMigrate(
 		&data.Variable{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
@@ -115,7 +117,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars, err := variables.NewCache(variables.NewSQLiteStorage(backends.Samples.GetORM()))
+	vars, err := variables.NewCache(variables.NewSQLiteStorage(samples.GetORM()))
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
@@ -182,7 +184,7 @@ func run() error {
 			return
 		}
 
-		data, err := workouts.GenerateData(backends.Samples.GetORM(), ref, cfg.PaceMetric)
+		data, err := workouts.GenerateData(samples.GetORM(), ref, cfg.PaceMetric)
 		if err != nil {
 			_ = c.Error(err)
 			return

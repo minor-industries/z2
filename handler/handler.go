@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database/sqlite"
+	"github.com/minor-industries/rtgraph/storage"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
 	"github.com/pkg/errors"
@@ -12,7 +13,7 @@ import (
 )
 
 type Backends struct {
-	Samples   *sqlite.Backend
+	Samples   storage.StorageBackend
 	RawValues *sqlite.Backend
 }
 

@@ -119,8 +119,12 @@ func run() error {
 	vars, err := variables.NewCache(&variables.NullStorage{})
 	noErr(err)
 
-	apiWasm := wasm.NewApiWasm(handler.NewApiServer(handler2.Backends{}, vars))
-	wasm.Register("apiWasm", apiWasm)
+	apiHandler := handler.NewApiServer(handler2.Backends{}, vars)
+	wasm.Register(
+		"apiWasm",
+		wasm.NewApiWasm(apiHandler),
+		wasm.NewCalendarWasm(apiHandler),
+	)
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
