@@ -7,16 +7,15 @@
     <link href="/dist/purecss/pure-min.css" rel="stylesheet" type="text/css">
     <link href="/dist/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
     <script type="module">
-        import {calendar} from "/dist/z2-bundle.js";
-
-        const {addEvent, DefaultApiClient, renderYear} = calendar;
-        const apiClient = new DefaultApiClient();
+        import {calendar, getWebEnv} from "/dist/z2-bundle.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
+            const {addEvent, renderYear} = calendar;
+            const env = await getWebEnv();
             const year = renderYear(2024);
             document.body.appendChild(year);
 
-            const resp = await apiClient.getEvents({
+            const resp = await env.calendarClient.getEvents({
                 view: "default" //TODO
             });
             console.log(resp);
