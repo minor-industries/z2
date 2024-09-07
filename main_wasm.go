@@ -122,11 +122,20 @@ func run() error {
 	apiHandler := handler.NewApiServer(handler2.Backends{
 		Samples: db,
 	}, vars)
-	wasm.Register(
-		"apiWasm",
-		wasm.NewApiWasm(apiHandler),
-		wasm.NewCalendarWasm(apiHandler),
-	)
+
+	goWasmApi := wasm.NewApiWasm(apiHandler)
+	js.Global().Set("goWasmApi", map[string]interface{}{
+		"addMarker":       js.FuncOf(goWasmApi.AddMarker),
+		"deleteRange":     js.FuncOf(goWasmApi.DeleteRange),
+		"updateVariables": js.FuncOf(goWasmApi.UpdateVariables),
+		"readVariables":   js.FuncOf(goWasmApi.ReadVariables),
+		"loadMarkers":     js.FuncOf(goWasmApi.LoadMarkers),
+	})
+
+	goWasmCalendar := wasm.NewCalendarWasm(apiHandler)
+	js.Global().Set("goWasmCalendar", map[string]interface{}{
+		"getEvents": js.FuncOf(goWasmCalendar.GetEvents),
+	})
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)

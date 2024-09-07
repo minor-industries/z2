@@ -119,22 +119,3 @@ func (a *ApiWasm) LoadMarkers(this js.Value, args []js.Value) interface{} {
 
 	return promiseResolve(js.ValueOf(result)) // Resolve the promise with the result
 }
-
-func Register(
-	globalObjectName string,
-	apiWasm *ApiWasm,
-	calendarWasm *CalendarWasm,
-) {
-	js.Global().Set("apiWasm", map[string]any{
-		"api": map[string]any{
-			"addMarker":       js.FuncOf(apiWasm.AddMarker),
-			"deleteRange":     js.FuncOf(apiWasm.DeleteRange),
-			"updateVariables": js.FuncOf(apiWasm.UpdateVariables),
-			"readVariables":   js.FuncOf(apiWasm.ReadVariables),
-			"loadMarkers":     js.FuncOf(apiWasm.LoadMarkers),
-		},
-		"calendar": map[string]any{
-			"getEvents": js.FuncOf(calendarWasm.GetEvents),
-		},
-	})
-}

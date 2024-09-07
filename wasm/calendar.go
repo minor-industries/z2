@@ -2,6 +2,7 @@ package wasm
 
 import (
 	"context"
+	"fmt"
 	"github.com/minor-industries/calendar/gen/go/calendar"
 	"syscall/js"
 )
@@ -15,32 +16,45 @@ func NewCalendarWasm(service calendar.Calendar) *CalendarWasm {
 }
 
 func (c *CalendarWasm) GetEvents(this js.Value, args []js.Value) interface{} {
-	// Create request object from the JavaScript args
-	req := calendar.CalendarEventReq{
-		View: args[0].Get("view").String(),
-	}
+	var resolve, reject js.Value
+	promise := js.Global().Get("Promise").New(js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		resolve, reject = args[0], args[1]
+		return nil
+	}))
 
-	// Call the Go service's GetEvents method
-	resp, err := c.service.GetEvents(context.Background(), &req)
-	if err != nil {
-		return promiseReject(err) // Reject the promise with the error
-	}
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				reject.Invoke(js.Global().Get("Error").New(fmt.Sprint(r)))
+			}
+		}()
 
-	// Convert the response to a JavaScript-friendly structure
-	jsResultSets := make([]interface{}, len(resp.ResultSets))
-	for i, resultSet := range resp.ResultSets {
-		jsResultSets[i] = map[string]interface{}{
-			"color": resultSet.Color,
-			"date":  resultSet.Date,
-			"query": resultSet.Query,
-			"count": resultSet.Count,
+		req := calendar.CalendarEventReq{
+			View: args[0].Get("view").String(),
 		}
-	}
 
-	// Wrap the result in a JavaScript object
-	result := map[string]interface{}{
-		"result_sets": jsResultSets,
-	}
+		resp, err := c.service.GetEvents(context.Background(), &req)
+		if err != nil {
+			reject.Invoke(js.Global().Get("Error").New(err.Error()))
+			return
+		}
 
-	return promiseResolve(js.ValueOf(result)) // Resolve the promise with the result
+		jsResultSets := make([]interface{}, len(resp.ResultSets))
+		for i, resultSet := range resp.ResultSets {
+			jsResultSets[i] = map[string]interface{}{
+				"color": resultSet.Color,
+				"date":  resultSet.Date,
+				"query": resultSet.Query,
+				"count": resultSet.Count,
+			}
+		}
+
+		result := map[string]interface{}{
+			"result_sets": jsResultSets,
+		}
+
+		resolve.Invoke(js.ValueOf(result))
+	}()
+
+	return promise
 }
