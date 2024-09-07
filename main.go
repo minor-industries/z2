@@ -37,6 +37,9 @@ import (
 //go:embed templates/*.html
 var templatesFS embed.FS
 
+//go:embed static/env.js
+var envJS []byte
+
 func run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
 	if err != nil {
@@ -203,6 +206,10 @@ func run() error {
 	} else {
 		router.StaticFS("/dist", http.FS(dist.FS))
 	}
+
+	router.GET("/env.js", func(c *gin.Context) {
+		c.Data(http.StatusOK, "application/javascript", envJS)
+	})
 
 	apiHandler := handler2.NewApiServer(backends, vars)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
