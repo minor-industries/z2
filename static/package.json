@@ -5,7 +5,10 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build": "tsc && node ../../cap/www/esbuild.config.mjs"
+    "build-wasm": "(cd .. && GOOS=js GOARCH=wasm go build -o static/dist/z2.wasm .)",
+    "build-js": "tsc",
+    "build-dist": "node esbuild.config.mjs",
+    "build": "npm run build-wasm && npm run build-js && npm run build-dist"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",
