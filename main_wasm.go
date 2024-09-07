@@ -119,7 +119,9 @@ func run() error {
 	vars, err := variables.NewCache(&variables.NullStorage{})
 	noErr(err)
 
-	apiHandler := handler.NewApiServer(handler2.Backends{}, vars)
+	apiHandler := handler.NewApiServer(handler2.Backends{
+		Samples: db,
+	}, vars)
 	wasm.Register(
 		"apiWasm",
 		wasm.NewApiWasm(apiHandler),
@@ -129,7 +131,10 @@ func run() error {
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
 
-	select {}
+	for range time.NewTicker(time.Minute).C {
+	}
+
+	return nil // should never get here
 }
 
 func noErr(err error) {
