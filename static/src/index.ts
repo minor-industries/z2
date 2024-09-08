@@ -2,6 +2,7 @@ import * as calendar from 'calendar'
 import {Graph, synchronize} from "rtgraph";
 import {setupBikeAnalysis} from "./bike";
 import {setupRowerAnalysis} from "./rower";
+import {setupAnalysis} from "./analysis";
 import {decode} from "@msgpack/msgpack"
 import {DefaultApiClient} from "./api_client";
 import {Env} from "./env"
@@ -16,6 +17,7 @@ export {
     calendar,
     Graph,
     synchronize,
+    setupAnalysis,
     setupBikeAnalysis,
     setupRowerAnalysis,
     decode,

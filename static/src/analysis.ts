@@ -43,8 +43,8 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
 
     const g1 = new Graph(document.getElementById("graphdiv0")!, {
         seriesNames: args.seriesNames,
-        title: "Avg Speed",
-        ylabel: "speed (km/h)",
+        title: args.title,
+        ylabel: args.ylabel,
         windowSize: null,
         height: 250,
         maxGapMs: 5 * second,

@@ -1,0 +1,37 @@
+{{ template "header" . }}
+
+<script type="module">
+    import {setupAnalysis} from "/dist/z2-bundle.js";
+    import {getEnv} from "/env.js"
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const date = params.get('date');
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+
+        setupAnalysis(env.apiClient, {
+            date: date,
+            ref: "ruck", // TODO?
+            seriesNames: [
+                "heartrate | time-bin",
+            ],
+            title: "Heart Rate",
+            ylabel: "heart rate (bpm)",
+        })
+
+    });
+</script>
+
+<div class="pure-g">
+    <div class="pure-u-1">
+        <div id="graphdiv0" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
+    </div>
+</div>
+
+{{ template "footer" . }}

@@ -172,6 +172,12 @@ func run() error {
 		})
 	})
 
+	router.GET("/data-hrm.html", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "data-hrm.html", gin.H{
+			"Title": "Heart Rate",
+		})
+	})
+
 	router.GET("/bike-presets.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "bike-presets.html", gin.H{
 			"Title": "Bike",
