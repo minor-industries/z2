@@ -73,7 +73,13 @@ var rowerConfig = Config{
 	Color: "green",
 }
 
+var hrmConfig = Config{
+	PaceMetric: "heartrate",
+	Color:      "red",
+}
+
 var Configs = map[string]Config{
 	"bike":  bikeConfig,
 	"rower": rowerConfig,
+	"hrm":   hrmConfig,
 }
