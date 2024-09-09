@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
+	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
@@ -139,6 +141,12 @@ func run() error {
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
+
+	br := broker.NewBroker()
+	go br.Start()
+
+	z2App := app.NewApp(graph, vars, br, "bike", "browser")
+	go z2App.Run()
 
 	for range time.NewTicker(time.Minute).C {
 	}
