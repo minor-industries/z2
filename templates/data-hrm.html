@@ -11,7 +11,7 @@
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
 
-        setupAnalysis(env.apiClient, {
+        setupAnalysis(env, {
             date: date,
             ref: "ruck", // TODO?
             seriesNames: [
@@ -19,8 +19,7 @@
             ],
             title: "Heart Rate",
             ylabel: "heart rate (bpm)",
-        })
-
+        });
     });
 </script>
 

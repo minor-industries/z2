@@ -1,8 +1,8 @@
 import {setupAnalysis} from "./analysis";
-import {ApiClient} from "./api_client";
+import {Env} from "./env";
 
-export function setupBikeAnalysis(apiClient: ApiClient, date: string) {
-    setupAnalysis(apiClient,{
+export function setupBikeAnalysis(env: Env, date: string) {
+    setupAnalysis(env, {
         date: date,
         ref: "bike",
         seriesNames: [

@@ -1,8 +1,8 @@
 import {setupAnalysis} from "./analysis";
-import {ApiClient} from "./api_client";
+import {Env} from "./env";
 
-export function setupRowerAnalysis(apiClient: ApiClient, date: string) {
-    setupAnalysis(apiClient, {
+export function setupRowerAnalysis(env: Env, date: string) {
+    setupAnalysis(env, {
         date: date,
         ref: "rower",
         seriesNames: [

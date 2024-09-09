@@ -3,6 +3,7 @@ import {dygraphs} from 'dygraphs'
 import {v4 as uuidv4} from 'uuid';
 import * as agg from "./aggregate"
 import {ApiClient} from "./api_client";
+import {Env} from "./env";
 
 
 export type Marker = {
@@ -29,7 +30,7 @@ export type AnalysisArgs = {
     ylabel: string,
 };
 
-export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
+export function setupAnalysis(env: Env, args: AnalysisArgs) {
     const second = 1000;
 
     const markers: Marker[] = [];
@@ -51,6 +52,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
         series: seriesOpts,
         disableScroll: true,
         date: args.date,
+        connector: env.connector,
     });
 
     const g2 = new Graph(document.getElementById("graphdiv1")!, {
@@ -66,6 +68,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
         maxGapMs: 5 * second,
         disableScroll: true,
         date: args.date,
+        connector: env.connector,
         drawCallback: (args: DrawCallbackArgs) => {
             console.log(
                 "max Value", agg.maxV(args, 0),
@@ -153,7 +156,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
                 const ok = confirm(prompt)
                 if (ok) {
                     alert(`deleting ${dateRange}`)
-                    return apiClient.deleteRange({
+                    return env.apiClient.deleteRange({
                         start: start,
                         end: end,
                     });
@@ -161,7 +164,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
                 return;
             case "KeyS":
                 if (confirm("save markers?")) {
-                    await saveMarkers(apiClient, markers);
+                    await saveMarkers(env.apiClient, markers);
                 }
                 return;
             default:
@@ -169,7 +172,7 @@ export function setupAnalysis(apiClient: ApiClient, args: AnalysisArgs) {
         }
     };
 
-    apiClient.loadMarkers({date: args.date, ref: args.ref}).then(resp => {
+    env.apiClient.loadMarkers({date: args.date, ref: args.ref}).then(resp => {
         markers.push(...resp.markers);
         updateAnnotations();
     })
