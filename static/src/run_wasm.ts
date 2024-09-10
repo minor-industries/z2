@@ -1,6 +1,7 @@
+declare var Go: any;
 import './wasm_exec.js';
 
-export async function runWasm(name) {
+export async function runWasm(name: string): Promise<void> {
     const go = new Go();
 
     const response = await fetch(name);
