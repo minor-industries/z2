@@ -29,5 +29,4 @@ build({
     minify: false,
     plugins: [],
 })
-    .then(copyFiles)
-    .catch(() => process.exit(1));
+    // .then(copyFiles);
