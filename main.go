@@ -140,49 +140,13 @@ func run() error {
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/dist/index.html")
+		c.Redirect(http.StatusMovedPermanently, "/dist/html/index.html")
 	})
 
 	graph.SetupServer(router.Group("/rtgraph"))
 
 	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*"))
 	router.SetHTMLTemplate(tmpl)
-
-	router.GET("/bike.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "bike.html", gin.H{
-			"Title": "Bike",
-		})
-	})
-
-	router.GET("/rower.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "rower.html", gin.H{
-			"Title": "Rower",
-		})
-	})
-
-	router.GET("/data-bike.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "data-bike.html", gin.H{
-			"Title": "Bike",
-		})
-	})
-
-	router.GET("/data-rower.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "data-rower.html", gin.H{
-			"Title": "Rower",
-		})
-	})
-
-	router.GET("/data-hrm.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "data-hrm.html", gin.H{
-			"Title": "Heart Rate",
-		})
-	})
-
-	router.GET("/bike-presets.html", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "bike-presets.html", gin.H{
-			"Title": "Bike",
-		})
-	})
 
 	router.GET("/workouts.html", func(c *gin.Context) {
 		ref := c.Query("ref")
