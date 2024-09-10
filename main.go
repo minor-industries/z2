@@ -242,9 +242,8 @@ func run() error {
 	go func() {
 		if opts.ReplayDB != "" {
 			go setupHRMs()
-			err = replay.RunDB(
+			err = replay.FromDatabase(
 				ctx,
-				errCh,
 				os.ExpandEnv(opts.ReplayDB),
 				mainHandler.Handle,
 			)
@@ -260,7 +259,9 @@ func run() error {
 				mainHandler.Handle,
 			)
 		}
-		errCh <- err
+		if err != nil {
+			errCh <- err
+		}
 	}()
 
 	z2App.Run()

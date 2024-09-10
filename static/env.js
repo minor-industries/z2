@@ -27,9 +27,9 @@ export async function getEnv() {
 
     const connector = new WASMConnector(window.subscribe);
 
-    setInterval(function () {
-        window.createValue("heartrate", (new Date()).getTime(), 70.0 + Math.random());
-    }, 1000)
+    // setInterval(function () {
+    //     window.createValue("heartrate", (new Date()).getTime(), 70.0 + Math.random());
+    // }, 1000)
 
     return {
         apiClient: window.goWasmApi,

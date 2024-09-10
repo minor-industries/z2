@@ -1,85 +1,48 @@
-//go:build !wasm
-
 package replay
 
 import (
-	"bufio"
-	"bytes"
 	"context"
-	"encoding/hex"
+	"fmt"
+	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/source"
-	"github.com/minor-industries/z2/testdata"
 	"github.com/pkg/errors"
-	"io/fs"
-	"strconv"
-	"strings"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
-type line struct {
-	timestamp time.Time
-	value     []byte
-}
-
-func Run(
+func replay(
 	ctx context.Context,
-	errCh chan error,
-	filename string,
+	rows []data.RawValue,
 	callback source.MessageCallback,
 ) error {
-	content, err := fs.ReadFile(testdata.FS, filename)
-	if err != nil {
-		return errors.Wrap(err, "readfile")
-	}
-
-	var lines []line
-
-	scanner := bufio.NewScanner(bytes.NewBuffer(content))
-	for scanner.Scan() {
-		parts := strings.Fields(scanner.Text())
-
-		t0, err := strconv.Atoi(parts[0])
-		if err != nil {
-			return errors.Wrap(err, "atoi")
-		}
-
-		t := time.UnixMilli(int64(t0))
-
-		raw, err := hex.DecodeString(parts[1])
-		if err != nil {
-			return errors.Wrap(err, "decode string")
-		}
-
-		lines = append(lines, line{t, raw})
+	if len(rows) == 0 {
+		return errors.New("no rows")
 	}
 
 	t0 := time.Now()
+	fmt.Println("t0", t0)
 	ticker := time.NewTicker(10 * time.Millisecond)
-
-	tFirst := lines[0].timestamp
+	tFirst := rows[0].Timestamp
 
 	for {
 		select {
 		case now := <-ticker.C:
 			dt := now.Sub(t0)
 			t := tFirst.Add(dt)
-			line := lines[0]
-			if t.Before(line.timestamp) {
+			row := rows[0]
+			if t.Before(row.Timestamp) {
 				continue
 			}
+			fmt.Println("row")
 			if err := callback(
 				now,
-				source.UUID(bluetooth.ServiceUUIDFitnessMachine.String()),
-				source.UUID(bluetooth.CharacteristicUUIDIndoorBikeData.String()),
-				line.value,
+				source.UUID(row.ServiceID),
+				source.UUID(row.CharacteristicID),
+				row.Message,
 			); err != nil {
-				// something seems "off" here
-				errCh <- errors.Wrap(err, "callback")
-				return nil
+				return errors.Wrap(err, "callback")
 			}
-			lines = lines[1:]
-			if len(lines) == 0 {
+			rows = rows[1:]
+			if len(rows) == 0 {
 				ticker.Stop()
 				break
 			}

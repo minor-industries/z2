@@ -14,6 +14,7 @@ import (
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source/heartrate"
+	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
@@ -147,6 +148,12 @@ func run() error {
 
 	z2App := app.NewApp(graph, vars, br, "bike", "browser")
 	go z2App.Run()
+
+	go func() {
+		if err := replay.FromFile(ctx, "bike.gob", btHandler.Handle); err != nil {
+			errCh <- err
+		}
+	}()
 
 	for range time.NewTicker(time.Minute).C {
 	}
