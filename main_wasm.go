@@ -18,6 +18,7 @@ import (
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/replay"
+	"github.com/minor-industries/z2/source/rower"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
@@ -73,6 +74,7 @@ func run() error {
 		multi.NewSource([]source.Source{
 			&heartrate.Source{},
 			&bike.BikeSource{},
+			rower.NewRowerSource(),
 		}),
 		opts.WriteRawValues,
 		cancel,
