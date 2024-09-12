@@ -37,8 +37,8 @@ import (
 //go:embed templates/*.html
 var templatesFS embed.FS
 
-//go:embed static/env.js
-var envJS []byte
+//go:embed static/env_web.js
+var envWebJS []byte
 
 func run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
@@ -178,7 +178,7 @@ func run() error {
 	}
 
 	router.GET("/env.js", func(c *gin.Context) {
-		c.Data(http.StatusOK, "application/javascript", envJS)
+		c.Data(http.StatusOK, "application/javascript", envWebJS)
 	})
 
 	apiHandler := handler2.NewApiServer(backends, vars)
