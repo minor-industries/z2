@@ -56,7 +56,7 @@ var files = []file{
 		},
 	},
 	{
-		name: "index.html",
+		name: "home.html",
 		args: map[string]any{},
 	},
 	{

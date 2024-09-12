@@ -109,7 +109,7 @@ func run() error {
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/dist/html/index.html")
+		c.Redirect(http.StatusMovedPermanently, "/dist/html/home.html")
 	})
 
 	graph.SetupServer(router.Group("/rtgraph"))

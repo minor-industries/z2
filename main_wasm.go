@@ -29,22 +29,22 @@ import (
 func run() error {
 	fmt.Println("in wasm run()")
 	opts := cfg.Config{
-		Source:            "bike",
-		ReplayDB:          "",
-		Port:              0,
-		HeartrateMonitors: nil,
-		StaticPath:        "",
-		RemoveDB:          false,
-		Webview:           false,
-		XRes:              0,
-		YRes:              0,
-		Scan:              false,
-		Audio:             "",
-		WriteRawValues:    false,
-		ResticPath:        "",
-		BackupHost:        "",
-		Backups:           nil,
-		Devices:           nil,
+		Devices: []cfg.Device{
+			{Kind: "bike"},
+		},
+		ReplayDB:       "",
+		Port:           0,
+		StaticPath:     "",
+		RemoveDB:       false,
+		Webview:        false,
+		XRes:           0,
+		YRes:           0,
+		Scan:           false,
+		Audio:          "",
+		WriteRawValues: false,
+		ResticPath:     "",
+		BackupHost:     "",
+		Backups:        nil,
 	}
 	_ = opts
 	errCh := make(chan error)
@@ -67,15 +67,26 @@ func run() error {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	allSources := map[string]source.Source{
+		"bike":  &bike.BikeSource{},
+		"rower": rower.NewRowerSource(),
+		"hrm":   &heartrate.Source{},
+	}
+
+	multiSource := multi.NewSource()
+	for _, s := range allSources {
+		err := multiSource.Add(s)
+		if err != nil {
+			return errors.Wrap(err, "add source")
+		}
+	}
 
 	btHandler := handler2.NewHandler(
 		graph,
 		nil,
-		multi.NewSource([]source.Source{
-			&heartrate.Source{},
-			&bike.BikeSource{},
-			rower.NewRowerSource(),
-		}),
+		multiSource,
 		opts.WriteRawValues,
 		cancel,
 		ctx,
