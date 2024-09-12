@@ -1,16 +1,5 @@
 import {runGoWasm, WASMConnector} from "./dist/z2-bundle.js";
 
-const resp = {
-    "result_sets": [
-        {
-            "color": "red",
-            "date": "2024-06-07",
-            "query": "hrm",
-            "count": 1
-        }
-    ]
-}
-
 export async function getEnv() {
     window.dbManager = {
         async loadDataAfter() {
