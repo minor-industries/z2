@@ -75,7 +75,7 @@ func Run(
 
 	var err error
 	enableOnce.Do(func() {
-		fmt.Println("enabling")
+		fmt.Println("enabling bluetooth adapter")
 		err = adapter.Enable()
 	})
 	if err != nil {
