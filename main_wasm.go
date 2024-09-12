@@ -13,7 +13,10 @@ import (
 	"github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/source/bike"
 	"github.com/minor-industries/z2/source/heartrate"
+	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
@@ -67,7 +70,10 @@ func run() error {
 	btHandler := handler2.NewHandler(
 		graph,
 		nil,
-		&heartrate.Source{},
+		multi.NewSource([]source.Source{
+			&heartrate.Source{},
+			&bike.BikeSource{},
+		}),
 		opts.WriteRawValues,
 		cancel,
 		ctx,
