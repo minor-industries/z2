@@ -161,6 +161,20 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	allSources := map[string]source.Source{
+		"bike":  &bike.BikeSource{},
+		"rower": rower.NewRowerSource(),
+		"hrm":   &heartrate.Source{},
+	}
+
+	multiSource := multi.NewSource()
+	for _, s := range allSources {
+		err := multiSource.Add(s)
+		if err != nil {
+			return errors.Wrap(err, "add source")
+		}
+	}
+
 	sources, err := SetupSources(opts.Devices)
 	if err != nil {
 		return errors.Wrap(err, "setup source")
@@ -169,7 +183,7 @@ func run() error {
 	mainHandler := handler.NewHandler(
 		graph,
 		backends.RawValues,
-		sources.multi,
+		multiSource,
 		opts.WriteRawValues,
 		cancel,
 		ctx,
@@ -230,48 +244,37 @@ func run() error {
 type SourceInfo struct {
 	primary     source.Source
 	primaryKind string
-	multi       source.Source
 	connect     []source.Source
 	addrs       []string
 }
 
 func SetupSources(devices []cfg.Device) (*SourceInfo, error) {
-	sources := map[string]source.Source{}
 	var primarySources []source.Source
 	result := &SourceInfo{}
 
 	for _, dev := range devices {
-		_, hasHandler := sources[dev.Kind]
-		if dev.Disable == true && hasHandler {
+		if dev.Disable == true {
 			continue
 		}
 
-		var handler source.Source
+		var src source.Source
 		switch dev.Kind {
 		case "bike":
-			handler = &bike.BikeSource{}
+			src = &bike.BikeSource{}
 			result.primaryKind = dev.Kind
-			primarySources = append(primarySources, handler)
+			primarySources = append(primarySources, src)
 		case "rower":
-			handler = rower.NewRowerSource()
+			src = rower.NewRowerSource()
 			result.primaryKind = dev.Kind
-			primarySources = append(primarySources, handler)
+			primarySources = append(primarySources, src)
 		case "hrm":
-			handler = &heartrate.Source{}
+			src = &heartrate.Source{}
 		default:
 			return nil, fmt.Errorf("unknown device kind: %s", dev.Kind)
 		}
 
-		if !hasHandler {
-			sources[dev.Kind] = handler
-		}
-
-		if dev.Disable {
-			continue
-		}
-
 		fmt.Printf("looking for %s at address %s\n", dev.Kind, dev.Addr)
-		result.connect = append(result.connect, handler)
+		result.connect = append(result.connect, src)
 		result.addrs = append(result.addrs, dev.Addr)
 	}
 
@@ -282,16 +285,6 @@ func SetupSources(devices []cfg.Device) (*SourceInfo, error) {
 		result.primary = primarySources[0]
 	default:
 		return nil, errors.New("found multiple primary devices")
-	}
-
-	var srcs []source.Source
-	for _, s := range sources {
-		srcs = append(srcs, s)
-	}
-	var err error
-	result.multi, err = multi.NewSource(srcs)
-	if err != nil {
-		return nil, errors.Wrap(err, "new multi-source")
 	}
 
 	return result, nil
