@@ -85,31 +85,42 @@ func Run(
 
 	ch := make(chan foundDevice, 10)
 
-	err = adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
-		//fmt.Println("scanned device:", result.Address.String(), result.RSSI, result.LocalName())
-		scanned := strings.ToLower(result.Address.String())
+	go func() {
+		err := adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
+			//fmt.Println("scanned device:", result.Address.String(), result.RSSI, result.LocalName())
+			scannedAddr := strings.ToLower(result.Address.String())
 
-		dev, ok := deviceMap[scanned]
-		if !ok {
+			dev, ok := deviceMap[scannedAddr]
+			if !ok {
+				return
+			}
+
+			if !addresses.Has(scannedAddr) {
+				return
+			}
+
+			fmt.Println("scannedAddr", dev.Address, reflect.TypeOf(dev.Source).String())
+			addresses.Delete(dev.Address)
+
+			ch <- foundDevice{
+				Device: dev,
+				Result: result,
+			}
+
+			if addresses.Len() == 0 {
+				err := adapter.StopScan()
+				if err != nil {
+					errCh <- errors.Wrap(err, "stop scan")
+				}
+				close(ch)
+			}
+		})
+
+		if err != nil {
+			errCh <- err
 			return
 		}
-
-		fmt.Println("scanned", dev.Address, reflect.TypeOf(dev.Source).String())
-		addresses.Delete(dev.Address)
-
-		ch <- foundDevice{
-			Device: dev,
-			Result: result,
-		}
-
-		if addresses.Len() == 0 {
-			err := adapter.StopScan()
-			if err != nil {
-				errCh <- errors.Wrap(err, "stop scan")
-			}
-			close(ch)
-		}
-	})
+	}()
 
 	for {
 		select {
@@ -135,7 +146,7 @@ func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevic
 		return errors.Wrap(err, "connect")
 	}
 
-	fmt.Println("connected to", found.Result.Address.String())
+	fmt.Println("connected to", found.Result.Address.String(), reflect.TypeOf(found.Device.Source).String())
 
 	src := found.Device.Source
 	srvcs, err := device.DiscoverServices(lo.Map(src.Services(), func(item UUID, _ int) bluetooth.UUID {
