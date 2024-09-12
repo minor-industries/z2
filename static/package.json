@@ -9,7 +9,7 @@
     "build-js": "tsc",
     "build-dist": "node esbuild.config.mjs",
     "build-html": "(cd .. && go generate ./templates)",
-    "copy-files": "cp *.html *.css dist",
+    "copy-files": "cp *.css dist",
     "build": "npm run build-wasm && npm run build-js && npm run build-dist && npm run copy-files && npm run build-html"
   },
   "dependencies": {

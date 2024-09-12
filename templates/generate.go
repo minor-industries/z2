@@ -32,6 +32,12 @@ var files = []file{
 		},
 	},
 	{
+		name: "hrm.html",
+		args: map[string]any{
+			"Title": "HRM",
+		},
+	},
+	{
 		name: "bike-presets.html",
 		args: map[string]any{
 			"Title": "Bike Presets",
