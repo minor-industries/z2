@@ -21,6 +21,9 @@ async function setup() {
         apiClient: window.goWasmApi,
         calendarClient: window.goWasmCalendar,
         connector: connector,
+        maybeStartFrontendBLE() {
+            return Promise.resolve();
+        },
     };
 }
 

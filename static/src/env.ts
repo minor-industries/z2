@@ -6,4 +6,6 @@ export interface Env {
     apiClient: ApiClient,
     calendarClient: calendar.ApiClient
     connector?: Connector,
+
+    maybeStartFrontendBLE(): Promise<void>
 }
