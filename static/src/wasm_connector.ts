@@ -32,10 +32,7 @@ export class WASMConnector {
     }
 
     connect(handler: Handler) {
-        console.log("subscribe")
-
         const req = handler.subscriptionRequest();
-        console.log(JSON.stringify(req));
 
         this.subscribe(JSON.stringify(req), data => {
             const msg = decode(data) as Msg;

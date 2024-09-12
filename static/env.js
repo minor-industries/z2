@@ -1,6 +1,6 @@
-import {runGoWasm, WASMConnector} from "./dist/z2-bundle.js";
+import {runGoWasm, runOnce, WASMConnector} from "./dist/z2-bundle.js";
 
-export async function getEnv() {
+async function setup() {
     window.dbManager = {
         async loadDataAfter() {
             return [];
@@ -16,13 +16,11 @@ export async function getEnv() {
 
     const connector = new WASMConnector(window.subscribe);
 
-    // setInterval(function () {
-    //     window.createValue("heartrate", (new Date()).getTime(), 70.0 + Math.random());
-    // }, 1000)
-
     return {
         apiClient: window.goWasmApi,
         calendarClient: window.goWasmCalendar,
         connector: connector,
     };
 }
+
+export const getEnv = runOnce(setup);

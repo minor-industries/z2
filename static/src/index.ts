@@ -7,6 +7,7 @@ import {decode} from "@msgpack/msgpack"
 import {DefaultApiClient} from "./api_client";
 import {Env} from "./env"
 import {runGoWasm, WASMConnector} from "./wasm_connector"
+import {runOnce} from "./util";
 
 //@ts-ignore
 import {runWasm} from "./startup.js";
@@ -27,4 +28,5 @@ export {
     Env,
     WASMConnector,
     runGoWasm,
+    runOnce,
 };
