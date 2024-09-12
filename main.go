@@ -28,6 +28,7 @@ import (
 	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/samber/lo"
 	webview "github.com/webview/webview_go"
 	"html/template"
 	"net/http"
@@ -194,30 +195,32 @@ func run() error {
 		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
-	if opts.ReplayDB != "" {
-		go func() {
+	go func() {
+		if opts.ReplayDB != "" {
+
 			errCh <- replay.FromDatabase(
 				ctx,
 				os.ExpandEnv(opts.ReplayDB),
 				mainHandler.Handle,
 			)
-		}()
-	} else {
-		for i := range sources.connect {
-			go func(i int) {
-				errCh <- source.Run(
-					ctx,
-					errCh,
-					sources.addrs[i],
-					sources.connect[i],
-					mainHandler.Handle,
-				)
-			}(i)
-		}
-	}
+		} else {
+			devices := lo.Map(sources.connect, func(src source.Source, index int) source.Device {
+				return source.Device{
+					Address:  sources.addrs[index],
+					Source:   src,
+					Callback: mainHandler.Handle,
+				}
+			})
 
-	z2App := app.NewApp(graph, vars, br, sources.primaryKind, opts.Audio)
-	z2App.Run()
+			source.Run(ctx, errCh, devices)
+			fmt.Println("all devices found, source.Run exited")
+		}
+	}()
+
+	if sources.primary != nil {
+		z2App := app.NewApp(graph, vars, br, sources.primaryKind, opts.Audio)
+		z2App.Run()
+	}
 
 	if opts.Webview {
 		return errors.New("webview not implemented")
@@ -280,7 +283,7 @@ func setupSources(devices []cfg.Device) (*SourceInfo, error) {
 
 	switch len(primarySources) {
 	case 0:
-		return nil, errors.New("no primary devices found")
+		// pass
 	case 1:
 		result.primary = primarySources[0]
 	default:

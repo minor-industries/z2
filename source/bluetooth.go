@@ -5,8 +5,10 @@ package source
 import (
 	"context"
 	"fmt"
+	"github.com/chrispappas/golang-generics-set/set"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -24,14 +26,52 @@ func mustParseUUID(s UUID) bluetooth.UUID {
 
 var enableOnce sync.Once
 
+type Device struct {
+	Address  string
+	Source   Source
+	Callback MessageCallback
+}
+
+type foundDevice struct {
+	Device Device
+	Result bluetooth.ScanResult
+}
+
 func Run(
 	ctx context.Context,
 	errCh chan error,
-	address string,
-	src Source,
-	messageCallback MessageCallback,
-) error {
+	devices []Device,
+) {
 	var adapter = bluetooth.DefaultAdapter
+
+	addresses := set.Set[string]{}
+	for _, device := range devices {
+		if device.Address != strings.ToLower(device.Address) {
+			errCh <- errors.New("device addresses must be given in lowercase")
+			return
+		}
+
+		for _, svc := range device.Source.Services() {
+			if string(svc) != strings.ToLower(string(svc)) {
+				errCh <- errors.New("service UUIDs must be given in lowercase")
+				return
+			}
+		}
+
+		for _, ch := range device.Source.Characteristics() {
+			if string(ch) != strings.ToLower(string(ch)) {
+				errCh <- errors.New("characteristic UUIDs must be given in lowercase")
+				return
+			}
+		}
+
+		addresses.Add(device.Address)
+	}
+
+	deviceMap := map[string]Device{}
+	for _, device := range devices {
+		deviceMap[strings.ToLower(device.Address)] = device
+	}
 
 	var err error
 	enableOnce.Do(func() {
@@ -39,32 +79,65 @@ func Run(
 		err = adapter.Enable()
 	})
 	if err != nil {
-		return errors.Wrap(err, "enable adapter")
+		errCh <- errors.Wrap(err, "enable adapter")
+		return
 	}
 
-	ch := make(chan bluetooth.ScanResult, 1)
+	ch := make(chan foundDevice, 10)
 
-	fmt.Println("scanning...", address)
 	err = adapter.Scan(func(adapter *bluetooth.Adapter, result bluetooth.ScanResult) {
-		//fmt.Println("found device:", result.Address.String(), result.RSSI, result.LocalName())
-		if strings.ToLower(result.Address.String()) == strings.ToLower(address) {
-			adapter.StopScan()
-			ch <- result
+		//fmt.Println("scanned device:", result.Address.String(), result.RSSI, result.LocalName())
+		scanned := strings.ToLower(result.Address.String())
+
+		dev, ok := deviceMap[scanned]
+		if !ok {
+			return
+		}
+
+		fmt.Println("scanned", dev.Address, reflect.TypeOf(dev.Source).String())
+		addresses.Delete(dev.Address)
+
+		ch <- foundDevice{
+			Device: dev,
+			Result: result,
+		}
+
+		if addresses.Len() == 0 {
+			err := adapter.StopScan()
+			if err != nil {
+				errCh <- errors.Wrap(err, "stop scan")
+			}
+			close(ch)
 		}
 	})
 
-	var device bluetooth.Device
-	select {
-	case result := <-ch:
-		device, err = adapter.Connect(result.Address, bluetooth.ConnectionParams{})
-		if err != nil {
-			return errors.Wrap(err, "connect")
+	for {
+		select {
+		case result, ok := <-ch:
+			if !ok {
+				return
+			}
+			err := handleDevice(errCh, adapter, result)
+			if err != nil {
+				errCh <- err
+				return
+			}
+		case <-ctx.Done():
+			// TODO: cleanup? what cleanup?
+			return
 		}
+	}
+}
 
-		fmt.Println("connected to", result.Address.String())
+func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevice) error {
+	device, err := adapter.Connect(found.Result.Address, bluetooth.ConnectionParams{})
+	if err != nil {
+		return errors.Wrap(err, "connect")
 	}
 
-	fmt.Println("discovering services/characteristics")
+	fmt.Println("connected to", found.Result.Address.String())
+
+	src := found.Device.Source
 	srvcs, err := device.DiscoverServices(lo.Map(src.Services(), func(item UUID, _ int) bluetooth.UUID {
 		return mustParseUUID(item)
 	}))
@@ -99,7 +172,7 @@ func Run(
 				svUUID := srvc.UUID()
 				chUUID := char.UUID()
 				if err := char.EnableNotifications(func(buf []byte) {
-					err := messageCallback(time.Now(), UUID(svUUID.String()), UUID(chUUID.String()), buf)
+					err := found.Device.Callback(time.Now(), UUID(svUUID.String()), UUID(chUUID.String()), buf)
 					if err != nil {
 						errCh <- errors.Wrap(err, "callback")
 					}
@@ -110,12 +183,5 @@ func Run(
 		}
 	}
 
-	<-ctx.Done()
-
-	err = device.Disconnect()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return errors.New("exited")
+	return nil
 }
