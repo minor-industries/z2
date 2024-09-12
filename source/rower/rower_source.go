@@ -8,9 +8,9 @@ import (
 var (
 	sv1 = source.UUID("ce060030-43e5-11e4-916c-0800200c9a66")
 
-	ch1 = source.UUID("CE060031-43E5-11E4-916C-0800200C9A66")
-	ch2 = source.UUID("CE060032-43E5-11E4-916C-0800200C9A66")
-	ch3 = source.UUID("CE060036-43E5-11E4-916C-0800200C9A66")
+	ch1 = source.UUID("ce060031-43e5-11e4-916c-0800200c9a66")
+	ch2 = source.UUID("ce060032-43e5-11e4-916c-0800200c9a66")
+	ch3 = source.UUID("ce060036-43e5-11e4-916c-0800200c9a66")
 )
 
 type rowerSource struct {

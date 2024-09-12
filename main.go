@@ -175,7 +175,7 @@ func run() error {
 		}
 	}
 
-	sources, err := SetupSources(opts.Devices)
+	sources, err := setupSources(opts.Devices)
 	if err != nil {
 		return errors.Wrap(err, "setup source")
 	}
@@ -248,7 +248,7 @@ type SourceInfo struct {
 	addrs       []string
 }
 
-func SetupSources(devices []cfg.Device) (*SourceInfo, error) {
+func setupSources(devices []cfg.Device) (*SourceInfo, error) {
 	var primarySources []source.Source
 	result := &SourceInfo{}
 

@@ -3,6 +3,7 @@ package multi
 import (
 	"fmt"
 	"github.com/minor-industries/z2/source"
+	"strings"
 )
 
 type Source struct {
@@ -16,7 +17,7 @@ func NewSource() *Source {
 func (s *Source) Add(src source.Source) error {
 	for _, svc := range src.Services() {
 		for _, ch := range src.Characteristics() {
-			key := fmt.Sprintf("%s::%s", svc, ch)
+			key := fmt.Sprintf("%s::%s", strings.ToLower(string(svc)), strings.ToLower(string(ch)))
 
 			if _, present := s.handlers[key]; present {
 				return fmt.Errorf("duplicate registration: %s", key)
@@ -29,7 +30,7 @@ func (s *Source) Add(src source.Source) error {
 }
 
 func (s *Source) Convert(msg source.Message) []source.Value {
-	key := fmt.Sprintf("%s::%s", msg.Service, msg.Characteristic)
+	key := fmt.Sprintf("%s::%s", strings.ToLower(string(msg.Service)), strings.ToLower(string(msg.Characteristic)))
 	handler, ok := s.handlers[key]
 	if !ok {
 		return nil
