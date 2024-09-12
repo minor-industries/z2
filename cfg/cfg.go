@@ -6,6 +6,13 @@ import (
 	"os"
 )
 
+type Device struct {
+	Addr    string `toml:"addr"`
+	Kind    string `toml:"kind"`
+	Name    string `toml:"name"`
+	Disable bool   `toml:"disable"`
+}
+
 type Backup struct {
 	AwsAccessKeyId     string `toml:"aws_access_key_id"`
 	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
@@ -15,25 +22,23 @@ type Backup struct {
 }
 
 type Config struct {
-	DBPath            string   `toml:"db_path"`
-	Source            string   `toml:"source"`
-	ReplayDB          string   `toml:"replay_db"`
-	Port              int      `toml:"port"`
-	HeartrateMonitors []string `toml:"heartrate_monitors"`
-	StaticPath        string   `toml:"static_path"`
-	RemoveDB          bool     `toml:"remove_db"`
-	Webview           bool     `toml:"webview"`
-	XRes              int      `toml:"xres"`
-	YRes              int      `toml:"yres"`
-	Scan              bool     `toml:"scan"`
-	Audio             string   `toml:"audio"`
-	WriteRawValues    bool     `toml:"write_raw_values"`
+	DBPath         string `toml:"db_path"`
+	ReplayDB       string `toml:"replay_db"`
+	Port           int    `toml:"port"`
+	StaticPath     string `toml:"static_path"`
+	RemoveDB       bool   `toml:"remove_db"`
+	Webview        bool   `toml:"webview"`
+	XRes           int    `toml:"xres"`
+	YRes           int    `toml:"yres"`
+	Scan           bool   `toml:"scan"`
+	Audio          string `toml:"audio"`
+	WriteRawValues bool   `toml:"write_raw_values"`
 
 	ResticPath string   `toml:"restic_path"`
 	BackupHost string   `toml:"backup_host"`
 	Backups    []Backup `toml:"backups"`
 
-	Devices map[string]string `toml:"devices"`
+	Devices []Device `toml:"devices"`
 }
 
 var Default = Config{

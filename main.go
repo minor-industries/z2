@@ -20,6 +20,7 @@ import (
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
 	"github.com/minor-industries/z2/source/heartrate"
+	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/source/rower"
 	"github.com/minor-industries/z2/static/dist"
@@ -31,7 +32,6 @@ import (
 	"html/template"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 //go:embed templates/*.html
@@ -62,18 +62,6 @@ func run() error {
 		return source.Scan()
 	}
 
-	if opts.Source == "" {
-		// temporary hack for supporting desktop launchers
-		switch filepath.Base(os.Args[0]) {
-		case "z2-bike":
-			opts.Source = "bike"
-		case "z2-rower":
-			opts.Source = "rower"
-		default:
-			return errors.New("missing source")
-		}
-	}
-
 	if opts.ReplayDB != "" {
 		// Don't write back raw values if we're replaying raw values
 		opts.WriteRawValues = false
@@ -97,24 +85,7 @@ func run() error {
 		backends.Samples,
 		errCh,
 		rtgraph.Opts{},
-		[]string{
-			"bike_instant_speed",
-			"bike_instant_cadence",
-			"bike_total_distance",
-			"bike_resistance_level",
-			"bike_instant_power",
-			"bike_total_energy",
-			"bike_energy_per_hour",
-			"bike_energy_per_minute",
-			"bike_heartrate",
-
-			"rower_stroke_count",
-			"rower_power",
-			"rower_speed",
-			"rower_spm",
-
-			"heartrate",
-		},
+		nil,
 	)
 	if err != nil {
 		return errors.Wrap(err, "new graph")
@@ -127,8 +98,6 @@ func run() error {
 
 	br := broker.NewBroker()
 	go br.Start()
-
-	z2App := app.NewApp(graph, vars, br, opts.Source, opts.Audio)
 
 	router := gin.New()
 	router.Use(gin.Recovery())
@@ -191,100 +160,141 @@ func run() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	//src := &mainHandler.BikeSource{}
-	srcAddr, src, err := getSource(opts)
+
+	sources, err := SetupSources(opts.Devices)
 	if err != nil {
-		return errors.Wrap(err, "get source")
+		return errors.Wrap(err, "setup source")
 	}
-	fmt.Printf("looking for %s at address %s\n", opts.Source, srcAddr)
 
 	mainHandler := handler.NewHandler(
 		graph,
 		backends.RawValues,
-		src,
+		sources.multi,
 		opts.WriteRawValues,
 		cancel,
 		ctx,
 	)
-	go mainHandler.Monitor()
-
-	setupHRMs := func() {
-		// TODO: this needs a lot of reorganization/cleanup
-		for _, addr := range opts.HeartrateMonitors {
-			addr := addr
-			hrmSrc := &heartrate.Source{}
-			h := handler.NewHandler(
-				graph,
-				backends.RawValues,
-				hrmSrc,
-				opts.WriteRawValues,
-				cancel,
-				ctx,
-			)
-
-			go func() {
-				errCh <- source.Run(
-					ctx,
-					errCh,
-					addr,
-					hrmSrc,
-					nil,
-					h.Handle,
-				)
-			}()
-		}
-	}
+	go mainHandler.Monitor() // TODO: should monitor each source independently
 
 	go func() {
 		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
 	}()
 
-	go func() {
-		if opts.ReplayDB != "" {
-			go setupHRMs()
-			err = replay.FromDatabase(
+	if opts.ReplayDB != "" {
+		go func() {
+			errCh <- replay.FromDatabase(
 				ctx,
 				os.ExpandEnv(opts.ReplayDB),
 				mainHandler.Handle,
 			)
-		} else {
-			err = source.Run(
-				ctx,
-				errCh,
-				srcAddr,
-				src,
-				func() {
-					go setupHRMs()
-				},
-				mainHandler.Handle,
-			)
+		}()
+	} else {
+		for i := range sources.connect {
+			go func(i int) {
+				errCh <- source.Run(
+					ctx,
+					errCh,
+					sources.addrs[i],
+					sources.connect[i],
+					mainHandler.Handle,
+				)
+			}(i)
 		}
-		if err != nil {
-			errCh <- err
-		}
-	}()
+	}
 
+	z2App := app.NewApp(graph, vars, br, sources.primaryKind, opts.Audio)
 	z2App.Run()
 
 	if opts.Webview {
-		w := webview.New(true)
-		errCh2 := make(chan error)
-		go func() {
-			err = <-errCh
-			w.Terminate()
-			errCh2 <- err
-		}()
-
-		runWebview(
-			opts,
-			w,
-			errCh,
-			fmt.Sprintf("http://localhost:%d/%s.html", opts.Port, opts.Source),
-		)
-		return <-errCh2
+		return errors.New("webview not implemented")
+		//w := webview.New(true)
+		//errCh2 := make(chan error)
+		//go func() {
+		//	err = <-errCh
+		//	w.Terminate()
+		//	errCh2 <- err
+		//}()
+		//
+		//runWebview(
+		//	opts,
+		//	w,
+		//	errCh,
+		//	fmt.Sprintf("http://localhost:%d/%s.html", opts.Port, opts.Source),
+		//)
+		//return <-errCh2
 	} else {
 		return <-errCh
 	}
+}
+
+type SourceInfo struct {
+	primary     source.Source
+	primaryKind string
+	multi       source.Source
+	connect     []source.Source
+	addrs       []string
+}
+
+func SetupSources(devices []cfg.Device) (*SourceInfo, error) {
+	sources := map[string]source.Source{}
+	var primarySources []source.Source
+	result := &SourceInfo{}
+
+	for _, dev := range devices {
+		_, hasHandler := sources[dev.Kind]
+		if dev.Disable == true && hasHandler {
+			continue
+		}
+
+		var handler source.Source
+		switch dev.Kind {
+		case "bike":
+			handler = &bike.BikeSource{}
+			result.primaryKind = dev.Kind
+			primarySources = append(primarySources, handler)
+		case "rower":
+			handler = rower.NewRowerSource()
+			result.primaryKind = dev.Kind
+			primarySources = append(primarySources, handler)
+		case "hrm":
+			handler = &heartrate.Source{}
+		default:
+			return nil, fmt.Errorf("unknown device kind: %s", dev.Kind)
+		}
+
+		if !hasHandler {
+			sources[dev.Kind] = handler
+		}
+
+		if dev.Disable {
+			continue
+		}
+
+		fmt.Printf("looking for %s at address %s\n", dev.Kind, dev.Addr)
+		result.connect = append(result.connect, handler)
+		result.addrs = append(result.addrs, dev.Addr)
+	}
+
+	switch len(primarySources) {
+	case 0:
+		return nil, errors.New("no primary devices found")
+	case 1:
+		result.primary = primarySources[0]
+	default:
+		return nil, errors.New("found multiple primary devices")
+	}
+
+	var srcs []source.Source
+	for _, s := range sources {
+		srcs = append(srcs, s)
+	}
+	var err error
+	result.multi, err = multi.NewSource(srcs)
+	if err != nil {
+		return nil, errors.Wrap(err, "new multi-source")
+	}
+
+	return result, nil
 }
 
 func getBackends(opts *cfg.Config) (handler.Backends, error) {
@@ -318,28 +328,6 @@ func getBackend(opts *cfg.Config) (*sqlite.Backend, error) {
 	}
 
 	return db, nil
-}
-
-func getSource(opts *cfg.Config) (string, source.Source, error) {
-	switch opts.Source {
-	case "bike", "rower":
-	default:
-		return "", nil, errors.Errorf("unknown source: %s", opts.Source)
-	}
-
-	hwid, ok := opts.Devices[opts.Source]
-	if !ok {
-		return "", nil, errors.Errorf("no device hardware ID specified for [%s]", opts.Source)
-	}
-
-	switch opts.Source {
-	case "bike":
-		return hwid, &bike.BikeSource{}, nil
-	case "rower":
-		return hwid, rower.NewRowerSource(), nil
-	default:
-		panic(fmt.Errorf("unknown source: %s", opts.Source))
-	}
 }
 
 func runWebview(

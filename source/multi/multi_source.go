@@ -9,19 +9,23 @@ type Source struct {
 	handlers map[string]source.Source
 }
 
-func NewSource(sources []source.Source) *Source {
+func NewSource(sources []source.Source) (*Source, error) {
 	handlers := map[string]source.Source{}
 
 	for _, source := range sources {
 		for _, svc := range source.Services() {
 			for _, ch := range source.Characteristics() {
 				key := fmt.Sprintf("%s::%s", svc, ch)
+
+				if _, present := handlers[key]; present {
+					return nil, fmt.Errorf("duplicate registration: %s", key)
+				}
 				handlers[key] = source
 			}
 		}
 	}
 
-	return &Source{handlers: handlers}
+	return &Source{handlers: handlers}, nil
 }
 
 func (s *Source) Convert(msg source.Message) []source.Value {

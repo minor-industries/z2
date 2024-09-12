@@ -29,7 +29,6 @@ func Run(
 	errCh chan error,
 	address string,
 	src Source,
-	connectCallback func(),
 	messageCallback MessageCallback,
 ) error {
 	var adapter = bluetooth.DefaultAdapter
@@ -63,9 +62,6 @@ func Run(
 		}
 
 		fmt.Println("connected to", result.Address.String())
-		if connectCallback != nil {
-			connectCallback()
-		}
 	}
 
 	fmt.Println("discovering services/characteristics")
