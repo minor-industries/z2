@@ -5,6 +5,7 @@ package wasm
 import (
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
+	"strings"
 	"syscall/js"
 	"time"
 )
@@ -16,8 +17,8 @@ func HandleBTMsg(btHandler *handler.Handler) {
 
 		err := btHandler.Handle(
 			time.Now(), // should we pass t in from javascript?
-			source.UUID(args[0].String()),
-			source.UUID(args[1].String()),
+			source.UUID(strings.ToLower(args[0].String())),
+			source.UUID(strings.ToLower(args[1].String())),
 			msgBuf,
 		)
 		if err != nil {

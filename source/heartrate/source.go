@@ -7,15 +7,6 @@ import (
 type Source struct{}
 
 func (s *Source) Convert(msg source.Message) []source.Value {
-	// TODO: perhaps this filtering should be in the caller
-	if msg.Service != s.Services()[0] {
-		return nil
-	}
-
-	if msg.Characteristic != s.Characteristics()[0] {
-		return nil
-	}
-
 	return []source.Value{{
 		Name:      "heartrate",
 		Timestamp: msg.Timestamp,
