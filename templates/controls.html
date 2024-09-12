@@ -41,12 +41,13 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls, DefaultApiClient} from "/dist/z2-bundle.js";
+    import {registerPresets, setupControls} from "/dist/z2-bundle.js";
+    import {getEnv} from "/env.js"
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const apiClient = new DefaultApiClient();
-        const controls = setupControls(apiClient, 'controls-container', "{{.}}");
-        registerPresets(apiClient, controls, "{{.}}");
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+        const controls = setupControls(env.apiClient, 'controls-container', "{{.}}");
+        registerPresets(env.apiClient, controls, "{{.}}");
     });
 </script>
 

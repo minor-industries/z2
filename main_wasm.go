@@ -46,7 +46,6 @@ func run() error {
 	errCh := make(chan error)
 
 	dbManager := js.Global().Get("dbManager")
-	fmt.Println(dbManager.String())
 
 	db, err := capacitor_sqlite.NewDatabaseManagerWrapper(dbManager)
 	if err != nil {

@@ -1,6 +1,7 @@
 import {runGoWasm, runOnce, WASMConnector} from "./dist/z2-bundle.js";
 
 async function setup() {
+    console.log("running setup");
     window.dbManager = {
         async loadDataAfter() {
             return [];

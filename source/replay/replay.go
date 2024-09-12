@@ -32,7 +32,6 @@ func replay(
 			if t.Before(row.Timestamp) {
 				continue
 			}
-			fmt.Println("row")
 			if err := callback(
 				now,
 				source.UUID(row.ServiceID),
