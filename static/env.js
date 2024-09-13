@@ -32,8 +32,8 @@ async function setup() {
     const connector = new WASMConnector(window.subscribe);
 
     return {
-        apiClient: window.goWasmApi,
-        calendarClient: window.goWasmCalendar,
+        apiClient: window.z2GoWasm.apiClient,
+        calendarClient: window.z2GoWasm.calendarClient,
         connector: connector,
         maybeStartFrontendBLE,
     };
