@@ -1,14 +1,16 @@
 {{ template "header" . }}
 
 <script type="module">
-    import {DefaultApiClient, setupBikeAnalysis} from "/dist/z2-bundle.js";
+    import {setupBikeAnalysis} from "/dist/z2-bundle.js";
+    import {getEnv} from "/env.js"
 
     const url = new URL(window.location.href);
     const params = new URLSearchParams(url.search);
     const date = params.get('date');
 
-    document.addEventListener("DOMContentLoaded", () => {
-        setupBikeAnalysis(new DefaultApiClient(), date);
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+        setupBikeAnalysis(env, date);
     });
 </script>
 
