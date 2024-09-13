@@ -13,6 +13,10 @@ async function maybeStartFrontendBLE() {
     }
 }
 
+function streamEvents(path, callback) {
+    window.z2GoWasm.z2.streamEvents(path, callback);
+}
+
 
 async function setup() {
     console.log("running setup");
@@ -36,6 +40,7 @@ async function setup() {
         calendarClient: window.z2GoWasm.calendarClient,
         connector: connector,
         maybeStartFrontendBLE,
+        streamEvents,
     };
 }
 

@@ -203,6 +203,28 @@ func run() error {
 				}()
 				return js.Undefined()
 			}),
+
+			"streamEvents": js.FuncOf(func(this js.Value, args []js.Value) any {
+				path := args[0].String()
+				callback := args[1]
+				go func() {
+					// TODO: should we share code with the gin handler?
+					switch path {
+					case "/events", "events":
+						ch := br.Subscribe()
+						defer br.Unsubscribe(ch)
+						for m := range ch {
+							switch msg := m.(type) {
+							case *app.PlaySound:
+								callback.Invoke(msg.Sound)
+							}
+						}
+					default:
+						printErr(fmt.Errorf("unknown events path: %s", path))
+					}
+				}()
+				return js.Undefined()
+			}),
 		},
 	})
 
