@@ -7,5 +7,7 @@ export interface Env {
     calendarClient: calendar.ApiClient
     connector?: Connector,
 
-    maybeStartFrontendBLE(): Promise<void>
+    maybeStartFrontendBLE(): Promise<void>,
+
+    streamEvents(path: string, callback: (event: string) => void): void,
 }

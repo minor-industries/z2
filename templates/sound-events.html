@@ -1,15 +1,15 @@
 {{ define "sound-events" }}
 
 <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-        const es = new EventSource('/events');
+    import {getEnv} from "/env.js";
 
-        es.onmessage = (event) => {
-            console.log("event:", event.data)
-
-            const audio = document.getElementById(`sound-${event.data}`);
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+        env.streamEvents("/events", data => {
+            console.log("event:", data)
+            const audio = document.getElementById(`sound-${data}`);
             audio.play();
-        };
+        });
     });
 </script>
 

@@ -39,7 +39,7 @@ import (
 //go:embed templates/*.html
 var templatesFS embed.FS
 
-//go:embed static/env_web.js
+//go:embed static/env_gin.js
 var envWebJS []byte
 
 func run() error {
