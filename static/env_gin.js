@@ -1,19 +1,13 @@
-import {calendar, DefaultApiClient, runOnce} from "/dist/z2-bundle.js";
+import {calendar, DefaultApiClient, runOnce, streamEvents} from "/dist/z2-bundle.js";
 
-function streamEvents(path, callback) {
-    const es = new EventSource(path);
-    es.onmessage = (event) => {
-        callback(event.data);
-    };
+async function maybeStartFrontendBLE() {
 }
 
 async function setup() {
     return {
         apiClient: new DefaultApiClient(),
         calendarClient: new calendar.DefaultApiClient(),
-        maybeStartFrontendBLE() {
-            return Promise.resolve();
-        },
+        maybeStartFrontendBLE,
         streamEvents,
     };
 }

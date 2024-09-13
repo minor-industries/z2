@@ -128,7 +128,6 @@ export class BumperControl {
                     present: true
                 }]
             });
-            console.log('Value updated successfully');
         } catch (error) {
             console.error('Error updating value:', error);
         }

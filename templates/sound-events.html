@@ -6,7 +6,6 @@
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
         env.streamEvents("/events", data => {
-            console.log("event:", data)
             const audio = document.getElementById(`sound-${data}`);
             audio.play();
         });
