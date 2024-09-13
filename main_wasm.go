@@ -17,6 +17,7 @@ import (
 	"github.com/minor-industries/z2/source/heartrate"
 	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/rower"
+	"github.com/minor-industries/z2/time_series"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
 	"github.com/pkg/errors"
@@ -63,6 +64,11 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new rtgraph")
 	}
+
+	vars, err := variables.NewCache(&variables.NullStorage{})
+	noErr(err)
+
+	time_series.SetupGraphFunctions(graph, vars)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -134,9 +140,6 @@ func run() error {
 
 		return js.Null()
 	}))
-
-	vars, err := variables.NewCache(&variables.NullStorage{})
-	noErr(err)
 
 	apiHandler := handler.NewApiServer(handler2.Backends{
 		Samples: db,

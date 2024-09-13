@@ -59,8 +59,6 @@ func NewApp(
 		audioPlayer:  audioPlayer,
 	}
 
-	app.setupGraphFunctions()
-
 	return app
 }
 

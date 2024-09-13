@@ -24,6 +24,7 @@ import (
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/source/rower"
 	"github.com/minor-industries/z2/static/dist"
+	"github.com/minor-industries/z2/time_series"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
@@ -96,6 +97,8 @@ func run() error {
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
+
+	time_series.SetupGraphFunctions(graph, vars)
 
 	br := broker.NewBroker()
 	go br.Start()

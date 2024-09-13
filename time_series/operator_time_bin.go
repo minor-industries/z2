@@ -1,4 +1,4 @@
-package app
+package time_series
 
 import (
 	"github.com/minor-industries/rtgraph/schema"
