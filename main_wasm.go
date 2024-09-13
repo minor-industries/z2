@@ -9,6 +9,7 @@ import (
 	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
+	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
@@ -176,32 +177,34 @@ func run() error {
 		"apiClient":      jsWasmApi,
 		"calendarClient": jsWasmCalendar,
 
-		"startReplay": js.FuncOf(func(this js.Value, args []js.Value) any {
-			kind := args[0].String()
-			go func() {
-				// should we protect this with a sync.Once?
-				fmt.Println("start replay:", kind)
-				err := replay.FromFile(
-					ctx,
-					fmt.Sprintf("%s.gob", kind),
-					btHandler.Handle,
-				)
-				if err != nil {
-					printErr(errors.Wrap(err, "start replay"))
-				}
-			}()
-			return js.Undefined()
-		}),
-	})
+		"z2": map[string]any{
+			"startReplay": js.FuncOf(func(this js.Value, args []js.Value) any {
+				kind := args[0].String()
+				go func() {
+					// should we protect this with a sync.Once?
+					fmt.Println("start replay:", kind)
+					err := replay.FromFile(
+						ctx,
+						fmt.Sprintf("%s.gob", kind),
+						btHandler.Handle,
+					)
+					if err != nil {
+						printErr(errors.Wrap(err, "start replay"))
+					}
+				}()
+				return js.Undefined()
+			}),
 
-	//z2App := app.NewApp(graph, vars, br, "bike", "browser")
-	//go z2App.Run()
-	//
-	//go func() {
-	//	if err := replay.FromFile(ctx, "bike.gob", btHandler.Handle); err != nil {
-	//		errCh <- err
-	//	}
-	//}()
+			"startApp": js.FuncOf(func(this js.Value, args []js.Value) any {
+				go func() {
+					// should we protect this with a sync.Once?
+					z2App := app.NewApp(graph, vars, br, "bike", "browser")
+					z2App.Run()
+				}()
+				return js.Undefined()
+			}),
+		},
+	})
 
 	for range time.NewTicker(time.Minute).C {
 	}

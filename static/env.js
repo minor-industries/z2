@@ -7,7 +7,8 @@ async function maybeStartFrontendBLE() {
 
     switch (currentPage) {
         case 'bike.html':
-            window.z2GoWasm.startReplay("bike");
+            window.z2GoWasm.z2.startReplay("bike");
+            window.z2GoWasm.z2.startApp("bike");
             return;
     }
 }
