@@ -98,6 +98,9 @@ func run() error {
 		ctx,
 	)
 
+	br := broker.NewBroker()
+	go br.Start()
+
 	wasm.HandleBTMsg(btHandler)
 
 	apiHandler := handler.NewApiServer(handler2.Backends{
@@ -117,12 +120,6 @@ func run() error {
 	jsWasmCalendar := map[string]any{
 		"getEvents": js.FuncOf(goWasmCalendar.GetEvents),
 	}
-
-	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
-	js.Global().Get("document").Call("dispatchEvent", eventInit)
-
-	br := broker.NewBroker()
-	go br.Start()
 
 	printErr := func(err error) {
 		js.Global().Get("console").Call("error", err.Error())
@@ -225,6 +222,9 @@ func run() error {
 			}),
 		},
 	})
+
+	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
+	js.Global().Get("document").Call("dispatchEvent", eventInit)
 
 	for range time.NewTicker(time.Minute).C {
 	}
