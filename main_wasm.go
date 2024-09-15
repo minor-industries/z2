@@ -101,8 +101,6 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	wasm.HandleBTMsg(btHandler)
-
 	apiHandler := handler.NewApiServer(handler2.Backends{
 		Samples: db,
 	}, vars)
@@ -220,6 +218,8 @@ func run() error {
 
 				return js.Undefined()
 			}),
+
+			"handleBTMsg": wasm.HandleBTMsg(btHandler),
 		},
 	})
 
