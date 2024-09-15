@@ -1,11 +1,20 @@
 <html lang="EN">
 <head>
     <title>Calendar View</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link href="/dist/cal.css" rel="stylesheet" type="text/css">
     <link href="/dist/purecss/base-min.css" rel="stylesheet" type="text/css">
     <link href="/dist/purecss/pure-min.css" rel="stylesheet" type="text/css">
     <link href="/dist/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+    </style>
+
     <script type="module">
         import {calendar} from "/dist/z2-bundle.js";
         import {getEnv} from "/env.js";
