@@ -13,11 +13,6 @@ async function maybeStartFrontendBLE() {
     }
 }
 
-function streamEvents(path, callback) {
-    window.z2GoWasm.z2.streamEvents(path, callback);
-}
-
-
 async function setup() {
     console.log("running setup");
     window.dbManager = {
@@ -33,14 +28,12 @@ async function setup() {
 
     await runGoWasm("/dist/z2.wasm")
 
-    const connector = new WASMConnector(window.subscribe);
-
     return {
         apiClient: window.z2GoWasm.apiClient,
         calendarClient: window.z2GoWasm.calendarClient,
-        connector: connector,
+        connector: new WASMConnector(window.z2GoWasm.z2.subscribe),
+        streamEvents: window.z2GoWasm.z2.streamEvents,
         maybeStartFrontendBLE,
-        streamEvents,
     };
 }
 

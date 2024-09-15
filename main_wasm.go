@@ -100,49 +100,6 @@ func run() error {
 
 	wasm.HandleBTMsg(btHandler)
 
-	js.Global().Set("createValue", js.FuncOf(func(this js.Value, args []js.Value) any {
-		seriesName := args[0].String()
-		ts := time.UnixMilli(int64(args[1].Int()))
-		value := args[2].Float()
-
-		if err := graph.CreateValue(seriesName, ts, value); err != nil {
-			panic(errors.Wrap(err, "create value"))
-		}
-
-		return js.Undefined()
-	}))
-
-	js.Global().Set("subscribe", js.FuncOf(func(this js.Value, args []js.Value) any {
-		now := time.Now()
-		msgs := make(chan *messages.Data)
-
-		req := subscription.Request{}
-		err := json.Unmarshal([]byte(args[0].String()), &req)
-		if err != nil {
-			panic(errors.Wrap(err, "unmarshal"))
-		}
-
-		go graph.Subscribe(&req, now, msgs)
-
-		callback := args[1]
-
-		go func() {
-			for data := range msgs {
-				binmsg, err := data.MarshalMsg(nil)
-				if err != nil {
-					panic(err)
-				}
-
-				uint8Array := js.Global().Get("Uint8Array").New(len(binmsg))
-				js.CopyBytesToJS(uint8Array, binmsg)
-
-				callback.Invoke(uint8Array)
-			}
-		}()
-
-		return js.Null()
-	}))
-
 	apiHandler := handler.NewApiServer(handler2.Backends{
 		Samples: db,
 	}, vars)
@@ -155,13 +112,11 @@ func run() error {
 		"readVariables":   js.FuncOf(goWasmApi.ReadVariables),
 		"loadMarkers":     js.FuncOf(goWasmApi.LoadMarkers),
 	}
-	js.Global().Set("goWasmApi", jsWasmApi)
 
 	goWasmCalendar := wasm.NewCalendarWasm(apiHandler)
 	jsWasmCalendar := map[string]any{
 		"getEvents": js.FuncOf(goWasmCalendar.GetEvents),
 	}
-	js.Global().Set("goWasmCalendar", jsWasmCalendar)
 
 	eventInit := js.Global().Get("CustomEvent").New("wasmReady")
 	js.Global().Get("document").Call("dispatchEvent", eventInit)
@@ -223,6 +178,49 @@ func run() error {
 						printErr(fmt.Errorf("unknown events path: %s", path))
 					}
 				}()
+				return js.Undefined()
+			}),
+
+			"subscribe": js.FuncOf(func(this js.Value, args []js.Value) any {
+				now := time.Now()
+				msgs := make(chan *messages.Data)
+
+				req := subscription.Request{}
+				err := json.Unmarshal([]byte(args[0].String()), &req)
+				if err != nil {
+					panic(errors.Wrap(err, "unmarshal"))
+				}
+
+				go graph.Subscribe(&req, now, msgs)
+
+				callback := args[1]
+
+				go func() {
+					for data := range msgs {
+						binmsg, err := data.MarshalMsg(nil)
+						if err != nil {
+							panic(err)
+						}
+
+						uint8Array := js.Global().Get("Uint8Array").New(len(binmsg))
+						js.CopyBytesToJS(uint8Array, binmsg)
+
+						callback.Invoke(uint8Array)
+					}
+				}()
+
+				return js.Null()
+			}),
+
+			"createValue": js.FuncOf(func(this js.Value, args []js.Value) any {
+				seriesName := args[0].String()
+				ts := time.UnixMilli(int64(args[1].Int()))
+				value := args[2].Float()
+
+				if err := graph.CreateValue(seriesName, ts, value); err != nil {
+					panic(errors.Wrap(err, "create value"))
+				}
+
 				return js.Undefined()
 			}),
 		},
