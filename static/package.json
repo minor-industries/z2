@@ -15,7 +15,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "calendar": "github:minor-industries/calendar#v0.0.4",
-    "rtgraph": "file:../../rtgraph",
+    "rtgraph": "github:minor-industries/rtgraph#v0.0.19",
     "uuid": "^10.0.0"
   }
 }

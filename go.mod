@@ -12,7 +12,7 @@ require (
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/jinzhu/now v1.1.5
 	github.com/minor-industries/calendar v0.0.2
-	github.com/minor-industries/rtgraph v0.0.19-0.20240908142452-97e7d0fb392f
+	github.com/minor-industries/rtgraph v0.0.19
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.0
 	github.com/samber/lo v1.46.0
@@ -40,7 +40,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.22.0 // indirect
+	github.com/go-playground/validator/v10 v10.22.1 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -65,7 +65,7 @@ require (
 	github.com/soypat/seqs v0.0.0-20240527012110-1201bab640ef // indirect
 	github.com/tinygo-org/cbgo v0.0.4 // indirect
 	github.com/tinygo-org/pio v0.0.0-20231216154340-cd888eb58899 // indirect
-	github.com/tinylib/msgp v1.2.0 // indirect
+	github.com/tinylib/msgp v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.10.0 // indirect
