@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bike Presets</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/dist/css/rtgraph.css"/>
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/grids-responsive-min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/bumper-control.css">
+</head>
+<body>
+
+
+<style>
+    .center-text {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+    .spaced-container {
+        margin-bottom: 20px;  
+    }
+</style>
+
+
+
+
+<div id="preset_A" class="pure-g spaced-container">
+    <div class="pure-u-1 center-text">
+        Preset A
+    </div>
+</div>
+<div id="controls-container" class="pure-g spaced-container">
+    
+</div>
+
+
+<div id="preset_B" class="pure-g spaced-container">
+    <div class="pure-u-1 center-text">
+        Preset B
+    </div>
+</div>
+<div id="controls-container" class="pure-g spaced-container">
+    
+</div>
+
+
+<div id="preset_C" class="pure-g spaced-container">
+    <div class="pure-u-1 center-text">
+        Preset C
+    </div>
+</div>
+<div id="controls-container" class="pure-g spaced-container">
+    
+</div>
+
+
+<div id="preset_D" class="pure-g spaced-container">
+    <div class="pure-u-1 center-text">
+        Preset D
+    </div>
+</div>
+<div id="controls-container" class="pure-g spaced-container">
+    
+</div>
+
+
+<script type="module">
+    import {createPresetControls, DefaultApiClient} from '/dist/z2-bundle.js';
+
+    document.addEventListener("DOMContentLoaded", () => {
+        createPresetControls(new DefaultApiClient(), "bike");
+    });
+</script>
+
+
+
+</body>
+</html>
+
+

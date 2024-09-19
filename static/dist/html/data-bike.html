@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bike Data</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/dist/css/rtgraph.css"/>
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/grids-responsive-min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="/dist/css/bumper-control.css">
+</head>
+<body>
+
+
+<script type="module">
+    import {setupBikeAnalysis} from "/dist/z2-bundle.js";
+    import {getEnv} from "/env.js"
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const date = params.get('date');
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+        setupBikeAnalysis(env, date);
+    });
+</script>
+
+<div class="pure-g">
+    <div class="pure-u-1">
+        <div id="graphdiv0" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
+    </div>
+</div>
+
+
+
+<button class="pure-button pure-button-primary back-button" onclick="window.history.back()">back</button>
+
+
+
+
+
+</body>
+</html>
+
