@@ -35,35 +35,30 @@ var namedSampleData = []NamedSeries{
 func insertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, error) {
 	count := 0
 
-	// Start the transaction
 	err := db.Transaction(func(tx *gorm.DB) error {
-		// Perform the insertions for a single NamedSeries
 		for i := range series.Timestamps {
-			// Create an entry for each timestamp/value combo
+			id := sqlite.HashedID(series.Name)
 			row := sqlite.Sample{
-				SeriesID:  []byte(series.Name), // Assuming SeriesID is derived from the Name
+				SeriesID:  id,
 				Timestamp: series.Timestamps[i],
 				Value:     series.Values[i],
 			}
 
-			// Insert with ON CONFLICT DO NOTHING
 			res := tx.Clauses(clause.OnConflict{
 				DoNothing: true,
 			}).Create(&row)
 
 			if res.Error != nil {
-				return res.Error // Rollback if any error occurs
+				return res.Error
 			}
 
-			// Only increment the count for successfully inserted rows
 			if res.RowsAffected > 0 {
 				count++
 			}
 		}
-		return nil // Commit if everything is successful
+		return nil
 	})
 
-	// Return the count and error if the transaction fails
 	if err != nil {
 		return 0, err
 	}
