@@ -79,8 +79,14 @@ func run() error {
 		return errors.Wrap(err, "get src db")
 	}
 
-	err = bucketAll(src, 60, func(ns NamedSeries) error {
-		fmt.Println(" ", ns.Name, len(ns.Timestamps))
+	err = bucketAll(src, 365, func(ns NamedSeries) error {
+		count, err := insertSeriesBatchWithTransaction(dst.GetORM(), ns)
+		if err != nil {
+			return errors.Wrap(err, "insert batch")
+		}
+
+		fmt.Printf("  %s: %d/%d\n", ns.Name, count, len(ns.Timestamps))
+
 		return nil
 	})
 	if err != nil {
