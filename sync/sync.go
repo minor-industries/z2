@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/jinzhu/now"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"os"
+	"time"
 )
 
 type NamedSeries struct {
@@ -66,17 +69,78 @@ func insertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, err
 	return count, nil
 }
 func run() error {
-	z2db, err := sqlite.Get("synced.db")
+	dst, err := sqlite.Get("synced.db")
 	if err != nil {
-		return errors.Wrap(err, "get db")
+		return errors.Wrap(err, "get dst db")
+	}
+
+	src, err := sqlite.Get(os.ExpandEnv("$HOME/.z2/z2.db"))
+	if err != nil {
+		return errors.Wrap(err, "get src db")
+	}
+
+	err = bucketAll(src, 60, func(ns NamedSeries) error {
+		fmt.Println(" ", ns.Name, len(ns.Timestamps))
+		return nil
+	})
+	if err != nil {
+		return errors.Wrap(err, "")
 	}
 
 	for _, s := range namedSampleData {
-		count, err := insertSeriesBatchWithTransaction(z2db.GetORM(), s)
+		count, err := insertSeriesBatchWithTransaction(dst.GetORM(), s)
 		if err != nil {
 			return errors.Wrap(err, "insert")
 		}
 		fmt.Println(s.Name, s, count)
+	}
+
+	return nil
+}
+
+func bucketAll(
+	src *sqlite.Backend,
+	lookbackDays int,
+	callback func(ns NamedSeries) error,
+) error {
+	orm := src.GetORM()
+	var seriesNames []string
+	tx := orm.Model(&sqlite.Series{}).Distinct("name").Pluck("name", &seriesNames)
+	if tx.Error != nil {
+		return errors.Wrap(tx.Error, "get distinct series names")
+	}
+
+	t0 := now.With(time.Now()).BeginningOfDay()
+
+	for i := 0; i < lookbackDays; i++ {
+		t1 := t0.AddDate(0, 0, 1)
+		fmt.Println(t0)
+
+		for _, series := range seriesNames {
+			samples, err := src.LoadDataBetween(series, t0, t1)
+			if err != nil {
+				return errors.Wrap(err, "load data between")
+			}
+			if len(samples.Values) == 0 {
+				continue
+			}
+
+			ns := NamedSeries{
+				Name:       series,
+				Timestamps: make([]int64, len(samples.Values)),
+				Values:     make([]float64, len(samples.Values)),
+			}
+
+			for i, s := range samples.Values {
+				ns.Timestamps[i] = s.Timestamp.UnixMilli()
+				ns.Values[i] = s.Value
+			}
+
+			if err := callback(ns); err != nil {
+				return errors.Wrap(err, "callback")
+			}
+		}
+		t0 = t0.AddDate(0, 0, -1)
 	}
 
 	return nil
