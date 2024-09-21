@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/chrispappas/golang-generics-set/set"
 	"github.com/jinzhu/now"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
@@ -55,12 +56,18 @@ func run() error {
 		return errors.Wrap(err, "get src db")
 	}
 
-	err = bucketAll(src, 365, func(ns NamedSeries) error {
+	seen := set.Set[time.Time]{}
+	err = bucketAll(src, 365, func(day time.Time, ns NamedSeries) error {
 		count, err := insertSeriesBatchWithTransaction(dst.GetORM(), ns)
 		if err != nil {
 			return errors.Wrap(err, "insert batch")
 		}
 
+		if !seen.Has(day) {
+			fmt.Println(day.Format("2006-01-02"))
+		}
+
+		seen.Add(day)
 		fmt.Printf("  %s: %d/%d\n", ns.Name, count, len(ns.Timestamps))
 
 		return nil
@@ -75,7 +82,7 @@ func run() error {
 func bucketAll(
 	src *sqlite.Backend,
 	lookbackDays int,
-	callback func(ns NamedSeries) error,
+	callback func(day time.Time, ns NamedSeries) error,
 ) error {
 	orm := src.GetORM()
 	var seriesNames []string
@@ -88,7 +95,6 @@ func bucketAll(
 
 	for i := 0; i < lookbackDays; i++ {
 		t1 := t0.AddDate(0, 0, 1)
-		fmt.Println(t0)
 
 		for _, series := range seriesNames {
 			samples, err := src.LoadDataBetween(series, t0, t1)
@@ -110,7 +116,7 @@ func bucketAll(
 				ns.Values[i] = s.Value
 			}
 
-			if err := callback(ns); err != nil {
+			if err := callback(t0, ns); err != nil {
 				return errors.Wrap(err, "callback")
 			}
 		}
