@@ -2,6 +2,7 @@ package sync
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/tinylib/msgp/msgp"
 	"net/http"
 )
@@ -11,7 +12,7 @@ type SyncResponse struct {
 	NewItems      int `json:"new_items"`
 }
 
-func RunServer() error {
+func RunServer(db *sqlite.Backend) error {
 	r := gin.Default()
 	r.POST("/sync", func(c *gin.Context) {
 		var series NamedSeries
@@ -19,10 +20,16 @@ func RunServer() error {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		existing, newItems := 0, 0
+
+		count, err := InsertSeriesBatchWithTransaction(db.GetORM(), series)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
 		resp := SyncResponse{
-			ExistingItems: existing,
-			NewItems:      newItems,
+			ExistingItems: len(series.Timestamps) - count,
+			NewItems:      count,
 		}
 		c.JSON(http.StatusOK, resp)
 	})

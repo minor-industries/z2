@@ -25,7 +25,7 @@ func TestInsertSeriesWithClient(t *testing.T) {
 
 	// Start the server in a goroutine
 	go func() {
-		if err := RunServer(); err != nil {
+		if err := RunServer(nil); err != nil {
 			t.Fatalf("failed to run server: %v", err)
 		}
 	}()
