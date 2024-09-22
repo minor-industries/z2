@@ -16,7 +16,7 @@ func run() error {
 		return errors.Wrap(err, "get src db")
 	}
 
-	client := sync.NewClient("http://localhost:8080")
+	client := sync.NewClient("localhost:8080")
 
 	seen := set.Set[time.Time]{}
 	err = sync.BucketAll(src, 365, func(day time.Time, ns sync.NamedSeries) error {

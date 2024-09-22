@@ -10,11 +10,11 @@ import (
 )
 
 type Client struct {
-	Endpoint string
+	host string
 }
 
 func NewClient(host string) *Client {
-	return &Client{Endpoint: fmt.Sprintf("%s/sync", host)}
+	return &Client{host: host}
 }
 
 func (c *Client) SendSeries(series NamedSeries) (*SyncResponse, error) {
@@ -23,7 +23,9 @@ func (c *Client) SendSeries(series NamedSeries) (*SyncResponse, error) {
 		return nil, fmt.Errorf("error encoding: %w", err)
 	}
 
-	resp, err := http.Post(c.Endpoint, "application/x-msgpack", &buf)
+	endPoint := fmt.Sprintf("http://%s/sync/series", c.host)
+
+	resp, err := http.Post(endPoint, "application/x-msgpack", &buf)
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %w", err)
 	}

@@ -32,7 +32,7 @@ func TestInsertSeriesWithClient(t *testing.T) {
 
 	time.Sleep(2 * time.Second)
 
-	client := NewClient("http://localhost:8080")
+	client := NewClient("localhost:8080")
 
 	seen := set.Set[time.Time]{}
 	err = BucketAll(src, 365, func(day time.Time, ns NamedSeries) error {

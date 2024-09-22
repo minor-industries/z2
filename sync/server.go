@@ -82,7 +82,7 @@ func addSeriesName(tx *gorm.DB, seen set.Set[string], seriesName string, id []by
 func RunServer(db *sqlite.Backend) error {
 	r := gin.Default()
 
-	r.POST("/sync", func(c *gin.Context) {
+	r.POST("/sync/series", func(c *gin.Context) {
 		var series NamedSeries
 		if err := msgp.Decode(c.Request.Body, &series); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
