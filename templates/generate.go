@@ -69,6 +69,12 @@ var files = []file{
 		name: "calendar.html",
 		args: map[string]any{},
 	},
+	{
+		name: "sync.html",
+		args: map[string]any{
+			"Title": "Sync",
+		},
+	},
 	// workouts not ready
 }
 
