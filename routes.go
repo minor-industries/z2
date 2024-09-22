@@ -94,6 +94,7 @@ func setupRoutes(
 		//TODO: parse get parameters
 		//TODO: better cleanup, disconnection handling, etc.
 		//TODO: create reusable sse code and use in all sse handlers
+		//TODO: only allow one sync to run at once? (or similar)
 
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
