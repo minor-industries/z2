@@ -79,6 +79,43 @@ func addSeriesName(tx *gorm.DB, seen set.Set[string], seriesName string, id []by
 	return nil
 }
 
+func insertMarkersBatchWithTransaction(
+	db *gorm.DB,
+	markers []Marker,
+) (int, error) {
+	count := 0
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		for _, marker := range markers {
+			row := sqlite.Marker{
+				ID:        marker.ID,
+				Type:      marker.Type,
+				Ref:       marker.Ref,
+				Timestamp: marker.Timestamp,
+			}
+
+			res := tx.Clauses(clause.OnConflict{
+				DoNothing: true,
+			}).Create(&row)
+
+			if res.Error != nil {
+				return res.Error
+			}
+
+			if res.RowsAffected > 0 {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func RunServer(db *sqlite.Backend) error {
 	r := gin.Default()
 
@@ -101,5 +138,26 @@ func RunServer(db *sqlite.Backend) error {
 		}
 		c.JSON(http.StatusOK, resp)
 	})
+
+	r.POST("/sync/markers", func(c *gin.Context) {
+		var markers Markers
+		if err := msgp.Decode(c.Request.Body, &markers); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		count, err := insertMarkersBatchWithTransaction(db.GetORM(), markers)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		resp := SyncResponse{
+			ExistingItems: len(markers) - count,
+			NewItems:      count,
+		}
+		c.JSON(http.StatusOK, resp)
+	})
+
 	return r.Run()
 }

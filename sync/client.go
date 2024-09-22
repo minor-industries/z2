@@ -17,11 +17,11 @@ func NewClient(host string) *Client {
 	return &Client{host: host}
 }
 
-func (c *Client) SendSeries(series msgp.Encodable) (*SyncResponse, error) {
+func (c *Client) SendSeries(series *NamedSeries) (*SyncResponse, error) {
 	return c.send(series, "sync/series")
 }
 
-func (c *Client) SendMarkers(markers msgp.Encodable) (*SyncResponse, error) {
+func (c *Client) SendMarkers(markers Markers) (*SyncResponse, error) {
 	return c.send(markers, "sync/markers")
 }
 

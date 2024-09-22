@@ -14,3 +14,5 @@ type Marker struct {
 	Ref       string
 	Timestamp int64
 }
+
+type Markers []Marker
