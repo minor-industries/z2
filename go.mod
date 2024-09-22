@@ -8,6 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ebitengine/oto/v3 v3.2.0
 	github.com/gammazero/deque v0.2.1
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/jinzhu/now v1.1.5
@@ -17,6 +18,7 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/samber/lo v1.46.0
 	github.com/stretchr/testify v1.9.0
+	github.com/tinylib/msgp v1.2.1
 	github.com/twitchtv/twirp v8.1.3+incompatible
 	github.com/webview/webview_go v0.0.0-20240220051247-56f456ca3a43
 	google.golang.org/protobuf v1.34.2
@@ -65,7 +67,6 @@ require (
 	github.com/soypat/seqs v0.0.0-20240527012110-1201bab640ef // indirect
 	github.com/tinygo-org/cbgo v0.0.4 // indirect
 	github.com/tinygo-org/pio v0.0.0-20231216154340-cd888eb58899 // indirect
-	github.com/tinylib/msgp v1.2.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.10.0 // indirect

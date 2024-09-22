@@ -4,6 +4,7 @@ package sync
 
 import (
 	"github.com/chrispappas/golang-generics-set/set"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
@@ -11,6 +12,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
+	"time"
 )
 
 func insertSeriesBatchWithTransaction(
@@ -115,6 +117,14 @@ func insertMarkersBatchWithTransaction(
 
 func RunServer(dbs map[string]*sqlite.Backend) error {
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:  []string{"*"},
+		AllowMethods:  []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:  []string{"*"},
+		ExposeHeaders: []string{"Content-Length"},
+		MaxAge:        12 * time.Hour,
+	}))
 
 	r.POST("/sync/:db/series", func(c *gin.Context) {
 		dbParam := c.Param("db")
