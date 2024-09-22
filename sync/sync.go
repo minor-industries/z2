@@ -1,27 +1,22 @@
-//go:build !wasm
-
 package sync
 
 import (
 	"fmt"
 	"github.com/chrispappas/golang-generics-set/set"
 	"github.com/jinzhu/now"
-	"github.com/minor-industries/rtgraph/database/sqlite"
+	"github.com/minor-industries/rtgraph/storage"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 	"time"
 )
 
 func BucketAll(
-	src *sqlite.Backend,
+	src storage.StorageBackend,
 	lookbackDays int,
 	callback func(day time.Time, ns *NamedSeries) error,
 ) error {
-	orm := src.GetORM()
-	var seriesNames []string
-	tx := orm.Model(&sqlite.Series{}).Distinct("name").Pluck("name", &seriesNames)
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "get distinct series names")
+	seriesNames, err := src.AllSeriesNames()
+	if err != nil {
+		return errors.Wrap(err, "get series names")
 	}
 
 	t0 := now.With(time.Now()).BeginningOfDay()
@@ -59,7 +54,7 @@ func BucketAll(
 	return nil
 }
 
-func Sync(src *sqlite.Backend, client *Client, info func(string)) error {
+func Sync(src storage.StorageBackend, client *Client, info func(string)) error {
 	err := sendSeries(src, client, info)
 	if err != nil {
 		return errors.Wrap(err, "send series")
@@ -73,36 +68,7 @@ func Sync(src *sqlite.Backend, client *Client, info func(string)) error {
 	return nil
 }
 
-func sendMarkers(src *sqlite.Backend, client *Client, info func(string)) error {
-	//TODO: perhaps sendMarkers should also respect lookback days
-	var markers []sqlite.Marker
-
-	tx := src.GetORM().Find(&markers)
-	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "load markers")
-	}
-
-	mapped := lo.Map(markers, func(m sqlite.Marker, index int) Marker {
-		return Marker{
-			ID:        m.ID,
-			Type:      m.Type,
-			Ref:       m.Ref,
-			Timestamp: m.Timestamp,
-		}
-	})
-
-	resp, err := client.SendMarkers(mapped)
-	if err != nil {
-		return errors.Wrap(err, "send markers")
-	}
-
-	info("markers")
-	info(fmt.Sprintf("  %d/%d", resp.NewItems, len(mapped)))
-
-	return nil
-}
-
-func sendSeries(src *sqlite.Backend, client *Client, info func(string)) error {
+func sendSeries(src storage.StorageBackend, client *Client, info func(string)) error {
 	seen := set.Set[time.Time]{}
 	err := BucketAll(src, 365, func(day time.Time, ns *NamedSeries) error {
 		resp, err := client.SendSeries(ns)

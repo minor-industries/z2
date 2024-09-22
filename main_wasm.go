@@ -19,6 +19,7 @@ import (
 	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/source/rower"
+	"github.com/minor-industries/z2/sync"
 	"github.com/minor-industries/z2/time_series"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/wasm"
@@ -220,6 +221,13 @@ func run() error {
 			}),
 
 			"handleBTMsg": wasm.HandleBTMsg(btHandler),
+
+			"triggerSync": js.FuncOf(func(this js.Value, args []js.Value) any {
+				sync.NewClient("jsu:8080", "z2-jeremy-iphone")
+				//sync.Sync()
+
+				return js.Undefined()
+			}),
 		},
 	})
 
