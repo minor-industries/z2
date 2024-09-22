@@ -19,7 +19,7 @@ func run() error {
 	client := sync.NewClient("localhost:8080")
 
 	seen := set.Set[time.Time]{}
-	err = sync.BucketAll(src, 365, func(day time.Time, ns sync.NamedSeries) error {
+	err = sync.BucketAll(src, 365, func(day time.Time, ns *sync.NamedSeries) error {
 		resp, err := client.SendSeries(ns)
 		if err != nil {
 			return errors.Wrap(err, "send series")

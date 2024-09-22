@@ -10,7 +10,7 @@ import (
 func BucketAll(
 	src *sqlite.Backend,
 	lookbackDays int,
-	callback func(day time.Time, ns NamedSeries) error,
+	callback func(day time.Time, ns *NamedSeries) error,
 ) error {
 	orm := src.GetORM()
 	var seriesNames []string
@@ -33,7 +33,7 @@ func BucketAll(
 				continue
 			}
 
-			ns := NamedSeries{
+			ns := &NamedSeries{
 				Name:       series,
 				Timestamps: make([]int64, len(samples.Values)),
 				Values:     make([]float64, len(samples.Values)),

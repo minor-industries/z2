@@ -17,15 +17,23 @@ func NewClient(host string) *Client {
 	return &Client{host: host}
 }
 
-func (c *Client) SendSeries(series NamedSeries) (*SyncResponse, error) {
+func (c *Client) SendSeries(series msgp.Encodable) (*SyncResponse, error) {
+	return c.send(series, "sync/series")
+}
+
+func (c *Client) SendMarkers(markers msgp.Encodable) (*SyncResponse, error) {
+	return c.send(markers, "sync/markers")
+}
+
+func (c *Client) send(data msgp.Encodable, endpoint string) (*SyncResponse, error) {
 	var buf bytes.Buffer
-	if err := msgp.Encode(&buf, &series); err != nil {
+	if err := msgp.Encode(&buf, data); err != nil {
 		return nil, fmt.Errorf("error encoding: %w", err)
 	}
 
-	endPoint := fmt.Sprintf("http://%s/sync/series", c.host)
+	url := fmt.Sprintf("http://%s/%s", c.host, endpoint)
 
-	resp, err := http.Post(endPoint, "application/x-msgpack", &buf)
+	resp, err := http.Post(url, "application/x-msgpack", &buf)
 	if err != nil {
 		return nil, fmt.Errorf("error making request: %w", err)
 	}
