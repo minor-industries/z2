@@ -13,6 +13,7 @@ import (
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/static/dist"
+	"github.com/minor-industries/z2/sync"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
@@ -88,6 +89,34 @@ func setupRoutes(
 		"/twirp/calendar.Calendar/*Method",
 		gin.WrapH(calendar.NewCalendarServer(apiHandler, nil)),
 	)
+
+	router.GET("/trigger-sync", func(c *gin.Context) {
+		//TODO: parse get parameters
+		//TODO: better cleanup, disconnection handling, etc.
+		//TODO: create reusable sse code and use in all sse handlers
+
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+
+		syncClient := sync.NewClient("localhost:8080", "z2-jeremy")
+		info := func(msg string) {
+			_, err := c.Writer.Write([]byte("data: " + msg + "\n\n"))
+			if err != nil {
+				fmt.Println("error writing to client:", err)
+				return
+			}
+			c.Writer.Flush()
+		}
+
+		err := sync.Sync(samples, syncClient, info)
+		if err != nil {
+			info("sync error: " + err.Error())
+		}
+
+		//TODO: report full number of new rows
+		info("sync complete")
+	})
 }
 
 func setupSse(
