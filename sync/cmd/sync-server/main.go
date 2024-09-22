@@ -14,7 +14,6 @@ var dbNames = []string{
 }
 
 func run() error {
-
 	dbs := lo.Associate(dbNames, func(name string) (string, *sqlite.Backend) {
 		dst, _ := sqlite.Get(name + ".db")
 		return name, dst

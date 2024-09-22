@@ -7,15 +7,12 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/minor-industries/calendar/gen/go/calendar"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
-	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
-	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
@@ -23,16 +20,11 @@ import (
 	"github.com/minor-industries/z2/source/multi"
 	"github.com/minor-industries/z2/source/replay"
 	"github.com/minor-industries/z2/source/rower"
-	"github.com/minor-industries/z2/static/dist"
 	"github.com/minor-industries/z2/time_series"
 	"github.com/minor-industries/z2/variables"
-	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/samber/lo"
 	webview "github.com/webview/webview_go"
-	"html/template"
-	"net/http"
 	"os"
 )
 
@@ -103,65 +95,6 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	router := gin.New()
-	router.Use(gin.Recovery())
-	skipLogging := []string{"/metrics"}
-	router.Use(gin.LoggerWithWriter(gin.DefaultWriter, skipLogging...))
-	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
-	router.GET("/favicon.ico", func(c *gin.Context) {
-		c.Status(204)
-	})
-
-	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/dist/html/home.html")
-	})
-
-	graph.SetupServer(router.Group("/rtgraph"))
-
-	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*"))
-	router.SetHTMLTemplate(tmpl)
-
-	router.GET("/workouts.html", func(c *gin.Context) {
-		ref := c.Query("ref")
-
-		cfg, ok := app.Configs[ref]
-		if !ok {
-			_ = c.Error(errors.New("unknown config"))
-			return
-		}
-
-		data, err := workouts.GenerateData(samples.GetORM(), ref, cfg.PaceMetric)
-		if err != nil {
-			_ = c.Error(err)
-			return
-		}
-		c.HTML(http.StatusOK, "workouts.html", gin.H{
-			"Title": ref + " workouts",
-			"Data":  data,
-			"Ref":   ref,
-		})
-	})
-
-	setupSse(br, router)
-
-	if opts.StaticPath != "" {
-		router.Static("/dist", opts.StaticPath)
-	} else {
-		router.StaticFS("/dist", http.FS(dist.FS))
-	}
-
-	router.GET("/env.js", func(c *gin.Context) {
-		c.Data(http.StatusOK, "application/javascript", envWebJS)
-	})
-
-	apiHandler := handler2.NewApiServer(backends, vars)
-	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
-
-	router.POST(
-		"/twirp/calendar.Calendar/*Method",
-		gin.WrapH(calendar.NewCalendarServer(apiHandler, nil)),
-	)
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -193,6 +126,9 @@ func run() error {
 		ctx,
 	)
 	go mainHandler.Monitor() // TODO: should monitor each source independently
+
+	router := gin.New()
+	setupRoutes(router, opts, graph, br, backends, vars)
 
 	go func() {
 		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
