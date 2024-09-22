@@ -1,18 +1,15 @@
-package main
+package sync
 
 import (
-	"fmt"
-	"github.com/chrispappas/golang-generics-set/set"
 	"github.com/jinzhu/now"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"os"
 	"time"
 )
 
-func insertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, error) {
+func InsertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, error) {
 	count := 0
 
 	err := db.Transaction(func(tx *gorm.DB) error {
@@ -45,41 +42,8 @@ func insertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, err
 
 	return count, nil
 }
-func run() error {
-	dst, err := sqlite.Get("synced.db")
-	if err != nil {
-		return errors.Wrap(err, "get dst db")
-	}
 
-	src, err := sqlite.Get(os.ExpandEnv("$HOME/.z2/z2.db"))
-	if err != nil {
-		return errors.Wrap(err, "get src db")
-	}
-
-	seen := set.Set[time.Time]{}
-	err = bucketAll(src, 365, func(day time.Time, ns NamedSeries) error {
-		count, err := insertSeriesBatchWithTransaction(dst.GetORM(), ns)
-		if err != nil {
-			return errors.Wrap(err, "insert batch")
-		}
-
-		if !seen.Has(day) {
-			fmt.Println(day.Format("2006-01-02"))
-		}
-
-		seen.Add(day)
-		fmt.Printf("  %s: %d/%d\n", ns.Name, count, len(ns.Timestamps))
-
-		return nil
-	})
-	if err != nil {
-		return errors.Wrap(err, "bucket all")
-	}
-
-	return nil
-}
-
-func bucketAll(
+func BucketAll(
 	src *sqlite.Backend,
 	lookbackDays int,
 	callback func(day time.Time, ns NamedSeries) error,
@@ -124,10 +88,4 @@ func bucketAll(
 	}
 
 	return nil
-}
-
-func main() {
-	if err := run(); err != nil {
-		panic(err)
-	}
 }

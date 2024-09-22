@@ -1,4 +1,4 @@
-package main
+package sync
 
 import (
 	"github.com/chrispappas/golang-generics-set/set"
@@ -25,7 +25,7 @@ func TestInsertSeriesWithClient(t *testing.T) {
 
 	// Start the server in a goroutine
 	go func() {
-		if err := runServer(); err != nil {
+		if err := RunServer(); err != nil {
 			t.Fatalf("failed to run server: %v", err)
 		}
 	}()
@@ -35,7 +35,7 @@ func TestInsertSeriesWithClient(t *testing.T) {
 	client := NewClient("http://localhost:8080")
 
 	seen := set.Set[time.Time]{}
-	err = bucketAll(src, 365, func(day time.Time, ns NamedSeries) error {
+	err = BucketAll(src, 365, func(day time.Time, ns NamedSeries) error {
 		resp, err := client.SendSeries(ns)
 		if err != nil {
 			return err

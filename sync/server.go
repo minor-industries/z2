@@ -1,4 +1,4 @@
-package main
+package sync
 
 import (
 	"github.com/gin-gonic/gin"
@@ -11,7 +11,7 @@ type SyncResponse struct {
 	NewItems      int `json:"new_items"`
 }
 
-func runServer() error {
+func RunServer() error {
 	r := gin.Default()
 	r.POST("/sync", func(c *gin.Context) {
 		var series NamedSeries

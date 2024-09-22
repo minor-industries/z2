@@ -1,4 +1,4 @@
-package main
+package sync
 
 //go:generate msgp
 
