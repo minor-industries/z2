@@ -17,7 +17,7 @@ func run() error {
 		return errors.Wrap(err, "get src db")
 	}
 
-	client := sync.NewClient("localhost:8080")
+	client := sync.NewClient("localhost:8080", "z2-jeremy")
 
 	err = sendSeries(src, client)
 	if err != nil {

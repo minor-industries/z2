@@ -4,17 +4,27 @@ import (
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/sync"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 )
 
-func run() error {
-	dstDBPath := "synced.db"
+var dbNames = []string{
+	"z2-jeremy",
+	"z2-risa",
+	"z2-jeremy-iphone",
+}
 
-	dst, err := sqlite.Get(dstDBPath)
-	if err != nil {
-		return errors.Wrap(err, "get destination database")
+func run() error {
+
+	dbs := lo.Associate(dbNames, func(name string) (string, *sqlite.Backend) {
+		dst, _ := sqlite.Get(name + ".db")
+		return name, dst
+	})
+
+	if lo.Contains(lo.Values(dbs), nil) {
+		return errors.New("couldn't open one or more dbs")
 	}
 
-	panic(sync.RunServer(dst))
+	panic(sync.RunServer(dbs))
 }
 
 func main() {

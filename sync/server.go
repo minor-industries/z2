@@ -116,10 +116,17 @@ func insertMarkersBatchWithTransaction(
 	return count, nil
 }
 
-func RunServer(db *sqlite.Backend) error {
+func RunServer(dbs map[string]*sqlite.Backend) error {
 	r := gin.Default()
 
-	r.POST("/sync/series", func(c *gin.Context) {
+	r.POST("/sync/:db/series", func(c *gin.Context) {
+		dbParam := c.Param("db")
+		db, ok := dbs[dbParam]
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "unknown db"})
+			return
+		}
+
 		var series NamedSeries
 		if err := msgp.Decode(c.Request.Body, &series); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -139,7 +146,14 @@ func RunServer(db *sqlite.Backend) error {
 		c.JSON(http.StatusOK, resp)
 	})
 
-	r.POST("/sync/markers", func(c *gin.Context) {
+	r.POST("/sync/:db/markers", func(c *gin.Context) {
+		dbParam := c.Param("db")
+		db, ok := dbs[dbParam]
+		if !ok {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "unknown db"})
+			return
+		}
+
 		var markers Markers
 		if err := msgp.Decode(c.Request.Body, &markers); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
