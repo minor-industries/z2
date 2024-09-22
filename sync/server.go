@@ -4,12 +4,48 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/tinylib/msgp/msgp"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"net/http"
 )
 
 type SyncResponse struct {
 	ExistingItems int `json:"existing_items"`
 	NewItems      int `json:"new_items"`
+}
+
+func insertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, error) {
+	count := 0
+
+	err := db.Transaction(func(tx *gorm.DB) error {
+		for i := range series.Timestamps {
+			id := sqlite.HashedID(series.Name)
+			row := sqlite.Sample{
+				SeriesID:  id,
+				Timestamp: series.Timestamps[i],
+				Value:     series.Values[i],
+			}
+
+			res := tx.Clauses(clause.OnConflict{
+				DoNothing: true,
+			}).Create(&row)
+
+			if res.Error != nil {
+				return res.Error
+			}
+
+			if res.RowsAffected > 0 {
+				count++
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 func RunServer(db *sqlite.Backend) error {
@@ -21,7 +57,7 @@ func RunServer(db *sqlite.Backend) error {
 			return
 		}
 
-		count, err := InsertSeriesBatchWithTransaction(db.GetORM(), series)
+		count, err := insertSeriesBatchWithTransaction(db.GetORM(), series)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

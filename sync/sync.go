@@ -4,44 +4,8 @@ import (
 	"github.com/jinzhu/now"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"time"
 )
-
-func InsertSeriesBatchWithTransaction(db *gorm.DB, series NamedSeries) (int, error) {
-	count := 0
-
-	err := db.Transaction(func(tx *gorm.DB) error {
-		for i := range series.Timestamps {
-			id := sqlite.HashedID(series.Name)
-			row := sqlite.Sample{
-				SeriesID:  id,
-				Timestamp: series.Timestamps[i],
-				Value:     series.Values[i],
-			}
-
-			res := tx.Clauses(clause.OnConflict{
-				DoNothing: true,
-			}).Create(&row)
-
-			if res.Error != nil {
-				return res.Error
-			}
-
-			if res.RowsAffected > 0 {
-				count++
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		return 0, err
-	}
-
-	return count, nil
-}
 
 func BucketAll(
 	src *sqlite.Backend,
