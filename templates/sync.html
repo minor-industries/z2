@@ -28,15 +28,11 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('start-sync').addEventListener('click', function () {
-        const host = document.getElementById('host').value;
-        const lookback = document.getElementById('lookback').value;
-        const database = document.getElementById('database').value;
 
-        const logOutput = document.getElementById('log-output');
-        logOutput.textContent = '';
+<script type="module">
+    import {getEnv} from "/env.js"
 
+    function sse(host, lookback, database, logOutput) {
         const sseUrl = `/trigger-sync?host=${encodeURIComponent(host)}&lookback=${lookback}&database=${encodeURIComponent(database)}`;
 
         const eventSource = new EventSource(sseUrl);
@@ -51,7 +47,28 @@
             logOutput.textContent += `connection closed or errored\n`;
             eventSource.close();
         };
-    });
+    }
+
+    function wasm(host, lookback, database, logOutput) {
+        window.z2GoWasm.z2.triggerSync();
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+
+        document.getElementById('start-sync').addEventListener('click', async () => {
+            const host = document.getElementById('host').value;
+            const lookback = document.getElementById('lookback').value;
+            const database = document.getElementById('database').value;
+
+            const logOutput = document.getElementById('log-output');
+            logOutput.textContent = '';
+
+            // sse(host, lookback, database, logOutput);
+            wasm(host, lookback, database, logOutput);
+        });
+    })
 </script>
+
 
 {{ template "footer" . }}

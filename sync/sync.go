@@ -55,6 +55,8 @@ func BucketAll(
 }
 
 func Sync(src storage.StorageBackend, client *Client, info func(string)) error {
+	info("staring sync")
+
 	err := sendSeries(src, client, info)
 	if err != nil {
 		return errors.Wrap(err, "send series")
@@ -64,6 +66,8 @@ func Sync(src storage.StorageBackend, client *Client, info func(string)) error {
 	if err != nil {
 		return errors.Wrap(err, "send series")
 	}
+
+	info("sync complete")
 
 	return nil
 }

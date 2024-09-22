@@ -23,7 +23,10 @@ async function setup() {
             return [];
         },
         async insertValue() {
-        }
+        },
+        async allSeriesNames() {
+            return [];
+        },
     }; // TODO
 
     await runGoWasm("/dist/z2.wasm")

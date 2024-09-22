@@ -116,9 +116,6 @@ func setupRoutes(
 		if err != nil {
 			info("sync error: " + err.Error())
 		}
-
-		//TODO: report full number of new rows
-		info("sync complete")
 	})
 }
 

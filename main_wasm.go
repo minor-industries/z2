@@ -223,9 +223,15 @@ func run() error {
 			"handleBTMsg": wasm.HandleBTMsg(btHandler),
 
 			"triggerSync": js.FuncOf(func(this js.Value, args []js.Value) any {
-				sync.NewClient("jsu:8080", "z2-jeremy-iphone")
-				//sync.Sync()
-
+				go func() {
+					syncClient := sync.NewClient("jsu:8080", "z2-jeremy-iphone")
+					err := sync.Sync(db, syncClient, func(s string) {
+						fmt.Println("sync:", s)
+					})
+					if err != nil {
+						printErr(errors.Wrap(err, "sync"))
+					}
+				}()
 				return js.Undefined()
 			}),
 		},
