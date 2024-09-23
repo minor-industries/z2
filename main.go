@@ -127,7 +127,6 @@ func run() error {
 	)
 
 	disconnect := make(chan struct{})
-	go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 
 	router := gin.New()
 	setupRoutes(router, opts, graph, br, backends, vars, disconnect)
@@ -138,13 +137,14 @@ func run() error {
 
 	go func() {
 		if opts.ReplayDB != "" {
-
+			fmt.Println("using replay database", opts.ReplayDB)
+			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 			errCh <- replay.FromDatabase(
 				ctx,
 				os.ExpandEnv(opts.ReplayDB),
 				mainHandler.Handle,
 			)
-		} else {
+		} else if len(sources.connect) > 0 {
 			devices := lo.Map(sources.connect, func(src source.Source, index int) source.Device {
 				return source.Device{
 					Address:  sources.addrs[index],
@@ -155,6 +155,9 @@ func run() error {
 
 			source.Run(ctx, errCh, devices, disconnect)
 			fmt.Println("all devices found, source.Run exited")
+			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
+		} else {
+			fmt.Println("no sources found")
 		}
 	}()
 
