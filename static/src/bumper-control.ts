@@ -1,5 +1,13 @@
 import {ApiClient} from "./api_client";
 
+function fixedValue(value: number, fixed?: number) {
+    if (fixed !== undefined) {
+        return value.toFixed(fixed)
+    } else {
+        return value.toString();
+    }
+}
+
 interface BumperControlConfig {
     containerId: string;
     label: string;
@@ -16,7 +24,7 @@ export class BumperControl {
     private readonly label: string;
     private readonly variableName: string;
     private readonly increment: number;
-    private value: number; // renamed from speed
+    private _value: number; // renamed from speed
     private readonly fixed?: number;
     private readonly maxValue?: number;
     private readonly minValue?: number;
@@ -34,14 +42,27 @@ export class BumperControl {
         this.label = config.label;
         this.variableName = config.variableName;
         this.increment = config.increment;
-        this.value = 0; // default value
         this.fixed = config.fixed;
+        this.defaultValue = config.defaultValue;
         this.maxValue = config.maxValue;
         this.minValue = config.minValue;
-        this.defaultValue = config.defaultValue;
+
+        this._value = this.defaultValue;
 
         this.createControl();
         this.fetchInitialValue();
+    }
+
+    get valueStr(): string {
+        return fixedValue(this.value, this.fixed);
+    }
+
+    set value(value: number) {
+        this._value = parseFloat(fixedValue(value, this.fixed))
+    }
+
+    get value(): number {
+        return this._value;
     }
 
     private createControl(): void {
@@ -49,7 +70,7 @@ export class BumperControl {
             <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
                 <div class="bumper-container">
                     <label style="margin-right: 10px;">${this.label}</label>
-                    <input type="text" class="pure-input-1 bumper-display" value="${this.value}" readonly>
+                    <input type="text" class="pure-input-1 bumper-display" value="${this.valueStr}" readonly>
                     <div class="bumper-buttons">
                         <button class="pure-button pure-button-primary bumper-button">▲</button>
                         <button class="pure-button pure-button-primary bumper-button">▼</button>
@@ -76,9 +97,6 @@ export class BumperControl {
             const variable = resp.variables.find(v => v.name === this.variableName);
             if (variable && variable.present) {
                 this.value = variable.value;
-            } else {
-                this.value = this.defaultValue;
-                await this.updateValueBackend();
             }
             this.updateDisplay();
         } catch (error) {
@@ -112,11 +130,7 @@ export class BumperControl {
     }
 
     private updateDisplay() {
-        if (this.fixed !== undefined) {
-            this.display.value = Number(this.value).toFixed(this.fixed);
-        } else {
-            this.display.value = this.value.toString();
-        }
+        this.display.value = this.valueStr;
     }
 
     private async updateValueBackend(): Promise<void> {

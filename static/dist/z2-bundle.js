@@ -16251,6 +16251,13 @@ async function runWasm2(name) {
 }
 
 // build/bumper-control.js
+function fixedValue(value, fixed) {
+  if (fixed !== void 0) {
+    return value.toFixed(fixed);
+  } else {
+    return value.toString();
+  }
+}
 var BumperControl = class {
   constructor(apiClient, config) {
     this.apiClient = apiClient;
@@ -16262,20 +16269,29 @@ var BumperControl = class {
     this.label = config.label;
     this.variableName = config.variableName;
     this.increment = config.increment;
-    this.value = 0;
     this.fixed = config.fixed;
+    this.defaultValue = config.defaultValue;
     this.maxValue = config.maxValue;
     this.minValue = config.minValue;
-    this.defaultValue = config.defaultValue;
+    this._value = this.defaultValue;
     this.createControl();
     this.fetchInitialValue();
+  }
+  get valueStr() {
+    return fixedValue(this.value, this.fixed);
+  }
+  set value(value) {
+    this._value = parseFloat(fixedValue(value, this.fixed));
+  }
+  get value() {
+    return this._value;
   }
   createControl() {
     const controlHTML = `
             <div class="pure-u-1 pure-u-md-1-2 pure-u-lg-1-3 pure-u-xl-1-4">
                 <div class="bumper-container">
                     <label style="margin-right: 10px;">${this.label}</label>
-                    <input type="text" class="pure-input-1 bumper-display" value="${this.value}" readonly>
+                    <input type="text" class="pure-input-1 bumper-display" value="${this.valueStr}" readonly>
                     <div class="bumper-buttons">
                         <button class="pure-button pure-button-primary bumper-button">\u25B2</button>
                         <button class="pure-button pure-button-primary bumper-button">\u25BC</button>
@@ -16299,9 +16315,6 @@ var BumperControl = class {
       const variable = resp.variables.find((v) => v.name === this.variableName);
       if (variable && variable.present) {
         this.value = variable.value;
-      } else {
-        this.value = this.defaultValue;
-        await this.updateValueBackend();
       }
       this.updateDisplay();
     } catch (error) {
@@ -16330,11 +16343,7 @@ var BumperControl = class {
     return value;
   }
   updateDisplay() {
-    if (this.fixed !== void 0) {
-      this.display.value = Number(this.value).toFixed(this.fixed);
-    } else {
-      this.display.value = this.value.toString();
-    }
+    this.display.value = this.valueStr;
   }
   async updateValueBackend() {
     try {
