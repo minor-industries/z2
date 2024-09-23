@@ -93,7 +93,6 @@ func setupRoutes(
 	)
 
 	router.GET("/trigger-sync", func(c *gin.Context) {
-		//TODO: parse get parameters
 		//TODO: better cleanup, disconnection handling, etc.
 		//TODO: create reusable sse code and use in all sse handlers
 		//TODO: only allow one sync to run at once? (or similar)
@@ -112,7 +111,7 @@ func setupRoutes(
 			c.Writer.Flush()
 		}
 
-		err := sync.Sync(samples, syncClient, info)
+		err := sync.Sync(samples, syncClient, 0, info)
 		if err != nil {
 			info("sync error: " + err.Error())
 		}

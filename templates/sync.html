@@ -7,13 +7,13 @@
                 <legend>Sync Configuration</legend>
 
                 <label for="host">Host</label>
-                <input id="host" type="text" placeholder="localhost:8080" required>
+                <input id="host" type="text" value="localhost:8080" required>
 
                 <label for="lookback">Lookback Days</label>
-                <input id="lookback" type="number" placeholder="7" required>
+                <input id="lookback" type="number" value="60" required>
 
                 <label for="database">Destination Database</label>
-                <input id="database" type="text" placeholder="Database" required>
+                <input id="database" type="text" value="z2" required>
 
                 <button type="button" id="start-sync" class="pure-button pure-button-primary">Go</button>
             </fieldset>
@@ -32,27 +32,6 @@
 <script type="module">
     import {getEnv} from "/env.js"
 
-    function sse(host, lookback, database, logOutput) {
-        const sseUrl = `/trigger-sync?host=${encodeURIComponent(host)}&lookback=${lookback}&database=${encodeURIComponent(database)}`;
-
-        const eventSource = new EventSource(sseUrl);
-
-        eventSource.onmessage = function (event) {
-            logOutput.textContent += event.data + '\n';
-        };
-
-        // TODO: add a close event and differentiate from log events
-
-        eventSource.onerror = function (err) {
-            logOutput.textContent += `connection closed or errored\n`;
-            eventSource.close();
-        };
-    }
-
-    function wasm(host, lookback, database, logOutput) {
-        window.z2GoWasm.z2.triggerSync();
-    }
-
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
 
@@ -64,8 +43,9 @@
             const logOutput = document.getElementById('log-output');
             logOutput.textContent = '';
 
-            // sse(host, lookback, database, logOutput);
-            wasm(host, lookback, database, logOutput);
+            env.sync(host, parseInt(lookback), database, msg => {
+                logOutput.textContent += msg + "\n";
+            });
         });
     })
 </script>

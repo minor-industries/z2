@@ -223,10 +223,16 @@ func run() error {
 			"handleBTMsg": wasm.HandleBTMsg(btHandler),
 
 			"triggerSync": js.FuncOf(func(this js.Value, args []js.Value) any {
+				host := args[0].String()
+				lookbackDays := args[1].Int()
+				database := args[2].String()
+				logCallback := args[3]
+
 				go func() {
-					syncClient := sync.NewClient("jsu:8080", "z2-jeremy-iphone")
-					err := sync.Sync(db, syncClient, func(s string) {
+					syncClient := sync.NewClient(host, database)
+					err := sync.Sync(db, syncClient, lookbackDays, func(s string) {
 						fmt.Println("sync:", s)
+						logCallback.Invoke(js.ValueOf(s))
 					})
 					if err != nil {
 						printErr(errors.Wrap(err, "sync"))

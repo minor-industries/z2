@@ -54,10 +54,10 @@ func BucketAll(
 	return nil
 }
 
-func Sync(src storage.StorageBackend, client *Client, info func(string)) error {
-	info("staring sync")
+func Sync(src storage.StorageBackend, client *Client, days int, info func(string)) error {
+	info(fmt.Sprintf("staring sync (%d days)", days))
 
-	err := sendSeries(src, client, info)
+	err := sendSeries(src, client, days, info)
 	if err != nil {
 		return errors.Wrap(err, "send series")
 	}
@@ -72,9 +72,9 @@ func Sync(src storage.StorageBackend, client *Client, info func(string)) error {
 	return nil
 }
 
-func sendSeries(src storage.StorageBackend, client *Client, info func(string)) error {
+func sendSeries(src storage.StorageBackend, client *Client, days int, info func(string)) error {
 	seen := set.Set[time.Time]{}
-	err := BucketAll(src, 365, func(day time.Time, ns *NamedSeries) error {
+	err := BucketAll(src, days, func(day time.Time, ns *NamedSeries) error {
 		resp, err := client.SendSeries(ns)
 		if err != nil {
 			return errors.Wrap(err, "send series")

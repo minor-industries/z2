@@ -16,7 +16,7 @@ func run() error {
 
 	client := sync.NewClient("localhost:8080", "z2-jeremy")
 
-	return sync.Sync(src, client, func(s string) {
+	return sync.Sync(src, client, 0, func(s string) {
 		fmt.Println(s)
 	})
 }

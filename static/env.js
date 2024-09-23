@@ -37,6 +37,7 @@ async function setup() {
         connector: new WASMConnector(window.z2GoWasm.z2.subscribe),
         streamEvents: window.z2GoWasm.z2.streamEvents,
         maybeStartFrontendBLE,
+        sync: window.z2GoWasm.z2.triggerSync,
     };
 }
 
