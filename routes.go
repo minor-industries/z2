@@ -126,13 +126,17 @@ func setupRoutes(
 		//TODO: better cleanup, disconnection handling, etc.
 		//TODO: only allow one sync to run at once? (or similar)
 
+		defer func() {
+			_ = send("close", "close")
+		}()
+
 		host := c.Query("host")
 		database := c.Query("database")
 		daysStr := c.Query("days")
 
 		days, err := strconv.Atoi(daysStr)
 		if err != nil {
-			_ = send("info", "invalid days parameter")
+			_ = send("server-error", "invalid days parameter")
 			return
 		}
 
@@ -143,8 +147,11 @@ func setupRoutes(
 		})
 
 		if err != nil {
-			_ = send("info", "sync error: "+err.Error())
+			_ = send("server-error", errors.Wrap(err, "sync").Error())
+			return
 		}
+
+		_ = send("info", "sync complete")
 	})
 }
 

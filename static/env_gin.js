@@ -19,10 +19,17 @@ function sync(host, days, database, logCallback) {
         logCallback(event.data);
     });
 
-    // TODO: add a close event and differentiate from log events
+    eventSource.addEventListener("server-error", (event) => {
+        logCallback("server error: " + event.data);
+    });
+
+    eventSource.addEventListener("close", (event) => {
+        logCallback("got server close message");
+        eventSource.close();
+    });
 
     eventSource.onerror = function (err) {
-        logCallback("connection closed or errored");
+        logCallback(`connection error`);
         eventSource.close();
     };
 }
