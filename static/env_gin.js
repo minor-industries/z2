@@ -3,9 +3,16 @@ import {calendar, DefaultApiClient, runOnce, streamEvents} from "/dist/z2-bundle
 async function maybeStartFrontendBLE() {
 }
 
-function sync(host, lookback, database, logCallback) {
-    const sseUrl = `/trigger-sync?host=${encodeURIComponent(host)}&lookback=${lookback}&database=${encodeURIComponent(database)}`;
+function sync(host, days, database, logCallback) {
+    const params = {
+        host: host,
+        days: days,
+        database: database
+    };
 
+    const queryString = new URLSearchParams(params).toString();
+    const sseUrl = `/trigger-sync?${queryString}`;
+    
     const eventSource = new EventSource(sseUrl);
 
     eventSource.onmessage = function (event) {

@@ -22,6 +22,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 func setupRoutes(
@@ -97,11 +98,10 @@ func setupRoutes(
 		//TODO: create reusable sse code and use in all sse handlers
 		//TODO: only allow one sync to run at once? (or similar)
 
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
+		host := c.Query("host")
+		database := c.Query("database")
+		daysStr := c.Query("days")
 
-		syncClient := sync.NewClient("localhost:8080", "z2-jeremy")
 		info := func(msg string) {
 			_, err := c.Writer.Write([]byte("data: " + msg + "\n\n"))
 			if err != nil {
@@ -111,7 +111,19 @@ func setupRoutes(
 			c.Writer.Flush()
 		}
 
-		err := sync.Sync(samples, syncClient, 0, info)
+		days, err := strconv.Atoi(daysStr)
+		if err != nil {
+			info("invalid days parameter") // TODO: error when available
+			return
+		}
+
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+
+		syncClient := sync.NewClient(host, database)
+
+		err = sync.Sync(samples, syncClient, days, info)
 		if err != nil {
 			info("sync error: " + err.Error())
 		}
