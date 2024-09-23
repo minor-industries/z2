@@ -1,8 +1,6 @@
 {{ template "header" . }}
 
-{{ with "bike" }}
-{{ template "controls" . }}
-{{ end }}
+{{ template "controls" "bike" }}
 
 {{ template "sound-events" .}}
 
@@ -120,6 +118,6 @@
     </div>
 </div>
 
-{{ template "disconnect" . }}
+{{ template "bottom-controls" "bike" }}
 
 {{ template "footer" . }}

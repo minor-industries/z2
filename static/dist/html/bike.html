@@ -16,7 +16,7 @@
 
     <style>
         body {
-            margin: 0;
+            margin: 0 0 20px;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             box-sizing: border-box;
         }
@@ -25,7 +25,6 @@
     <link rel="stylesheet" type="text/css" href="/dist/css/bumper-control.css">
 </head>
 <body>
-
 
 
 
@@ -80,7 +79,6 @@
         registerPresets(env.apiClient, controls, "bike");
     });
 </script>
-
 
 
 
@@ -216,18 +214,29 @@
 
 
 
+<hr/>
+
 <button id="disconnect-button" class="pure-button pure-button-primary back-button">disconnect</button>
+
+<button id="analysis-button" class="pure-button pure-button-primary back-button">analysis</button>
 
 <script type="module">
     import {getEnv} from "/env.js";
+    import {localDate} from "/dist/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
+        const today = localDate();
         const env = await getEnv();
+
         document.getElementById("disconnect-button").onclick = async () => {
             const resp = confirm("Are you sure you want to disconnect bluetooth devices?");
             if (resp) {
                 await env.apiClient.disconnectBluetoothDevices({});
             }
+        };
+
+        document.getElementById("analysis-button").onclick = () => {
+            document.location = "/dist/html/data-bike.html?date=" + today;
         };
     });
 </script>

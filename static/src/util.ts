@@ -10,3 +10,12 @@ export function runOnce<T extends (...args: any[]) => Promise<any>>(asyncFn: T):
         return resultPromise;
     }) as T;
 }
+
+export function localDate(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-indexed, so +1
+    const day = now.getDate().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}

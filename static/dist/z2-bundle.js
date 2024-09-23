@@ -16231,6 +16231,13 @@ function runOnce(asyncFn) {
     return resultPromise;
   };
 }
+function localDate() {
+  const now = /* @__PURE__ */ new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 // build/stream_events.js
 function streamEvents(path, callback) {
@@ -16512,6 +16519,7 @@ export {
   dist_exports as calendar,
   createPresetControls,
   decode,
+  localDate,
   registerPresets,
   runGoWasm,
   runOnce,
