@@ -4,13 +4,10 @@ package heartrate
 
 import (
 	"context"
-	"encoding/hex"
-	"fmt"
 	"github.com/minor-industries/z2/source"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
-	"tinygo.org/x/bluetooth"
 )
 
 const (
@@ -28,23 +25,7 @@ func TestHeartrate(t *testing.T) {
 	defer cancel()
 
 	go func() {
-		errCh <- source.Run(
-			ctx,
-			errCh,
-			address,
-			src,
-			nil,
-			func(
-				t time.Time,
-				service bluetooth.UUID,
-				characteristic bluetooth.UUID,
-				msg []byte,
-			) error {
-				fmt.Println(hex.EncodeToString(msg))
-				fmt.Println(msg[1])
-				return nil
-			},
-		)
+		errCh <- source.Run(ctx, errCh, address, nil)
 	}()
 
 	require.NoError(t, <-errCh)

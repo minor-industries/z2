@@ -56,6 +56,8 @@ export interface ApiClient {
     readVariables(req: ReadVariablesReq): Promise<ReadVariablesResp>;
 
     loadMarkers(req: LoadMarkersReq): Promise<LoadMarkersResp>;
+
+    disconnectBluetoothDevices(req: Empty): Promise<Empty>;
 }
 
 export class DefaultApiClient implements ApiClient {
@@ -77,5 +79,9 @@ export class DefaultApiClient implements ApiClient {
 
     public async loadMarkers(req: LoadMarkersReq): Promise<LoadMarkersResp> {
         return rpc("api.Api", "LoadMarkers", req);
+    }
+
+    public async disconnectBluetoothDevices(req: Empty): Promise<Empty> {
+        return rpc("api.Api", "DisconnectBluetoothDevices", req);
     }
 }

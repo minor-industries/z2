@@ -32,6 +32,7 @@ func setupRoutes(
 	br *broker.Broker,
 	backends handler.Backends,
 	vars *variables.Cache,
+	disconnect chan struct{},
 ) {
 	samples := backends.Samples.(*sqlite.Backend) // TODO
 
@@ -85,7 +86,7 @@ func setupRoutes(
 		c.Data(http.StatusOK, "application/javascript", envWebJS)
 	})
 
-	apiHandler := handler2.NewApiServer(backends, vars)
+	apiHandler := handler2.NewApiServer(backends, vars, disconnect)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	router.POST(

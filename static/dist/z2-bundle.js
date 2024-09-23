@@ -15655,6 +15655,9 @@ var DefaultApiClient2 = class {
   async loadMarkers(req) {
     return rpc2("api.Api", "LoadMarkers", req);
   }
+  async disconnectBluetoothDevices(req) {
+    return rpc2("api.Api", "DisconnectBluetoothDevices", req);
+  }
 };
 
 // build/wasm_exec.js

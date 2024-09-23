@@ -57,4 +57,5 @@ service Api {
   rpc ReadVariables (ReadVariablesReq) returns (ReadVariablesResp);
   rpc AddMarker (AddMarkerReq) returns (Empty);
   rpc LoadMarkers (LoadMarkersReq) returns (LoadMarkersResp);
+  rpc DisconnectBluetoothDevices (Empty) returns (Empty);
 }

@@ -102,9 +102,13 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	apiHandler := handler.NewApiServer(handler2.Backends{
-		Samples: db,
-	}, vars)
+	apiHandler := handler.NewApiServer(
+		handler2.Backends{
+			Samples: db,
+		},
+		vars,
+		make(chan struct{}), // TODO: handle disconnect in wasm builds
+	)
 
 	goWasmApi := wasm.NewApiWasm(apiHandler)
 	jsWasmApi := map[string]any{

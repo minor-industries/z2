@@ -125,10 +125,12 @@ func run() error {
 		cancel,
 		ctx,
 	)
-	go mainHandler.Monitor() // TODO: should monitor each source independently
+
+	disconnect := make(chan struct{})
+	go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 
 	router := gin.New()
-	setupRoutes(router, opts, graph, br, backends, vars)
+	setupRoutes(router, opts, graph, br, backends, vars, disconnect)
 
 	go func() {
 		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
@@ -151,7 +153,7 @@ func run() error {
 				}
 			})
 
-			source.Run(ctx, errCh, devices)
+			source.Run(ctx, errCh, devices, disconnect)
 			fmt.Println("all devices found, source.Run exited")
 		}
 	}()

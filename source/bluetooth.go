@@ -9,7 +9,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"reflect"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -41,6 +40,7 @@ func Run(
 	ctx context.Context,
 	errCh chan error,
 	devices []Device,
+	disconnect chan struct{},
 ) {
 	var adapter = bluetooth.DefaultAdapter
 
@@ -128,7 +128,8 @@ func Run(
 			if !ok {
 				return
 			}
-			err := handleDevice(errCh, adapter, result)
+
+			err := handleDevice(errCh, adapter, result, disconnect)
 			if err != nil {
 				errCh <- err
 				return
@@ -140,7 +141,12 @@ func Run(
 	}
 }
 
-func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevice) error {
+func handleDevice(
+	errCh chan error,
+	adapter *bluetooth.Adapter,
+	found foundDevice,
+	disconnect chan struct{},
+) error {
 	device, err := adapter.Connect(found.Result.Address, bluetooth.ConnectionParams{})
 	if err != nil {
 		return errors.Wrap(err, "connect")
@@ -156,7 +162,6 @@ func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevic
 		return errors.Wrap(err, "discover services")
 	}
 
-	buf := make([]byte, 255)
 	for _, srvc := range srvcs {
 		fmt.Println("- service", srvc.UUID().String())
 
@@ -169,13 +174,6 @@ func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevic
 		for _, char := range chars {
 			fmt.Println("-- 16 bit", srvc.Is16Bit())
 			fmt.Println("-- characteristic", char.UUID().String())
-			n, err := char.Read(buf)
-			if err != nil {
-				fmt.Println("    ", err.Error())
-			} else {
-				fmt.Println("    data bytes", strconv.Itoa(n))
-				fmt.Println("    value =", string(buf[:n]))
-			}
 
 			fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
 			{
@@ -193,6 +191,15 @@ func handleDevice(errCh chan error, adapter *bluetooth.Adapter, found foundDevic
 			}
 		}
 	}
+
+	go func() {
+		<-disconnect
+		fmt.Printf("disconnect %s\n", reflect.TypeOf(found.Device.Source).String())
+		err := device.Disconnect()
+		if err != nil {
+			errCh <- errors.Wrap(err, "disconnect")
+		}
+	}()
 
 	return nil
 }

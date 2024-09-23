@@ -84,7 +84,7 @@ func (h *Handler) Handle(
 	return nil
 }
 
-func (h *Handler) Monitor() {
+func (h *Handler) Monitor(disconnect chan struct{}) {
 	t := time.NewTicker(500 * time.Millisecond)
 	defer t.Stop()
 
@@ -100,6 +100,8 @@ func (h *Handler) Monitor() {
 				h.cancel()
 				return
 			}
+		case <-disconnect:
+			return
 		case <-h.ctx.Done():
 			return
 		}
