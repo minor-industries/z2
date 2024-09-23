@@ -27,6 +27,8 @@
 <body>
 
 
+<h1 style="text-align: center;" id="title">&nbsp;</h1>
+
 <script type="module">
     import {setupAnalysis} from "/dist/z2-bundle.js";
     import {getEnv} from "/env.js"
@@ -36,6 +38,8 @@
     const date = params.get('date');
 
     document.addEventListener("DOMContentLoaded", async () => {
+        document.getElementById("title").textContent = date;
+
         const env = await getEnv();
 
         setupAnalysis(env, {
