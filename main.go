@@ -162,22 +162,25 @@ func run() error {
 	}
 
 	if opts.Webview {
-		return errors.New("webview not implemented")
-		//w := webview.New(true)
-		//errCh2 := make(chan error)
-		//go func() {
-		//	err = <-errCh
-		//	w.Terminate()
-		//	errCh2 <- err
-		//}()
-		//
-		//runWebview(
-		//	opts,
-		//	w,
-		//	errCh,
-		//	fmt.Sprintf("http://localhost:%d/%s.html", opts.Port, opts.Source),
-		//)
-		//return <-errCh2
+		if sources.primary == nil {
+			return errors.New("unknown primary source")
+		}
+
+		w := webview.New(true)
+		errCh2 := make(chan error)
+		go func() {
+			err = <-errCh
+			w.Terminate()
+			errCh2 <- err
+		}()
+
+		runWebview(
+			opts,
+			w,
+			errCh,
+			fmt.Sprintf("http://localhost:%d/dist/html/%s.html", opts.Port, sources.primaryKind),
+		)
+		return <-errCh2
 	} else {
 		return <-errCh
 	}
