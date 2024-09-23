@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"github.com/tinylib/msgp/msgp"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -115,8 +116,15 @@ func insertMarkersBatchWithTransaction(
 	return count, nil
 }
 
-func RunServer(dbs map[string]*sqlite.Backend) error {
-	r := gin.Default()
+func SetupRoutes(r *gin.Engine, dbNames []string) error {
+	dbs := lo.Associate(dbNames, func(name string) (string, *sqlite.Backend) {
+		dst, _ := sqlite.Get(name + ".db")
+		return name, dst
+	})
+
+	if lo.Contains(lo.Values(dbs), nil) {
+		return errors.New("couldn't open one or more dbs")
+	}
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:  []string{"*"},
@@ -179,6 +187,16 @@ func RunServer(dbs map[string]*sqlite.Backend) error {
 		}
 		c.JSON(http.StatusOK, resp)
 	})
+
+	return nil
+}
+
+func RunServer(dbNames []string) error {
+	r := gin.Default()
+
+	if err := SetupRoutes(r, dbNames); err != nil {
+		return errors.Wrap(err, "setup routes")
+	}
 
 	return r.Run()
 }

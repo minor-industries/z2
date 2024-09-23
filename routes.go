@@ -153,6 +153,13 @@ func setupRoutes(
 
 		_ = send("info", "sync complete")
 	})
+
+	if opts.SyncServer {
+		err := sync.SetupRoutes(router, opts.SyncDBs)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func sse(

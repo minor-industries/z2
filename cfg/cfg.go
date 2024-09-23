@@ -39,6 +39,9 @@ type Config struct {
 	Backups    []Backup `toml:"backups"`
 
 	Devices []Device `toml:"devices"`
+
+	SyncServer bool     `toml:"sync_server"`
+	SyncDBs    []string `toml:"sync_dbs"`
 }
 
 var Default = Config{
@@ -49,6 +52,7 @@ var Default = Config{
 	YRes:       700,
 	Audio:      "browser",
 	ResticPath: "restic",
+	SyncServer: false,
 }
 
 const (
