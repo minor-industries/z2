@@ -217,8 +217,8 @@
 <hr/>
 
 <button id="disconnect-button" class="pure-button pure-button-primary back-button">disconnect</button>
-
 <button id="analysis-button" class="pure-button pure-button-primary back-button">analysis</button>
+<button id="sync-button" class="pure-button pure-button-primary back-button">sync</button>
 
 <script type="module">
     import {getEnv} from "/env.js";
@@ -237,6 +237,10 @@
 
         document.getElementById("analysis-button").onclick = () => {
             document.location = "/dist/html/data-bike.html?date=" + today;
+        };
+
+        document.getElementById("sync-button").onclick = () => {
+            document.location = "/dist/html/sync.html";
         };
     });
 </script>
