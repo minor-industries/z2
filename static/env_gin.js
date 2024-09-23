@@ -12,12 +12,12 @@ function sync(host, days, database, logCallback) {
 
     const queryString = new URLSearchParams(params).toString();
     const sseUrl = `/trigger-sync?${queryString}`;
-    
+
     const eventSource = new EventSource(sseUrl);
 
-    eventSource.onmessage = function (event) {
+    eventSource.addEventListener("info", (event) => {
         logCallback(event.data);
-    };
+    });
 
     // TODO: add a close event and differentiate from log events
 

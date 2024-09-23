@@ -3,7 +3,7 @@ export function streamEvents(
     callback: (data: string) => void
 ): void {
     const es = new EventSource(path);
-    es.onmessage = (event) => {
+    es.addEventListener("play-sound", (event) => {
         callback(event.data);
-    };
+    });
 }

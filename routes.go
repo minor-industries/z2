@@ -74,8 +74,6 @@ func setupRoutes(
 		})
 	})
 
-	setupSse(br, router)
-
 	if opts.StaticPath != "" {
 		router.Static("/dist", opts.StaticPath)
 	} else {
@@ -94,65 +92,14 @@ func setupRoutes(
 		gin.WrapH(calendar.NewCalendarServer(apiHandler, nil)),
 	)
 
-	router.GET("/trigger-sync", func(c *gin.Context) {
-		//TODO: better cleanup, disconnection handling, etc.
-		//TODO: create reusable sse code and use in all sse handlers
-		//TODO: only allow one sync to run at once? (or similar)
-
-		host := c.Query("host")
-		database := c.Query("database")
-		daysStr := c.Query("days")
-
-		info := func(msg string) {
-			_, err := c.Writer.Write([]byte("data: " + msg + "\n\n"))
-			if err != nil {
-				fmt.Println("error writing to client:", err)
-				return
-			}
-			c.Writer.Flush()
-		}
-
-		days, err := strconv.Atoi(daysStr)
-		if err != nil {
-			info("invalid days parameter") // TODO: error when available
-			return
-		}
-
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-
-		syncClient := sync.NewClient(host, database)
-
-		err = sync.Sync(samples, syncClient, days, info)
-		if err != nil {
-			info("sync error: " + err.Error())
-		}
-	})
-}
-
-func setupSse(
-	br *broker.Broker,
-	router *gin.Engine,
-) {
-	router.GET("/events", func(c *gin.Context) {
-		c.Writer.Header().Set("Content-Type", "text/event-stream")
-		c.Writer.Header().Set("Cache-Control", "no-cache")
-		c.Writer.Header().Set("Connection", "keep-alive")
-
+	sse(router, "/events", func(
+		c *gin.Context,
+		send func(eventName string, data string) error,
+	) {
 		clientGone := c.Request.Context().Done()
 
 		ch := br.Subscribe()
 		defer br.Unsubscribe(ch)
-
-		sendMsg := func(message string) {
-			_, err := c.Writer.Write([]byte("data: " + message + "\n\n"))
-			if err != nil {
-				fmt.Println("Error writing to client:", err)
-				return
-			}
-			c.Writer.Flush()
-		}
 
 		for {
 			select {
@@ -165,12 +112,73 @@ func setupSse(
 				}
 				switch msg := m.(type) {
 				case *app.PlaySound:
-					sendMsg(
-						fmt.Sprintf("%s", msg.Sound),
-					)
+					_ = send("play-sound", fmt.Sprintf("%s", msg.Sound))
 				}
 			}
 
 		}
+	})
+
+	sse(router, "/trigger-sync", func(
+		c *gin.Context,
+		send func(eventName string, data string) error,
+	) {
+		//TODO: better cleanup, disconnection handling, etc.
+		//TODO: only allow one sync to run at once? (or similar)
+
+		host := c.Query("host")
+		database := c.Query("database")
+		daysStr := c.Query("days")
+
+		days, err := strconv.Atoi(daysStr)
+		if err != nil {
+			_ = send("info", "invalid days parameter")
+			return
+		}
+
+		syncClient := sync.NewClient(host, database)
+
+		err = sync.Sync(samples, syncClient, days, func(s string) {
+			_ = send("info", s)
+		})
+
+		if err != nil {
+			_ = send("info", "sync error: "+err.Error())
+		}
+	})
+}
+
+func sse(
+	router *gin.Engine,
+	path string,
+	handler func(
+		c *gin.Context,
+		send func(eventName, data string) error,
+	),
+) {
+	router.GET(path, func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Type", "text/event-stream")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+
+		send := func(eventName, data string) error {
+			if eventName != "" {
+				_, err := c.Writer.Write([]byte("event: " + eventName + "\n"))
+				if err != nil {
+					return errors.Wrap(err, "write event")
+				}
+			}
+
+			_, err := c.Writer.Write([]byte("data: " + data + "\n\n"))
+			if err != nil {
+				if err != nil {
+					return errors.Wrap(err, "write data")
+				}
+			}
+			c.Writer.Flush()
+			return nil
+		}
+
+		handler(c, send)
 	})
 }
