@@ -231,6 +231,26 @@
 
 
 
+<button id="disconnect-button" class="pure-button pure-button-primary back-button">disconnect</button>
+
+<script type="module">
+    import {getEnv} from "/env.js";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+        document.getElementById("disconnect-button").onclick = async () => {
+            const resp = confirm("Are you sure you want to disconnect bluetooth devices?");
+            if (resp) {
+                await env.apiClient.disconnectBluetoothDevices({});
+            }
+        };
+    });
+</script>
+
+
+
+
+
 </body>
 </html>
 
