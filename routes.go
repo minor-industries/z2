@@ -12,7 +12,7 @@ import (
 	"github.com/minor-industries/z2/app"
 	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
-	"github.com/minor-industries/z2/frontend/z2"
+	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/sync"
@@ -21,6 +21,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"strconv"
 )
@@ -77,7 +78,8 @@ func setupRoutes(
 	if opts.StaticPath != "" {
 		router.Static("/z2", opts.StaticPath)
 	} else {
-		router.StaticFS("/z2", http.FS(z2.FS))
+		subFS, _ := fs.Sub(frontend.FS, "z2")
+		router.StaticFS("/z2", http.FS(subFS))
 	}
 
 	router.GET("/env.js", func(c *gin.Context) {

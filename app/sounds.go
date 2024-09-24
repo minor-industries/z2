@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/ebitengine/oto/v3"
 	"github.com/hajimehoshi/go-mp3"
-	"github.com/minor-industries/z2/frontend/z2"
+	"github.com/minor-industries/z2/frontend"
 	"github.com/pkg/errors"
 	"io/fs"
 	"sync"
@@ -30,7 +30,7 @@ func (app *App) playAudio(name string) error {
 
 	fmt.Println("play", fileName)
 
-	fileBytes, err := fs.ReadFile(z2.FS, fileName)
+	fileBytes, err := fs.ReadFile(frontend.FS, fileName)
 	if err != nil {
 		return errors.Wrap(err, "read audio file")
 	}
