@@ -1,0 +1,46 @@
+<html lang="EN">
+<head>
+    <title>Calendar View</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link href="/dist/css/cal.css" rel="stylesheet" type="text/css">
+    <link href="/dist/css/purecss/base-min.css" rel="stylesheet" type="text/css">
+    <link href="/dist/css/purecss/pure-min.css" rel="stylesheet" type="text/css">
+    <link href="/dist/css/purecss/grids-responsive-min.css" rel="stylesheet" type="text/css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+    </style>
+
+    <script type="module">
+        import {calendar} from "/dist/z2-bundle.js";
+        import {getEnv} from "/env.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const {addEvent, renderYear} = calendar;
+            const env = await getEnv();
+            const year = renderYear(2024);
+            document.body.appendChild(year);
+
+            const resp = await env.calendarClient.getEvents({
+                view: "default" 
+            });
+            console.log(resp);
+
+            resp.result_sets.forEach(s => {
+                addEvent(s, event => {
+                    window.location.href = `data-${event.query}.html?date=${event.date}`;
+                });
+            })
+
+        });
+    </script>
+</head>
+<body>
+
+
+</body>
+</html>
