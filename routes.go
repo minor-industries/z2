@@ -75,15 +75,20 @@ func setupRoutes(
 		})
 	})
 
-	if opts.StaticPath != "" {
-		router.Static("/z2", opts.StaticPath)
-	} else {
-		subFS, _ := fs.Sub(frontend.FS, "z2")
-		router.StaticFS("/z2", http.FS(subFS))
-	}
+	subFS, _ := fs.Sub(frontend.FS, "z2")
+	httpFS := http.FS(subFS)
+	router.GET("/z2/*filepath", func(c *gin.Context) {
+		filepath := c.Param("filepath")
+		if filepath == "/env.js" {
+			c.Data(http.StatusOK, "application/javascript", envWebJS)
+			return
+		}
 
-	router.GET("/env.js", func(c *gin.Context) {
-		c.Data(http.StatusOK, "application/javascript", envWebJS)
+		if opts.StaticPath != "" {
+			c.File(opts.StaticPath + filepath)
+		} else {
+			c.FileFromFS(filepath, httpFS)
+		}
 	})
 
 	apiHandler := handler2.NewApiServer(backends, vars, disconnect)
