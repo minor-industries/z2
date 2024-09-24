@@ -1,15 +1,15 @@
 {{ define "controls" }}
 
 <audio id="sound-fast">
-    <source src="/dist/sounds/fast.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/fast.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="sound-slow">
-    <source src="/dist/sounds/slow.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/slow.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="sound-fairway">
-    <source src="/dist/sounds/fairway.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/fairway.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -41,7 +41,7 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls} from "/dist/z2-bundle.js";
+    import {registerPresets, setupControls} from "/z2/z2-bundle.js";
     import {getEnv} from "/env.js"
 
     document.addEventListener("DOMContentLoaded", async () => {

@@ -183,7 +183,7 @@ func run() error {
 			opts,
 			w,
 			errCh,
-			fmt.Sprintf("http://localhost:%d/dist/html/%s.html", opts.Port, sources.primaryKind),
+			fmt.Sprintf("http://localhost:%d/z2/html/%s.html", opts.Port, sources.primaryKind),
 		)
 		return <-errCh2
 	} else {

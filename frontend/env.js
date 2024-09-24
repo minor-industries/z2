@@ -1,4 +1,4 @@
-import {runGoWasm, runOnce, WASMConnector} from "./dist/z2-bundle.js";
+import {runGoWasm, runOnce, WASMConnector} from "./z2/z2-bundle.js";
 
 async function maybeStartFrontendBLE() {
     const url = new URL(window.location.href);
@@ -29,7 +29,7 @@ async function setup() {
         },
     }; // TODO
 
-    await runGoWasm("/dist/z2.wasm")
+    await runGoWasm("/z2/z2.wasm")
 
     return {
         apiClient: window.z2GoWasm.apiClient,

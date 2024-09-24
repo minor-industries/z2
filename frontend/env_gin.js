@@ -1,4 +1,4 @@
-import {calendar, DefaultApiClient, runOnce, streamEvents} from "/dist/z2-bundle.js";
+import {calendar, DefaultApiClient, runOnce, streamEvents} from "/z2/z2-bundle.js";
 
 async function maybeStartFrontendBLE() {
 }

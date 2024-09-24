@@ -7,12 +7,12 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/dygraph.css"/>
-    <link rel="stylesheet" type="text/css" href="/dist/css/rtgraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/z2/css/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/z2/css/rtgraph.css"/>
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/base-min.css">
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/pure-min.css">
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/grids-responsive-min.css">
 
     <style>
         body {
@@ -22,7 +22,7 @@
         }
     </style>
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/bumper-control.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/bumper-control.css">
 </head>
 <body>
 
@@ -30,15 +30,15 @@
 
 
 <audio id="sound-fast">
-    <source src="/dist/sounds/fast.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/fast.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="sound-slow">
-    <source src="/dist/sounds/slow.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/slow.mp3" type="audio/mpeg">
 </audio>
 
 <audio id="sound-fairway">
-    <source src="/dist/sounds/fairway.mp3" type="audio/mpeg">
+    <source src="/z2/sounds/fairway.mp3" type="audio/mpeg">
 </audio>
 
 <script>
@@ -70,7 +70,7 @@
 </div>
 
 <script type="module">
-    import {registerPresets, setupControls} from "/dist/z2-bundle.js";
+    import {registerPresets, setupControls} from "/z2/z2-bundle.js";
     import {getEnv} from "/env.js"
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -99,7 +99,7 @@
 
 
 <script type="module">
-    import {Graph} from '/dist/z2-bundle.js';
+    import {Graph} from '/z2/z2-bundle.js';
     import {getEnv} from "/env.js"
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -237,7 +237,7 @@
 
 <script type="module">
     import {getEnv} from "/env.js";
-    import {localDate} from "/dist/z2-bundle.js";
+    import {localDate} from "/z2/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
         const today = localDate();
@@ -251,11 +251,11 @@
         };
 
         document.getElementById("analysis-button").onclick = () => {
-            document.location = "/dist/html/data-rower.html?date=" + today;
+            document.location = "/z2/html/data-rower.html?date=" + today;
         };
 
         document.getElementById("sync-button").onclick = () => {
-            document.location = "/dist/html/sync.html";
+            document.location = "/z2/html/sync.html";
         };
     });
 </script>

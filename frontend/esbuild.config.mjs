@@ -13,7 +13,7 @@ const copyFiles = () => {
         rtgraph.css
         sse.html
     `.trim().split(/\s+/)
-    const destDir = './dist/';
+    const destDir = './z2/';
 
     filesToCopy.forEach(file => {
         const destPath = path.join(destDir, path.basename(file));
@@ -24,7 +24,7 @@ const copyFiles = () => {
 build({
     entryPoints: ['./build/index.js'],
     bundle: true,
-    outfile: './dist/z2-bundle.js',
+    outfile: './z2/z2-bundle.js',
     format: 'esm',
     minify: false,
     plugins: [],

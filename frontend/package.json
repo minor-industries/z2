@@ -5,11 +5,11 @@
     "typescript": "^5.4.5"
   },
   "scripts": {
-    "build-wasm": "(cd .. && GOOS=js GOARCH=wasm go build -o static/dist/z2.wasm .)",
+    "build-wasm": "(cd .. && GOOS=js GOARCH=wasm go build -o frontend/z2/z2.wasm .)",
     "build-js": "tsc",
-    "build-dist": "node esbuild.config.mjs",
+    "build-z2": "node esbuild.config.mjs",
     "build-html": "go generate ./templates",
-    "build": "npm run build-wasm && npm run build-js && npm run build-dist && npm run build-html"
+    "build": "npm run build-wasm && npm run build-js && npm run build-z2 && npm run build-html"
   },
   "dependencies": {
     "@types/uuid": "^10.0.0",

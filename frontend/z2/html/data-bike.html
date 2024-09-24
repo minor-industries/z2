@@ -3,16 +3,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HRM data</title>
+    <title>Bike Data</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/dygraph.css"/>
-    <link rel="stylesheet" type="text/css" href="/dist/css/rtgraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/z2/css/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/z2/css/rtgraph.css"/>
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/base-min.css">
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/pure-min.css">
-    <link rel="stylesheet" type="text/css" href="/dist/css/purecss/grids-responsive-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/grids-responsive-min.css">
 
     <style>
         body {
@@ -22,7 +22,7 @@
         }
     </style>
 
-    <link rel="stylesheet" type="text/css" href="/dist/css/bumper-control.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/bumper-control.css">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
 <h1 style="text-align: center;" id="title">&nbsp;</h1>
 
 <script type="module">
-    import {setupAnalysis} from "/dist/z2-bundle.js";
+    import {setupBikeAnalysis} from "/z2/z2-bundle.js";
     import {getEnv} from "/env.js"
 
     const url = new URL(window.location.href);
@@ -41,16 +41,7 @@
         document.getElementById("title").textContent = date;
 
         const env = await getEnv();
-
-        setupAnalysis(env, {
-            date: date,
-            ref: "ruck", 
-            seriesNames: [
-                "heartrate | time-bin",
-            ],
-            title: "Heart Rate",
-            ylabel: "heart rate (bpm)",
-        });
+        setupBikeAnalysis(env, date);
     });
 </script>
 

@@ -1,4 +1,4 @@
-package dist
+package z2
 
 import (
 	"embed"

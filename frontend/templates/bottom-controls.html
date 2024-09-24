@@ -8,7 +8,7 @@
 
 <script type="module">
     import {getEnv} from "/env.js";
-    import {localDate} from "/dist/z2-bundle.js";
+    import {localDate} from "/z2/z2-bundle.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
         const today = localDate();
@@ -22,11 +22,11 @@
         };
 
         document.getElementById("analysis-button").onclick = () => {
-            document.location = "/dist/html/data-{{.}}.html?date=" + today;
+            document.location = "/z2/html/data-{{.}}.html?date=" + today;
         };
 
         document.getElementById("sync-button").onclick = () => {
-            document.location = "/dist/html/sync.html";
+            document.location = "/z2/html/sync.html";
         };
     });
 </script>

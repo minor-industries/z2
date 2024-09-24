@@ -12,7 +12,7 @@ import (
 	"github.com/minor-industries/z2/app"
 	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
-	"github.com/minor-industries/z2/frontend/dist"
+	"github.com/minor-industries/z2/frontend/z2"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/sync"
@@ -45,7 +45,7 @@ func setupRoutes(
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/dist/html/home.html")
+		c.Redirect(http.StatusMovedPermanently, "/z2/html/home.html")
 	})
 
 	graph.SetupServer(router.Group("/rtgraph"))
@@ -75,9 +75,9 @@ func setupRoutes(
 	})
 
 	if opts.StaticPath != "" {
-		router.Static("/dist", opts.StaticPath)
+		router.Static("/z2", opts.StaticPath)
 	} else {
-		router.StaticFS("/dist", http.FS(dist.FS))
+		router.StaticFS("/z2", http.FS(z2.FS))
 	}
 
 	router.GET("/env.js", func(c *gin.Context) {
