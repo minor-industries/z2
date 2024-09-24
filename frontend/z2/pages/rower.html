@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bike</title>
+    <title>Rower</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
@@ -75,8 +75,8 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
-        const controls = setupControls(env.apiClient, 'controls-container', "bike");
-        registerPresets(env.apiClient, controls, "bike");
+        const controls = setupControls(env.apiClient, 'controls-container', "rower");
+        registerPresets(env.apiClient, controls, "rower");
     });
 </script>
 
@@ -116,13 +116,13 @@
 
         new Graph(document.getElementById("graphdiv0"), {
             seriesNames: [
-                "bike_avg_speed_short",
-                "bike_instant_speed | mygate bike_target_speed bike_max_drift_pct",
-                "bike_instant_speed_min",
-                "bike_instant_speed_max",
+                "rower_avg_power_short",
+                "rower_power | mygate rower_target_power rower_max_drift_pct",
+                "rower_power_min",
+                "rower_power_max",
             ],
-            title: "Speed: {value}",
-            ylabel: "speed (km/h)",
+            title: "Power: {value}",
+            ylabel: "power (watts)",
             windowSize: minute,
             height: 250,
             series: seriesOpts,
@@ -132,15 +132,17 @@
 
         new Graph(document.getElementById("graphdiv1"), {
             seriesNames: [
-                "bike_instant_cadence | gt 30 | avg 30s triangle",
-                "bike_instant_cadence"
+                "rower_avg_power_long",
+                "rower_target_power",
             ],
-            title: "Cadence: {value}",
-            ylabel: "cadence (rpm)",
-            windowSize: minute,
+            title: "Average power: {value}",
+            ylabel: "power (watts)",
+            windowSize: 15 * minute,
             height: 250,
-            series: seriesOpts,
             maxGapMs: 5 * second,
+            series: {
+                y2: {strokeWidth: 1.0, color: "red"},
+            },
             connector: env.connector
         });
 
@@ -151,30 +153,14 @@
             ],
             title: "Heartrate: {value}",
             ylabel: "bpm",
-            windowSize: 2 * minute,
+            windowSize: 15 * minute,
             height: 250,
             series: seriesOpts,
             maxGapMs: 5 * second,
             connector: env.connector
         });
 
-        new Graph(document.getElementById("graphdiv5"), {
-            seriesNames: [
-                "bike_avg_speed_long",
-                "bike_target_speed"
-            ],
-            title: "Average speed: {value}",
-            ylabel: "speed (km/h)",
-            windowSize: 15 * minute,
-            height: 250,
-            maxGapMs: 5 * second,
-            series: {
-                y2: {strokeWidth: 1.0, color: "red"},
-            },
-            connector: env.connector,
-        });
-
-        new Graph(document.getElementById("graphdiv4"), {
+        new Graph(document.getElementById("graphdiv3"), {
             seriesNames: [
                 "heartrate | gt 0 | avg 15m triangle",
                 "heartrate | gt 0"
@@ -182,6 +168,31 @@
             title: "Average heartrate: {value}",
             ylabel: "bpm",
             windowSize: 15 * minute,
+            height: 250,
+            series: seriesOpts,
+            maxGapMs: 5 * second,
+            connector: env.connector
+        });
+
+        new Graph(document.getElementById("graphdiv4"), {
+            seriesNames: [
+                "rower_stroke_count"
+            ],
+            title: "Stroke count: {value}",
+            windowSize: minute,
+            height: 250,
+            maxGapMs: 5 * second,
+            connector: env.connector
+        });
+
+        new Graph(document.getElementById("graphdiv5"), {
+            seriesNames: [
+                "rower_spm | gt 5 | avg 30s triangle",
+                "rower_spm"
+            ],
+            title: "SPM: {value}",
+            ylabel: "spm",
+            windowSize: minute,
             height: 250,
             series: seriesOpts,
             maxGapMs: 5 * second,
@@ -196,7 +207,7 @@
     </div>
 
     <div class="pure-u-1 pure-u-sm-2-3">
-        <div id="graphdiv5" class="rtgraph-graph"></div>
+        <div id="graphdiv1" class="rtgraph-graph"></div>
     </div>
 
     <div class="pure-u-1 pure-u-sm-1-3">
@@ -204,11 +215,15 @@
     </div>
 
     <div class="pure-u-1 pure-u-sm-2-3">
+        <div id="graphdiv3" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1 pure-u-sm-1-3">
         <div id="graphdiv4" class="rtgraph-graph"></div>
     </div>
 
     <div class="pure-u-1 pure-u-sm-1-3">
-        <div id="graphdiv1" class="rtgraph-graph"></div>
+        <div id="graphdiv5" class="rtgraph-graph"></div>
     </div>
 </div>
 
@@ -236,11 +251,11 @@
         };
 
         document.getElementById("analysis-button").onclick = () => {
-            document.location = "/z2/html/data-bike.html?date=" + today;
+            document.location = "/z2/pages/data-rower.html?date=" + today;
         };
 
         document.getElementById("sync-button").onclick = () => {
-            document.location = "/z2/html/sync.html";
+            document.location = "/z2/pages/sync.html";
         };
     });
 </script>

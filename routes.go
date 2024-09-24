@@ -46,7 +46,7 @@ func setupRoutes(
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/z2/html/home.html")
+		c.Redirect(http.StatusMovedPermanently, "/z2/pages/home.html")
 	})
 
 	graph.SetupServer(router.Group("/rtgraph"))
