@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/ebitengine/oto/v3"
 	"github.com/hajimehoshi/go-mp3"
-	"github.com/minor-industries/z2/static/dist"
+	"github.com/minor-industries/z2/frontend/dist"
 	"github.com/pkg/errors"
 	"io/fs"
 	"sync"

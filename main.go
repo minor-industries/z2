@@ -28,10 +28,10 @@ import (
 	"os"
 )
 
-//go:embed templates/*.html
+//go:embed frontend/templates/*.html
 var templatesFS embed.FS
 
-//go:embed static/env_gin.js
+//go:embed frontend/env_gin.js
 var envWebJS []byte
 
 func run() error {

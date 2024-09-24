@@ -79,7 +79,7 @@ var files = []file{
 }
 
 func main() {
-	outdir := filepath.Join("..", "static", "dist", "html")
+	outdir := filepath.Join("..", "dist", "html")
 	tmpl := template.Must(template.ParseFS(FS, "*.html"))
 
 	for _, f := range files {

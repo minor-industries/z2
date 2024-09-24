@@ -12,9 +12,9 @@ import (
 	"github.com/minor-industries/z2/app"
 	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
+	"github.com/minor-industries/z2/frontend/dist"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
-	"github.com/minor-industries/z2/static/dist"
 	"github.com/minor-industries/z2/sync"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
@@ -50,7 +50,7 @@ func setupRoutes(
 
 	graph.SetupServer(router.Group("/rtgraph"))
 
-	tmpl := template.Must(template.New("").ParseFS(templatesFS, "templates/*"))
+	tmpl := template.Must(template.New("").ParseFS(templatesFS, "frontend/templates/*"))
 	router.SetHTMLTemplate(tmpl)
 
 	router.GET("/workouts.html", func(c *gin.Context) {
