@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rower Data</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+    <link rel="stylesheet" type="text/css" href="/z2/css/dygraph.css"/>
+    <link rel="stylesheet" type="text/css" href="/z2/css/rtgraph.css"/>
+
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/base-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/pure-min.css">
+    <link rel="stylesheet" type="text/css" href="/z2/css/purecss/grids-responsive-min.css">
+
+    <style>
+        body {
+            margin: 0 0 20px;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            box-sizing: border-box;
+        }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="/z2/css/bumper-control.css">
+</head>
+<body>
+
+
+<h1 style="text-align: center;" id="title">&nbsp;</h1>
+
+<script type="module">
+    import {setupRowerAnalysis} from "/z2/z2-bundle.js";
+    import {getEnv} from "/z2/env.js"
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    const date = params.get('date');
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        document.getElementById("title").textContent = date;
+
+        const env = await getEnv();
+        setupRowerAnalysis(env, date);
+    });
+</script>
+
+<div class="pure-g">
+    <div class="pure-u-1">
+        <div id="graphdiv0" class="rtgraph-graph"></div>
+    </div>
+
+    <div class="pure-u-1">
+        <div id="graphdiv1" class="rtgraph-graph"></div>
+    </div>
+</div>
+
+
+
+<button class="pure-button pure-button-primary back-button" onclick="window.history.back()">back</button>
+
+
+
+
+
+</body>
+</html>
+
