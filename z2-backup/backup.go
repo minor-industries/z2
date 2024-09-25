@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/cfg"
@@ -9,25 +11,6 @@ import (
 	"os/exec"
 	"path/filepath"
 )
-
-func removeIfExist(path string) error {
-	if _, err := os.Stat(path); err == nil {
-		if err := os.Remove(path); err != nil {
-			return errors.Wrap(err, "remove existing file")
-		}
-	}
-	return nil
-}
-
-func hardLinkFile(src, dest string) error {
-	if err := removeIfExist(dest); err != nil {
-		return err
-	}
-	if err := os.Link(src, dest); err != nil {
-		return errors.Wrap(err, "create hard link")
-	}
-	return nil
-}
 
 func run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
@@ -74,7 +57,7 @@ func run() error {
 
 	for _, backupCfg := range opts.Backups {
 		//cmd := exec.Command(opts.ResticPath, "init")
-		cmd := exec.Command(os.ExpandEnv(opts.ResticPath), "backup", "--host", opts.BackupHost, ".")
+		cmd := exec.Command(os.ExpandEnv(opts.ResticPath), "backup", "--json", "--host", opts.BackupHost, ".")
 		cmd.Env = append(os.Environ(),
 			"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
 			"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,
@@ -85,17 +68,44 @@ func run() error {
 			cmd.Env = append(cmd.Env, "RESTIC_CACERT="+os.ExpandEnv(backupCfg.CACertPath))
 		}
 		cmd.Dir = backupPath
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
 
-		if err := cmd.Run(); err != nil {
-			return errors.Wrap(err, "run restic")
+		stdoutPipe, err := cmd.StdoutPipe()
+		if err != nil {
+			return errors.Wrap(err, "get stdout pipe")
+		}
+
+		if err := cmd.Start(); err != nil {
+			return errors.Wrap(err, "start restic")
+		}
+
+		scanner := bufio.NewScanner(stdoutPipe)
+		for scanner.Scan() {
+			line := scanner.Bytes()
+			fmt.Println(string(line))
+			var result map[string]interface{}
+			if err := json.Unmarshal(line, &result); err != nil {
+				fmt.Printf("Failed to parse JSON: %v\n", err)
+				continue
+			}
+
+			if percentDone, ok := result["percent_done"].(float64); ok {
+				fmt.Printf("Progress: %.2f%%\n", percentDone*100)
+			} else {
+				fmt.Printf("Restic output: %s\n", line)
+			}
+		}
+
+		if err := scanner.Err(); err != nil {
+			return errors.Wrap(err, "read from restic stdout")
+		}
+
+		if err := cmd.Wait(); err != nil {
+			return errors.Wrap(err, "wait for restic command")
 		}
 	}
 
 	return nil
 }
-
 func main() {
 	if err := run(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
