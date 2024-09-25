@@ -172,17 +172,18 @@ func setupRoutes(
 
 		processor, err := backup.NewProcessor(opts)
 		if err != nil {
-			_ = send("server-error", errors.Wrap(err, "load configuration").Error())
+			_ = send("server-error", errors.Wrap(err, "setup").Error())
 			return
 		}
 
-		for _, backupCfg := range opts.Backups {
+		for i, backupCfg := range opts.Backups {
+			_ = send("info", fmt.Sprintf("starting backup[%d]:", i))
 			err = processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
 				switch msg := msg.(type) {
 				case backup.ResticStatus:
-					_ = send("progress", fmt.Sprintf("%.1f%%", msg.PercentDone*100))
+					_ = send("info", fmt.Sprintf("progress: %.1f%%", msg.PercentDone*100))
 				case backup.ResticSummary:
-					_ = send("info", "backup complete")
+					_ = send("info", fmt.Sprintf("backup[%d] complete", i))
 				}
 				return nil
 			}))
