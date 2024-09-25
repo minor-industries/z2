@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
@@ -11,6 +12,62 @@ import (
 	"os/exec"
 	"path/filepath"
 )
+
+type ResticMessage struct {
+	MessageType string `json:"message_type"`
+}
+
+type ResticStatus struct {
+	MessageType  string   `json:"message_type"`
+	PercentDone  float64  `json:"percent_done"`
+	TotalFiles   int      `json:"total_files"`
+	FilesDone    int      `json:"files_done"`
+	TotalBytes   int64    `json:"total_bytes"`
+	BytesDone    int64    `json:"bytes_done"`
+	CurrentFiles []string `json:"current_files"`
+}
+
+type ResticSummary struct {
+	MessageType         string  `json:"message_type"`
+	FilesNew            int     `json:"files_new"`
+	FilesChanged        int     `json:"files_changed"`
+	FilesUnmodified     int     `json:"files_unmodified"`
+	DirsNew             int     `json:"dirs_new"`
+	DirsChanged         int     `json:"dirs_changed"`
+	DirsUnmodified      int     `json:"dirs_unmodified"`
+	DataBlobs           int     `json:"data_blobs"`
+	TreeBlobs           int     `json:"tree_blobs"`
+	DataAdded           int64   `json:"data_added"`
+	DataAddedPacked     int64   `json:"data_added_packed"`
+	TotalFilesProcessed int     `json:"total_files_processed"`
+	TotalBytesProcessed int64   `json:"total_bytes_processed"`
+	TotalDuration       float64 `json:"total_duration"`
+	SnapshotID          string  `json:"snapshot_id"`
+}
+
+func decodeResticMessage(data []byte) (any, error) {
+	var shim ResticMessage
+	if err := json.Unmarshal(data, &shim); err != nil {
+		return nil, err
+	}
+
+	switch shim.MessageType {
+	case "status":
+		var status ResticStatus
+		if err := json.Unmarshal(data, &status); err != nil {
+			return nil, err
+		}
+		return status, nil
+	case "summary":
+		var summary ResticSummary
+		if err := json.Unmarshal(data, &summary); err != nil {
+			return nil, err
+		}
+		return summary, nil
+	default:
+		return nil, errors.New("unknown message type")
+	}
+}
 
 func Run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
@@ -81,18 +138,13 @@ func Run() error {
 		scanner := bufio.NewScanner(stdoutPipe)
 		for scanner.Scan() {
 			line := scanner.Bytes()
-			fmt.Println(string(line))
-			var result map[string]interface{}
-			if err := json.Unmarshal(line, &result); err != nil {
-				fmt.Printf("Failed to parse JSON: %v\n", err)
-				continue
+
+			msg, err := decodeResticMessage(line)
+			if err != nil {
+				return errors.Wrap(err, "decode restic message")
 			}
 
-			if percentDone, ok := result["percent_done"].(float64); ok {
-				fmt.Printf("Progress: %.2f%%\n", percentDone*100)
-			} else {
-				fmt.Printf("Restic output: %s\n", line)
-			}
+			fmt.Println(spew.Sdump(msg))
 		}
 
 		if err := scanner.Err(); err != nil {
