@@ -1,4 +1,4 @@
-package main
+package backup
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-func run() error {
+func Run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
 	if err != nil {
 		return errors.Wrap(err, "load configuration")
@@ -105,10 +105,4 @@ func run() error {
 	}
 
 	return nil
-}
-func main() {
-	if err := run(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		os.Exit(1)
-	}
 }
