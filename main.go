@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jessevdk/go-flags"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
@@ -28,7 +29,16 @@ import (
 )
 
 func run() error {
-	opts, err := cfg.Load(cfg.DefaultConfigPath)
+	_, err := flags.Parse(&opts)
+	if err != nil {
+		return errors.Wrap(err, "parse flags")
+	}
+
+	if opts.ConfigFile == "" {
+		opts.ConfigFile = cfg.DefaultConfigPath
+	}
+
+	opts, err := cfg.Load(opts.ConfigFile)
 	if err != nil {
 		return errors.Wrap(err, "load config file")
 	}
@@ -278,6 +288,10 @@ func runWebview(
 	w.Navigate(url)
 	w.Run()
 	ch <- nil
+}
+
+var opts struct {
+	ConfigFile string `long:"config-file" description:"config file path"`
 }
 
 func main() {
