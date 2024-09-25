@@ -218,6 +218,7 @@
 
 <button id="disconnect-button" class="pure-button pure-button-primary back-button">disconnect</button>
 <button id="analysis-button" class="pure-button pure-button-primary back-button">analysis</button>
+<button id="backup-button" class="pure-button pure-button-primary back-button">backup</button>
 <button id="sync-button" class="pure-button pure-button-primary back-button">sync</button>
 
 <script type="module">
@@ -237,6 +238,10 @@
 
         document.getElementById("analysis-button").onclick = () => {
             document.location = "/z2/pages/data-bike.html?date=" + today;
+        };
+
+        document.getElementById("backup-button").onclick = () => {
+            document.location = "/z2/pages/backup.html";
         };
 
         document.getElementById("sync-button").onclick = () => {
