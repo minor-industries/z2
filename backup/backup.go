@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
@@ -69,7 +68,7 @@ func decodeResticMessage(data []byte) (any, error) {
 	}
 }
 
-func Run() error {
+func Run(callback func(any) error) error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)
 	if err != nil {
 		return errors.Wrap(err, "load configuration")
@@ -144,7 +143,9 @@ func Run() error {
 				return errors.Wrap(err, "decode restic message")
 			}
 
-			fmt.Println(spew.Sdump(msg))
+			if err := callback(msg); err != nil {
+				return errors.Wrap(err, "callback returned error")
+			}
 		}
 
 		if err := scanner.Err(); err != nil {
