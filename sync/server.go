@@ -3,6 +3,7 @@
 package sync
 
 import (
+	"fmt"
 	"github.com/chrispappas/golang-generics-set/set"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -122,6 +123,7 @@ func insertMarkersBatchWithTransaction(
 func SetupRoutes(r *gin.Engine, env *cfg.SyncServerConfig) error {
 	dbs := lo.Associate(env.Databases, func(name string) (string, *sqlite.Backend) {
 		dbFile := filepath.Join(os.ExpandEnv(env.DBPath), name+".db")
+		fmt.Println("opening db", dbFile)
 		dst, _ := sqlite.Get(dbFile)
 		return name, dst
 	})
