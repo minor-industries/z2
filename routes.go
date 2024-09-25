@@ -176,10 +176,10 @@ func setupRoutes(
 			return
 		}
 
-		for i, backupCfg := range opts.Backups {
+		for i, target := range opts.Backup.Targets {
 			_ = send("info", "")
 			_ = send("info", fmt.Sprintf("starting backup[%d]", i))
-			err = processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
+			err = processor.BackupOne(target, backup.QuantizeFilter(func(msg any) error {
 				switch msg := msg.(type) {
 				case backup.ResticStatus:
 					_ = send("info", fmt.Sprintf("  progress: %.1f%%", msg.PercentDone*100))
@@ -195,8 +195,8 @@ func setupRoutes(
 		}
 	})
 
-	if opts.SyncServer {
-		err := sync.SetupRoutes(router, opts.SyncDBs)
+	if opts.SyncServer.Start {
+		err := sync.SetupRoutes(router, opts.SyncServer.Databases)
 		if err != nil {
 			panic(err)
 		}

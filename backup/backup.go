@@ -92,11 +92,11 @@ type Processor struct {
 }
 
 func NewProcessor(opts *cfg.Config) (*Processor, error) {
-	if opts.BackupHost == "" {
+	if opts.Backup.SourceHost == "" {
 		return nil, errors.New("backup_host unset in config file")
 	}
 
-	if len(opts.Backups) == 0 {
+	if len(opts.Backup.Targets) == 0 {
 		return nil, errors.New("no backup configs found!")
 	}
 
@@ -104,7 +104,7 @@ func NewProcessor(opts *cfg.Config) (*Processor, error) {
 	dbFile := filepath.Join(z2Path, "z2.db")
 	backupPath := filepath.Join(z2Path, "backup")
 
-	prefixed := fmt.Sprintf("z2-backup-%s", opts.BackupHost)
+	prefixed := fmt.Sprintf("z2-backup-%s", opts.Backup.SourceHost)
 	backupFile := filepath.Join(backupPath, prefixed+".db")
 
 	err := os.MkdirAll(backupPath, 0o750)
@@ -134,9 +134,16 @@ func NewProcessor(opts *cfg.Config) (*Processor, error) {
 	}, nil
 }
 
-func (p *Processor) BackupOne(backupCfg cfg.Backup, callback func(any) error) error {
+func (p *Processor) BackupOne(backupCfg cfg.BackupTarget, callback func(any) error) error {
 	//cmd := exec.Command(opts.ResticPath, "init")
-	cmd := exec.Command(os.ExpandEnv(p.opts.ResticPath), "backup", "--json", "--host", p.opts.BackupHost, ".")
+	cmd := exec.Command(
+		os.ExpandEnv(p.opts.Backup.ResticPath),
+		"backup",
+		"--json",
+		"--host",
+		p.opts.Backup.SourceHost,
+		".",
+	)
 	cmd.Env = append(os.Environ(),
 		"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
 		"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,

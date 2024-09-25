@@ -53,6 +53,11 @@ async function setup() {
         streamEvents,
         sync,
         backup,
+        defaultSyncConfig: {
+            host: "{{.Sync.Host}}",
+            days: "{{.Sync.Days}}",
+            dstDB: "{{.Sync.DstDB}}",
+        }
     };
 }
 

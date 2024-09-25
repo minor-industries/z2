@@ -13,12 +13,23 @@ type Device struct {
 	Disable bool   `toml:"disable"`
 }
 
-type Backup struct {
+type BackupTarget struct {
 	AwsAccessKeyId     string `toml:"aws_access_key_id"`
 	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
 	ResticRepository   string `toml:"restic_repository"`
 	ResticPassword     string `toml:"restic_password"`
 	CACertPath         string `toml:"ca_cert_path"`
+}
+
+type BackupConfig struct {
+	ResticPath string         `toml:"restic_path"`
+	SourceHost string         `toml:"source_host"`
+	Targets    []BackupTarget `toml:"targets"`
+}
+
+type SyncServerConfig struct {
+	Start     bool     `toml:"start"`
+	Databases []string `toml:"databases"`
 }
 
 type Config struct {
@@ -34,25 +45,28 @@ type Config struct {
 	Audio          string `toml:"audio"`
 	WriteRawValues bool   `toml:"write_raw_values"`
 
-	ResticPath string   `toml:"restic_path"`
-	BackupHost string   `toml:"backup_host"`
-	Backups    []Backup `toml:"backups"`
-
 	Devices []Device `toml:"devices"`
 
-	SyncServer bool     `toml:"sync_server"`
-	SyncDBs    []string `toml:"sync_dbs"`
+	Backup     BackupConfig     `toml:"backup"`
+	SyncServer SyncServerConfig `toml:"sync_server"`
 }
 
 var Default = Config{
-	DBPath:     "$HOME/.z2/z2.db",
-	Port:       8077,
-	Webview:    true,
-	XRes:       1132,
-	YRes:       700,
-	Audio:      "browser",
-	ResticPath: "restic",
-	SyncServer: false,
+	DBPath:  "$HOME/.z2/z2.db",
+	Port:    8077,
+	Webview: true,
+	XRes:    1132,
+	YRes:    700,
+	Audio:   "browser",
+
+	Backup: BackupConfig{
+		ResticPath: "restic",
+		SourceHost: "",
+	},
+
+	SyncServer: SyncServerConfig{
+		Start: false,
+	},
 }
 
 const (
