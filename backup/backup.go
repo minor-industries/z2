@@ -68,14 +68,18 @@ func decodeResticMessage(data []byte) (any, error) {
 	}
 }
 
-func Run(callback func(any) error) error {
-	opts, err := cfg.Load(cfg.DefaultConfigPath)
-	if err != nil {
-		return errors.Wrap(err, "load configuration")
+type Processor struct {
+	backupPath string
+	opts       *cfg.Config
+}
+
+func NewProcessor(opts *cfg.Config) (*Processor, error) {
+	if opts.BackupHost == "" {
+		return nil, errors.New("backup_host unset in config file")
 	}
 
-	if opts.BackupHost == "" {
-		return errors.New("backup_host unset in config file")
+	if len(opts.Backups) == 0 {
+		return nil, errors.New("no backup configs found!")
 	}
 
 	z2Path := os.ExpandEnv("$HOME/.z2")
@@ -85,76 +89,76 @@ func Run(callback func(any) error) error {
 	prefixed := fmt.Sprintf("z2-backup-%s", opts.BackupHost)
 	backupFile := filepath.Join(backupPath, prefixed+".db")
 
-	err = os.MkdirAll(backupPath, 0o750)
+	err := os.MkdirAll(backupPath, 0o750)
 	if err != nil {
-		return errors.Wrap(err, "mkdir backup path")
+		return nil, errors.Wrap(err, "mkdir backup path")
 	}
 
 	db, err := sqlite.Get(dbFile)
 	if err != nil {
-		return errors.Wrap(err, "get database")
+		return nil, errors.Wrap(err, "get database")
 	}
 
 	if _, err := os.Stat(backupFile); err == nil {
 		if err := os.Remove(backupFile); err != nil {
-			return errors.Wrap(err, "remove existing backup file")
+			return nil, errors.Wrap(err, "remove existing backup file")
 		}
 	}
 
 	tx := db.GetORM().Exec("VACUUM INTO ?", backupFile)
 	if tx.Error != nil {
-		return errors.Wrap(tx.Error, "vacuum into")
+		return nil, errors.Wrap(tx.Error, "vacuum into")
 	}
 
-	if len(opts.Backups) == 0 {
-		fmt.Println("no backup configs found!")
-		return nil
+	return &Processor{
+		opts:       opts,
+		backupPath: backupPath,
+	}, nil
+}
+
+func (p *Processor) BackupOne(backupCfg cfg.Backup, callback func(any) error) error {
+	//cmd := exec.Command(opts.ResticPath, "init")
+	cmd := exec.Command(os.ExpandEnv(p.opts.ResticPath), "backup", "--json", "--host", p.opts.BackupHost, ".")
+	cmd.Env = append(os.Environ(),
+		"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
+		"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,
+		"RESTIC_REPOSITORY="+backupCfg.ResticRepository,
+		"RESTIC_PASSWORD="+backupCfg.ResticPassword,
+	)
+	if backupCfg.CACertPath != "" {
+		cmd.Env = append(cmd.Env, "RESTIC_CACERT="+os.ExpandEnv(backupCfg.CACertPath))
+	}
+	cmd.Dir = p.backupPath
+
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return errors.Wrap(err, "get stdout pipe")
 	}
 
-	for _, backupCfg := range opts.Backups {
-		//cmd := exec.Command(opts.ResticPath, "init")
-		cmd := exec.Command(os.ExpandEnv(opts.ResticPath), "backup", "--json", "--host", opts.BackupHost, ".")
-		cmd.Env = append(os.Environ(),
-			"AWS_ACCESS_KEY_ID="+backupCfg.AwsAccessKeyId,
-			"AWS_SECRET_ACCESS_KEY="+backupCfg.AwsSecretAccessKey,
-			"RESTIC_REPOSITORY="+backupCfg.ResticRepository,
-			"RESTIC_PASSWORD="+backupCfg.ResticPassword,
-		)
-		if backupCfg.CACertPath != "" {
-			cmd.Env = append(cmd.Env, "RESTIC_CACERT="+os.ExpandEnv(backupCfg.CACertPath))
-		}
-		cmd.Dir = backupPath
+	if err := cmd.Start(); err != nil {
+		return errors.Wrap(err, "start restic")
+	}
 
-		stdoutPipe, err := cmd.StdoutPipe()
+	scanner := bufio.NewScanner(stdoutPipe)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+
+		msg, err := decodeResticMessage(line)
 		if err != nil {
-			return errors.Wrap(err, "get stdout pipe")
+			return errors.Wrap(err, "decode restic message")
 		}
 
-		if err := cmd.Start(); err != nil {
-			return errors.Wrap(err, "start restic")
+		if err := callback(msg); err != nil {
+			return errors.Wrap(err, "callback returned error")
 		}
+	}
 
-		scanner := bufio.NewScanner(stdoutPipe)
-		for scanner.Scan() {
-			line := scanner.Bytes()
+	if err := scanner.Err(); err != nil {
+		return errors.Wrap(err, "read from restic stdout")
+	}
 
-			msg, err := decodeResticMessage(line)
-			if err != nil {
-				return errors.Wrap(err, "decode restic message")
-			}
-
-			if err := callback(msg); err != nil {
-				return errors.Wrap(err, "callback returned error")
-			}
-		}
-
-		if err := scanner.Err(); err != nil {
-			return errors.Wrap(err, "read from restic stdout")
-		}
-
-		if err := cmd.Wait(); err != nil {
-			return errors.Wrap(err, "wait for restic command")
-		}
+	if err := cmd.Wait(); err != nil {
+		return errors.Wrap(err, "wait for restic command")
 	}
 
 	return nil
