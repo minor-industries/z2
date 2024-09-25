@@ -3,17 +3,8 @@ import {calendar, DefaultApiClient, runOnce, streamEvents} from "/z2/z2-bundle.j
 async function maybeStartFrontendBLE() {
 }
 
-function sync(host, days, database, logCallback) {
-    const params = {
-        host: host,
-        days: days,
-        database: database
-    };
-
-    const queryString = new URLSearchParams(params).toString();
-    const sseUrl = `/trigger-sync?${queryString}`;
-
-    const eventSource = new EventSource(sseUrl);
+function startSSE(url, logCallback) {
+    const eventSource = new EventSource(url);
 
     eventSource.addEventListener("info", (event) => {
         logCallback(event.data);
@@ -34,6 +25,25 @@ function sync(host, days, database, logCallback) {
     };
 }
 
+function sync(host, days, database, logCallback) {
+    const params = {
+        host: host,
+        days: days,
+        database: database
+    };
+
+    const queryString = new URLSearchParams(params).toString();
+    const sseUrl = `/trigger-sync?${queryString}`;
+
+    startSSE(sseUrl, logCallback);
+}
+
+function backup(logCallback) {
+    const sseUrl = `/trigger-backup`;
+
+    startSSE(sseUrl, logCallback);
+}
+
 
 async function setup() {
     return {
@@ -42,6 +52,7 @@ async function setup() {
         maybeStartFrontendBLE,
         streamEvents,
         sync,
+        backup,
     };
 }
 

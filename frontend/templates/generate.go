@@ -75,6 +75,12 @@ var files = []file{
 			"Title": "Sync",
 		},
 	},
+	{
+		name: "backup.html",
+		args: map[string]any{
+			"Title": "Backup",
+		},
+	},
 	// workouts not ready
 }
 

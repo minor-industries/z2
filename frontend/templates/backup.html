@@ -1,0 +1,39 @@
+{{ template "header" . }}
+
+<h1>Backup</h1>
+
+<div class="pure-g">
+    <div class="pure-u-1 pure-u-md-1-3">
+        <form class="pure-form pure-form-stacked" id="backup-form">
+            <fieldset>
+                <button type="button" id="start-backup" class="pure-button pure-button-primary">Go</button>
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+<div class="pure-g">
+    <div class="pure-u-1">
+        <h2>Backup Logs</h2>
+        <pre id="log-output" class="pure-pre"></pre>
+    </div>
+</div>
+
+<script type="module">
+    import {getEnv} from "/z2/env.js"
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const env = await getEnv();
+
+        document.getElementById('start-backup').addEventListener('click', async () => {
+            const logOutput = document.getElementById('log-output');
+            logOutput.textContent = '';
+
+            env.backup(msg => {
+                logOutput.textContent += msg + "\n";
+            });
+        });
+    })
+</script>
+
+{{ template "footer" . }}
