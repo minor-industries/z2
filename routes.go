@@ -3,6 +3,8 @@
 package main
 
 import (
+	"bytes"
+	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/calendar/gen/go/calendar"
@@ -27,6 +29,26 @@ import (
 	"strconv"
 )
 
+//go:embed frontend/templates/*.html
+var templatesFS embed.FS
+
+//go:embed frontend/env_gin.js
+var envWebJSTemplate []byte
+
+func renderEnvTemplate(data map[string]any) ([]byte, error) {
+	tmpl, err := template.New("env.js").Parse(string(envWebJSTemplate))
+	if err != nil {
+		return nil, err
+	}
+
+	var result bytes.Buffer
+	if err := tmpl.Execute(&result, data); err != nil {
+		return nil, err
+	}
+
+	return result.Bytes(), nil
+}
+
 func setupRoutes(
 	router *gin.Engine,
 	opts *cfg.Config,
@@ -35,7 +57,7 @@ func setupRoutes(
 	backends handler.Backends,
 	vars *variables.Cache,
 	disconnect chan struct{},
-) {
+) error {
 	samples := backends.Samples.(*sqlite.Backend) // TODO
 
 	router.Use(gin.Recovery())
@@ -76,12 +98,23 @@ func setupRoutes(
 		})
 	})
 
+	envJS, err := renderEnvTemplate(map[string]any{
+		"Sync": map[string]any{
+			"Host":     opts.Sync.Host,
+			"Days":     opts.Sync.Days,
+			"Database": opts.Sync.Database,
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "render env.js")
+	}
+
 	subFS, _ := fs.Sub(frontend.FS, "z2")
 	httpFS := http.FS(subFS)
 	router.GET("/z2/*filepath", func(c *gin.Context) {
 		filepath := c.Param("filepath")
 		if filepath == "/env.js" {
-			c.Data(http.StatusOK, "application/javascript", envWebJS)
+			c.Data(http.StatusOK, "application/javascript", envJS)
 			return
 		}
 
@@ -195,12 +228,14 @@ func setupRoutes(
 		}
 	})
 
-	if opts.SyncServer.Start {
+	if opts.SyncServer.Enable {
 		err := sync.SetupRoutes(router, opts.SyncServer.Databases)
 		if err != nil {
 			panic(err)
 		}
 	}
+
+	return nil
 }
 
 func sse(

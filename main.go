@@ -4,7 +4,6 @@ package main
 
 import (
 	"context"
-	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph"
@@ -27,12 +26,6 @@ import (
 	webview "github.com/webview/webview_go"
 	"os"
 )
-
-//go:embed frontend/templates/*.html
-var templatesFS embed.FS
-
-//go:embed frontend/env_gin.js
-var envWebJS []byte
 
 func run() error {
 	opts, err := cfg.Load(cfg.DefaultConfigPath)

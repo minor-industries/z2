@@ -31,9 +31,7 @@ import (
 func run() error {
 	fmt.Println("in wasm run()")
 	opts := cfg.Config{
-		Devices: []cfg.Device{
-			{Kind: "bike"},
-		},
+		DBPath:         "",
 		ReplayDB:       "",
 		Port:           0,
 		StaticPath:     "",
@@ -44,9 +42,23 @@ func run() error {
 		Scan:           false,
 		Audio:          "",
 		WriteRawValues: false,
-		ResticPath:     "",
-		BackupHost:     "",
-		Backups:        nil,
+		Devices: []cfg.Device{
+			{Kind: "bike"},
+		},
+		Backup: cfg.BackupConfig{
+			ResticPath: "",
+			SourceHost: "",
+			Targets:    nil,
+		},
+		Sync: cfg.SyncConfig{
+			Host:     "",
+			Database: "",
+			Days:     0,
+		},
+		SyncServer: cfg.SyncServerConfig{
+			Enable:    false,
+			Databases: nil,
+		},
 	}
 	_ = opts
 	errCh := make(chan error)

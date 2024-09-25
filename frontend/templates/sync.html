@@ -7,13 +7,13 @@
         <form class="pure-form pure-form-stacked" id="sync-form">
             <fieldset>
                 <label for="host">Host</label>
-                <input id="host" type="text" value="localhost:8080" required>
+                <input id="host" type="text" required>
 
                 <label for="lookback">Lookback Days</label>
-                <input id="lookback" type="number" value="60" required>
+                <input id="lookback" type="number" required>
 
                 <label for="database">Destination Database</label>
-                <input id="database" type="text" value="z2" required>
+                <input id="database" type="text" required>
 
                 <button type="button" id="start-sync" class="pure-button pure-button-primary">Go</button>
             </fieldset>
@@ -34,6 +34,10 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
+
+        document.getElementById('host').value = env.defaultSyncConfig.host;
+        document.getElementById('lookback').value = env.defaultSyncConfig.days;
+        document.getElementById('database').value = env.defaultSyncConfig.database;
 
         document.getElementById('start-sync').addEventListener('click', async () => {
             const host = document.getElementById('host').value;

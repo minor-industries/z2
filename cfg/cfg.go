@@ -28,8 +28,14 @@ type BackupConfig struct {
 }
 
 type SyncServerConfig struct {
-	Start     bool     `toml:"start"`
+	Enable    bool     `toml:"enable"`
 	Databases []string `toml:"databases"`
+}
+
+type SyncConfig struct {
+	Host     string `toml:"host"`
+	Database string `toml:"database"`
+	Days     int    `toml:"days"`
 }
 
 type Config struct {
@@ -47,7 +53,9 @@ type Config struct {
 
 	Devices []Device `toml:"devices"`
 
-	Backup     BackupConfig     `toml:"backup"`
+	Backup BackupConfig `toml:"backup"`
+
+	Sync       SyncConfig       `toml:"sync"`
 	SyncServer SyncServerConfig `toml:"sync_server"`
 }
 
@@ -64,8 +72,14 @@ var Default = Config{
 		SourceHost: "",
 	},
 
+	Sync: SyncConfig{
+		Host:     "",
+		Database: "",
+		Days:     60,
+	},
+
 	SyncServer: SyncServerConfig{
-		Start: false,
+		Enable: false,
 	},
 }
 

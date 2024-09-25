@@ -56,7 +56,7 @@ async function setup() {
         defaultSyncConfig: {
             host: "{{.Sync.Host}}",
             days: "{{.Sync.Days}}",
-            dstDB: "{{.Sync.DstDB}}",
+            database: "{{.Sync.Database}}",
         }
     };
 }
