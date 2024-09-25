@@ -11,6 +11,7 @@ import (
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
 	handler2 "github.com/minor-industries/z2/app/handler"
+	"github.com/minor-industries/z2/backup"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
@@ -159,6 +160,37 @@ func setupRoutes(
 		}
 
 		_ = send("info", "sync complete")
+	})
+
+	sse(router, "/trigger-backup", func(
+		c *gin.Context,
+		send func(eventName string, data string) error,
+	) {
+		defer func() {
+			_ = send("close", "close")
+		}()
+
+		processor, err := backup.NewProcessor(opts)
+		if err != nil {
+			_ = send("server-error", errors.Wrap(err, "load configuration").Error())
+			return
+		}
+
+		for _, backupCfg := range opts.Backups {
+			err = processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
+				switch msg := msg.(type) {
+				case backup.ResticStatus:
+					_ = send("progress", fmt.Sprintf("%.1f%%", msg.PercentDone*100))
+				case backup.ResticSummary:
+					_ = send("info", "backup complete")
+				}
+				return nil
+			}))
+
+			if err != nil {
+				_ = send("server-error", errors.Wrap(err, "backup one").Error())
+			}
+		}
 	})
 
 	if opts.SyncServer {
