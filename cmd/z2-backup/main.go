@@ -20,23 +20,21 @@ func run() error {
 	}
 
 	for _, backupCfg := range opts.Backups {
-		lastQuantum := -1.0
-		processor.BackupOne(backupCfg, func(msg any) error {
+		err := processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
 			switch msg := msg.(type) {
 			case backup.ResticStatus:
-				currentQuantum := float64(int(msg.PercentDone*10)) / 10.0
-
-				if currentQuantum > lastQuantum {
-					lastQuantum = currentQuantum
-					fmt.Printf("Progress: %.1f%%\n", msg.PercentDone*100)
-				}
+				fmt.Printf("Progress: %.1f%%\n", msg.PercentDone*100)
 			case backup.ResticSummary:
 				fmt.Println("Backup done!")
 			default:
 				fmt.Println("Unknown message type")
 			}
 			return nil
-		})
+		}))
+
+		if err != nil {
+			return errors.Wrap(err, "backup one")
+		}
 	}
 
 	return nil

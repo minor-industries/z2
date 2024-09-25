@@ -68,6 +68,24 @@ func decodeResticMessage(data []byte) (any, error) {
 	}
 }
 
+func QuantizeFilter(callback func(msg any) error) func(msg any) error {
+	lastQuantum := -1.0
+
+	return func(msg any) error {
+		switch msg := msg.(type) {
+		case ResticStatus:
+			currentQuantum := float64(int(msg.PercentDone*10)) / 10.0
+			if currentQuantum > lastQuantum {
+				lastQuantum = currentQuantum
+				return callback(msg)
+			}
+			return nil
+		default:
+			return callback(msg)
+		}
+	}
+}
+
 type Processor struct {
 	backupPath string
 	opts       *cfg.Config
