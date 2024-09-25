@@ -7,12 +7,15 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/rtgraph/database/sqlite"
+	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"github.com/samber/lo"
 	"github.com/tinylib/msgp/msgp"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -116,9 +119,10 @@ func insertMarkersBatchWithTransaction(
 	return count, nil
 }
 
-func SetupRoutes(r *gin.Engine, dbNames []string) error {
-	dbs := lo.Associate(dbNames, func(name string) (string, *sqlite.Backend) {
-		dst, _ := sqlite.Get(name + ".db")
+func SetupRoutes(r *gin.Engine, env *cfg.SyncServerConfig) error {
+	dbs := lo.Associate(env.Databases, func(name string) (string, *sqlite.Backend) {
+		dbFile := filepath.Join(os.ExpandEnv(env.DBPath), name+".db")
+		dst, _ := sqlite.Get(dbFile)
 		return name, dst
 	})
 
@@ -194,7 +198,11 @@ func SetupRoutes(r *gin.Engine, dbNames []string) error {
 func RunServer(dbNames []string) error {
 	r := gin.Default()
 
-	if err := SetupRoutes(r, dbNames); err != nil {
+	if err := SetupRoutes(r, &cfg.SyncServerConfig{
+		Enable:    true,
+		Databases: dbNames,
+		DBPath:    ".",
+	}); err != nil {
 		return errors.Wrap(err, "setup routes")
 	}
 

@@ -30,6 +30,7 @@ type BackupConfig struct {
 type SyncServerConfig struct {
 	Enable    bool     `toml:"enable"`
 	Databases []string `toml:"databases"`
+	DBPath    string   `toml:"db_path"`
 }
 
 type SyncConfig struct {

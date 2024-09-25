@@ -229,7 +229,7 @@ func setupRoutes(
 	})
 
 	if opts.SyncServer.Enable {
-		err := sync.SetupRoutes(router, opts.SyncServer.Databases)
+		err := sync.SetupRoutes(router, &opts.SyncServer)
 		if err != nil {
 			panic(err)
 		}
