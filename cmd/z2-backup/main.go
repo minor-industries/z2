@@ -19,7 +19,7 @@ func run() error {
 		return errors.Wrap(err, "check config")
 	}
 
-	for _, backupCfg := range opts.Backups {
+	for _, backupCfg := range opts.Backup.Targets {
 		err := processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
 			switch msg := msg.(type) {
 			case backup.ResticStatus:
