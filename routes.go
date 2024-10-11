@@ -14,6 +14,7 @@ import (
 	"github.com/minor-industries/z2/app"
 	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/backup"
+	"github.com/minor-industries/z2/backup/restic"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
@@ -212,11 +213,11 @@ func setupRoutes(
 		for i, target := range opts.Backup.Targets {
 			_ = send("info", "")
 			_ = send("info", fmt.Sprintf("starting backup[%d]", i))
-			err = processor.BackupOne(target, backup.QuantizeFilter(func(msg any) error {
+			err = restic.BackupOne(&opts.Backup, &target, processor.BackupPath, restic.QuantizeFilter(func(msg any) error {
 				switch msg := msg.(type) {
-				case backup.ResticStatus:
+				case restic.ResticStatus:
 					_ = send("info", fmt.Sprintf("  progress: %.1f%%", msg.PercentDone*100))
-				case backup.ResticSummary:
+				case restic.ResticSummary:
 					_ = send("info", fmt.Sprintf("backup[%d] complete", i))
 				}
 				return nil

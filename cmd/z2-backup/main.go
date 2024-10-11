@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/minor-industries/z2/backup"
+	"github.com/minor-industries/z2/backup/restic"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"os"
@@ -20,11 +21,11 @@ func run() error {
 	}
 
 	for _, backupCfg := range opts.Backup.Targets {
-		err := processor.BackupOne(backupCfg, backup.QuantizeFilter(func(msg any) error {
+		err := restic.BackupOne(&opts.Backup, &backupCfg, processor.BackupPath, restic.QuantizeFilter(func(msg any) error {
 			switch msg := msg.(type) {
-			case backup.ResticStatus:
+			case restic.ResticStatus:
 				fmt.Printf("Progress: %.1f%%\n", msg.PercentDone*100)
-			case backup.ResticSummary:
+			case restic.ResticSummary:
 				fmt.Println("Backup done!")
 			default:
 				fmt.Println("Unknown message type")
