@@ -15,13 +15,13 @@ func run() error {
 		return errors.Wrap(err, "load configuration")
 	}
 
-	processor, err := backup.NewProcessor(opts)
+	backupPath, err := backup.PrepareForBackup(&opts.Backup)
 	if err != nil {
 		return errors.Wrap(err, "check config")
 	}
 
 	for _, backupCfg := range opts.Backup.Targets {
-		err := restic.BackupOne(&opts.Backup, &backupCfg, processor.BackupPath, restic.QuantizeFilter(func(msg any) error {
+		err := restic.BackupOne(&opts.Backup, &backupCfg, backupPath, restic.QuantizeFilter(func(msg any) error {
 			switch msg := msg.(type) {
 			case restic.ResticStatus:
 				fmt.Printf("Progress: %.1f%%\n", msg.PercentDone*100)

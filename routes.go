@@ -204,16 +204,16 @@ func setupRoutes(
 			_ = send("close", "close")
 		}()
 
-		processor, err := backup.NewProcessor(opts)
+		backupPath, err := backup.PrepareForBackup(&opts.Backup)
 		if err != nil {
-			_ = send("server-error", errors.Wrap(err, "setup").Error())
+			_ = send("server-error", errors.Wrap(err, "prepare for backup").Error())
 			return
 		}
 
 		for i, target := range opts.Backup.Targets {
 			_ = send("info", "")
 			_ = send("info", fmt.Sprintf("starting backup[%d]", i))
-			err = restic.BackupOne(&opts.Backup, &target, processor.BackupPath, restic.QuantizeFilter(func(msg any) error {
+			err = restic.BackupOne(&opts.Backup, &target, backupPath, restic.QuantizeFilter(func(msg any) error {
 				switch msg := msg.(type) {
 				case restic.ResticStatus:
 					_ = send("info", fmt.Sprintf("  progress: %.1f%%", msg.PercentDone*100))
