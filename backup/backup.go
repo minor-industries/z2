@@ -2,15 +2,15 @@ package backup
 
 import (
 	"fmt"
+	cfg2 "github.com/minor-industries/backup/cfg"
 	"github.com/minor-industries/rtgraph/database/sqlite"
-	"github.com/minor-industries/z2/cfg"
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
 )
 
 // PrepareForBackup dumps the database to a directory and returns this path
-func PrepareForBackup(opts *cfg.BackupConfig) (string, error) {
+func PrepareForBackup(opts *cfg2.BackupConfig) (string, error) {
 	if opts.SourceHost == "" {
 		return "", errors.New("backup_host unset in config file")
 	}

@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"github.com/BurntSushi/toml"
+	"github.com/minor-industries/backup/cfg"
 	"github.com/pkg/errors"
 	"os"
 )
@@ -13,19 +14,19 @@ type Device struct {
 	Disable bool   `toml:"disable"`
 }
 
-type BackupTarget struct {
-	AwsAccessKeyId     string `toml:"aws_access_key_id"`
-	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
-	ResticRepository   string `toml:"restic_repository"`
-	ResticPassword     string `toml:"restic_password"`
-	CACertPath         string `toml:"ca_cert_path"`
-}
+//type BackupTarget struct {
+//	AwsAccessKeyId     string `toml:"aws_access_key_id"`
+//	AwsSecretAccessKey string `toml:"aws_secret_access_key"`
+//	ResticRepository   string `toml:"restic_repository"`
+//	ResticPassword     string `toml:"restic_password"`
+//	CACertPath         string `toml:"ca_cert_path"`
+//}
 
-type BackupConfig struct {
-	ResticPath string         `toml:"restic_path"`
-	SourceHost string         `toml:"source_host"`
-	Targets    []BackupTarget `toml:"targets"`
-}
+//type BackupConfig struct {
+//	ResticPath string         `toml:"restic_path"`
+//	SourceHost string         `toml:"source_host"`
+//	Targets    []BackupTarget `toml:"targets"`
+//}
 
 type SyncServerConfig struct {
 	Enable    bool     `toml:"enable"`
@@ -54,7 +55,7 @@ type Config struct {
 
 	Devices []Device `toml:"devices"`
 
-	Backup BackupConfig `toml:"backup"`
+	Backup cfg.BackupConfig `toml:"backup"`
 
 	Sync       SyncConfig       `toml:"sync"`
 	SyncServer SyncServerConfig `toml:"sync_server"`
@@ -68,7 +69,7 @@ var Default = Config{
 	YRes:    700,
 	Audio:   "browser",
 
-	Backup: BackupConfig{
+	Backup: cfg.BackupConfig{
 		ResticPath: "restic",
 		SourceHost: "",
 	},
