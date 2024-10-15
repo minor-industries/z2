@@ -88,6 +88,10 @@ github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWE
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
 github.com/minor-industries/backup v0.0.0-20241014190003-75152676c73d h1:xniLETF5udNMeZ/VuBEaJYX3Dvqd7vXUcNo/SDvfhGg=
 github.com/minor-industries/backup v0.0.0-20241014190003-75152676c73d/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
+github.com/minor-industries/backup v0.0.0-20241015170620-047ed8ebae68 h1:4gTu51IEdcXqbScWJOuYG+7rr3P9tPEOTnNC33nfKc4=
+github.com/minor-industries/backup v0.0.0-20241015170620-047ed8ebae68/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
+github.com/minor-industries/backup v0.0.0-20241015171350-e41b52e4df2d h1:hd5YuEpEl18oEtDofjOlhslttzC9IR+A7f8yKx2m8bQ=
+github.com/minor-industries/backup v0.0.0-20241015171350-e41b52e4df2d/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
 github.com/minor-industries/calendar v0.0.2 h1:z0HSSbS/dC4NktGuWPNYtV7/EMhjaN9nLB0nVxMGIyY=
 github.com/minor-industries/calendar v0.0.2/go.mod h1:ObostlqefZmRtphanxopvWSVW2dhQ2KiJCqC5jZvQZc=
 github.com/minor-industries/rtgraph v0.0.20 h1:/H0xAETtSck3pl7tzNHzeGgykGfVPvl8rxWrsPm+Er0=
