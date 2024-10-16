@@ -20,7 +20,6 @@ func run() error {
 		return errors.Wrap(err, "check config")
 	}
 
-	// TODO: reuse this message parsing code for both backup paths
 	err = restic.Run(&opts.Backup, backupPath, restic.LogMessages(func(msg string) error {
 		fmt.Println(msg)
 		return nil

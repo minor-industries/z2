@@ -94,6 +94,8 @@ github.com/minor-industries/backup v0.0.0-20241015171350-e41b52e4df2d h1:hd5YuEp
 github.com/minor-industries/backup v0.0.0-20241015171350-e41b52e4df2d/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
 github.com/minor-industries/backup v0.0.0-20241016163152-757b19a4d47b h1:/4CGoULSeyUENj+DWYjigDFwpN1VNCBcc1nwhGRXibk=
 github.com/minor-industries/backup v0.0.0-20241016163152-757b19a4d47b/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
+github.com/minor-industries/backup v0.0.0-20241016165138-a90733379ccb h1:NeXn5YRJCg9mh7nAKK/OvmbbCWl8mQmdPQ4cqcs2qFk=
+github.com/minor-industries/backup v0.0.0-20241016165138-a90733379ccb/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
 github.com/minor-industries/calendar v0.0.2 h1:z0HSSbS/dC4NktGuWPNYtV7/EMhjaN9nLB0nVxMGIyY=
 github.com/minor-industries/calendar v0.0.2/go.mod h1:ObostlqefZmRtphanxopvWSVW2dhQ2KiJCqC5jZvQZc=
 github.com/minor-industries/rtgraph v0.0.20 h1:/H0xAETtSck3pl7tzNHzeGgykGfVPvl8rxWrsPm+Er0=
