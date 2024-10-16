@@ -15,7 +15,7 @@ func PrepareForBackup(opts *cfg2.BackupConfig) (string, error) {
 		return "", errors.New("backup_host unset in config file")
 	}
 
-	if len(opts.Targets) == 0 {
+	if len(opts.Targets)+len(opts.KeychainProfiles) == 0 {
 		return "", errors.New("no backup configs found!")
 	}
 

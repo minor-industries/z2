@@ -210,7 +210,7 @@ func setupRoutes(
 			return
 		}
 
-		if err := restic.Run(&opts.Backup, backupPath, restic.LogMessages(func(msg string) error {
+		if err := restic.Run(&opts.Backup, backupPath, []string{"."}, restic.LogMessages(func(msg string) error {
 			_ = send("info", msg)
 			return nil
 		})); err != nil {

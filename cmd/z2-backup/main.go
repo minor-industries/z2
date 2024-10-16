@@ -20,7 +20,7 @@ func run() error {
 		return errors.Wrap(err, "check config")
 	}
 
-	err = restic.Run(&opts.Backup, backupPath, restic.LogMessages(func(msg string) error {
+	err = restic.Run(&opts.Backup, backupPath, []string{"."}, restic.LogMessages(func(msg string) error {
 		fmt.Println(msg)
 		return nil
 	}))
