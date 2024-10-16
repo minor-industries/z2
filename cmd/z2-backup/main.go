@@ -20,22 +20,9 @@ func run() error {
 		return errors.Wrap(err, "check config")
 	}
 
-	err = restic.Run(&opts.Backup, backupPath, restic.QuantizeFilter(func(msg any) error {
-		switch msg := msg.(type) {
-		case restic.StartBackup:
-			if msg.KeychainProfile != "" {
-				fmt.Println("loading keychain profile:", msg.KeychainProfile)
-			}
-			if msg.Repository != "" {
-				fmt.Println("starting backup:", msg.Repository)
-			}
-		case restic.ResticStatus:
-			fmt.Printf("Progress: %.1f%%\n", msg.PercentDone*100)
-		case restic.ResticSummary:
-			fmt.Println("Backup done!")
-		default:
-			fmt.Println("Unknown message type")
-		}
+	// TODO: reuse this message parsing code for both backup paths
+	err = restic.Run(&opts.Backup, backupPath, restic.LogMessages(func(msg string) error {
+		fmt.Println(msg)
 		return nil
 	}))
 
