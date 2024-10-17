@@ -16,7 +16,7 @@ func PrepareForBackup(opts *cfg2.BackupConfig) (string, error) {
 	}
 
 	if len(opts.Targets)+len(opts.KeychainProfiles) == 0 {
-		return "", errors.New("no backup configs found!")
+		return "", errors.New("no backup configs found")
 	}
 
 	z2Path := os.ExpandEnv("$HOME/.z2")
