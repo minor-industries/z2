@@ -5903,7 +5903,7 @@ var DefaultApiClient = class {
   }
 };
 
-// ../../../node_modules/tinyqueue/index.js
+// node_modules/tinyqueue/index.js
 var TinyQueue = class {
   constructor(data = [], compare = (a, b) => a < b ? -1 : a > b ? 1 : 0) {
     this.data = data;
@@ -5960,7 +5960,7 @@ var TinyQueue = class {
   }
 };
 
-// ../../rtgraph/assets/rtgraph/dist/binary_search.js
+// node_modules/rtgraph/assets/rtgraph/dist/binary_search.js
 function binarySearch(arr, notFoundValue, comparator) {
   let left = 0;
   let right = arr.length - 1;
@@ -5977,7 +5977,7 @@ function binarySearch(arr, notFoundValue, comparator) {
   return result;
 }
 
-// ../../rtgraph/assets/rtgraph/dist/sorted_array_merge.js
+// node_modules/rtgraph/assets/rtgraph/dist/sorted_array_merge.js
 function sortedArrayMerge(arr1x, arr1y, arr2x, arr2y) {
   let m = arr1x.length;
   let n = arr2x.length;
@@ -6006,7 +6006,7 @@ function sortedArrayMerge(arr1x, arr1y, arr2x, arr2y) {
   return arr1x;
 }
 
-// ../../rtgraph/assets/rtgraph/dist/combine.js
+// node_modules/rtgraph/assets/rtgraph/dist/combine.js
 var Cache = class {
   constructor(numSeries, maxGapMS) {
     this.overlapCount = 0;
@@ -6129,7 +6129,7 @@ var Cache = class {
   }
 };
 
-// ../../../node_modules/dygraphs/src/dygraph-tickers.js
+// node_modules/dygraphs/src/dygraph-tickers.js
 var numericLinearTicks = function(a, b, pixels, opts, dygraph, vals) {
   var nonLogscaleOpts = function(opt) {
     if (opt === "logscale") return false;
@@ -6397,7 +6397,7 @@ var getDateAxis = function(start_time, end_time, granularity, opts, dg) {
   return ticks;
 };
 
-// ../../../node_modules/dygraphs/src/dygraph-utils.js
+// node_modules/dygraphs/src/dygraph-utils.js
 var LOG_SCALE = 10;
 var LN_TEN = Math.log(LOG_SCALE);
 var log10 = function(x) {
@@ -7131,7 +7131,7 @@ function setupDOMready_(self) {
   }
 }
 
-// ../../../node_modules/dygraphs/src/dygraph-layout.js
+// node_modules/dygraphs/src/dygraph-layout.js
 var DygraphLayout = function(dygraph) {
   this.dygraph_ = dygraph;
   this.points = [];
@@ -7378,7 +7378,7 @@ DygraphLayout.prototype.removeAllDatasets = function() {
 };
 var dygraph_layout_default = DygraphLayout;
 
-// ../../../node_modules/dygraphs/src/dygraph-canvas.js
+// node_modules/dygraphs/src/dygraph-canvas.js
 var DygraphCanvasRenderer = function(dygraph, element, elementContext, layout) {
   this.dygraph_ = dygraph;
   this.layout = layout;
@@ -7972,7 +7972,7 @@ DygraphCanvasRenderer._fillPlotter = function(e) {
 };
 var dygraph_canvas_default = DygraphCanvasRenderer;
 
-// ../../../node_modules/dygraphs/src/dygraph-interaction-model.js
+// node_modules/dygraphs/src/dygraph-interaction-model.js
 var DRAG_EDGE_MARGIN = 100;
 var DygraphInteraction = {};
 DygraphInteraction.maybeTreatMouseOpAsClick = function(event, g, context) {
@@ -8443,7 +8443,7 @@ DygraphInteraction.dragIsPanInteractionModel = {
 };
 var dygraph_interaction_model_default = DygraphInteraction;
 
-// ../../../node_modules/dygraphs/src/dygraph-default-attrs.js
+// node_modules/dygraphs/src/dygraph-default-attrs.js
 var DEFAULT_ATTRS = {
   highlightCircleSize: 3,
   highlightSeriesOpts: null,
@@ -8557,7 +8557,7 @@ var DEFAULT_ATTRS = {
 };
 var dygraph_default_attrs_default = DEFAULT_ATTRS;
 
-// ../../../node_modules/dygraphs/src/dygraph-options-reference.js
+// node_modules/dygraphs/src/dygraph-options-reference.js
 var OPTIONS_REFERENCE = null;
 if (typeof process !== "undefined" && true) {
   OPTIONS_REFERENCE = // <JSON>
@@ -9452,7 +9452,7 @@ if (typeof process !== "undefined" && true) {
 var op;
 var dygraph_options_reference_default = OPTIONS_REFERENCE;
 
-// ../../../node_modules/dygraphs/src/dygraph-options.js
+// node_modules/dygraphs/src/dygraph-options.js
 var DygraphOptions = function(dygraph) {
   this.dygraph_ = dygraph;
   this.yAxes_ = [];
@@ -9674,7 +9674,7 @@ if (typeof process !== "undefined" && true) {
 var WARNINGS;
 var dygraph_options_default = DygraphOptions;
 
-// ../../../node_modules/dygraphs/src/iframe-tarp.js
+// node_modules/dygraphs/src/iframe-tarp.js
 function IFrameTarp() {
   this.tarps = [];
 }
@@ -9702,7 +9702,7 @@ IFrameTarp.prototype.uncover = function() {
 };
 var iframe_tarp_default = IFrameTarp;
 
-// ../../../node_modules/dygraphs/src/datahandler/datahandler.js
+// node_modules/dygraphs/src/datahandler/datahandler.js
 var DygraphDataHandler = function() {
 };
 var handler = DygraphDataHandler;
@@ -9750,7 +9750,7 @@ handler.parseFloat = function(val) {
 };
 var datahandler_default = DygraphDataHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/default.js
+// node_modules/dygraphs/src/datahandler/default.js
 var DefaultHandler = function() {
 };
 DefaultHandler.prototype = new datahandler_default();
@@ -9813,7 +9813,7 @@ DefaultHandler.prototype.getExtremeYValues = function getExtremeYValues(series, 
 };
 var default_default = DefaultHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/bars.js
+// node_modules/dygraphs/src/datahandler/bars.js
 var BarsHandler = function() {
   datahandler_default.call(this);
 };
@@ -9858,7 +9858,7 @@ BarsHandler.prototype.onLineEvaluated = function(points, axis, logscale) {
 };
 var bars_default = BarsHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/bars-error.js
+// node_modules/dygraphs/src/datahandler/bars-error.js
 var ErrorBarsHandler = function() {
 };
 ErrorBarsHandler.prototype = new bars_default();
@@ -9925,7 +9925,7 @@ ErrorBarsHandler.prototype.rollingAverage = function(originalData, rollPeriod, o
 };
 var bars_error_default = ErrorBarsHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/bars-custom.js
+// node_modules/dygraphs/src/datahandler/bars-custom.js
 var CustomBarsHandler = function() {
 };
 CustomBarsHandler.prototype = new bars_default();
@@ -9999,7 +9999,7 @@ CustomBarsHandler.prototype.rollingAverage = function(originalData, rollPeriod, 
 };
 var bars_custom_default = CustomBarsHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/default-fractions.js
+// node_modules/dygraphs/src/datahandler/default-fractions.js
 var DefaultFractionHandler = function() {
 };
 DefaultFractionHandler.prototype = new default_default();
@@ -10055,7 +10055,7 @@ DefaultFractionHandler.prototype.rollingAverage = function(originalData, rollPer
 };
 var default_fractions_default = DefaultFractionHandler;
 
-// ../../../node_modules/dygraphs/src/datahandler/bars-fractions.js
+// node_modules/dygraphs/src/datahandler/bars-fractions.js
 var FractionsBarsHandler = function() {
 };
 FractionsBarsHandler.prototype = new bars_default();
@@ -10139,7 +10139,7 @@ FractionsBarsHandler.prototype.rollingAverage = function(originalData, rollPerio
 };
 var bars_fractions_default = FractionsBarsHandler;
 
-// ../../../node_modules/dygraphs/src/plugins/annotations.js
+// node_modules/dygraphs/src/plugins/annotations.js
 var annotations = function() {
   this.annotations_ = [];
 };
@@ -10278,7 +10278,7 @@ annotations.prototype.destroy = function() {
 };
 var annotations_default = annotations;
 
-// ../../../node_modules/dygraphs/src/plugins/axes.js
+// node_modules/dygraphs/src/plugins/axes.js
 var axes = function() {
   this.xlabels_ = [];
   this.ylabels_ = [];
@@ -10488,7 +10488,7 @@ axes.prototype.willDrawChart = function(e) {
 };
 var axes_default = axes;
 
-// ../../../node_modules/dygraphs/src/plugins/chart-labels.js
+// node_modules/dygraphs/src/plugins/chart-labels.js
 var chart_labels = function() {
   this.title_div_ = null;
   this.xlabel_div_ = null;
@@ -10628,7 +10628,7 @@ chart_labels.prototype.destroy = function() {
 };
 var chart_labels_default = chart_labels;
 
-// ../../../node_modules/dygraphs/src/plugins/grid.js
+// node_modules/dygraphs/src/plugins/grid.js
 var grid = function() {
 };
 grid.prototype.toString = function() {
@@ -10715,7 +10715,7 @@ grid.prototype.destroy = function() {
 };
 var grid_default = grid;
 
-// ../../../node_modules/dygraphs/src/plugins/legend.js
+// node_modules/dygraphs/src/plugins/legend.js
 var Legend = function() {
   this.legend_div_ = null;
   this.is_generated_div_ = false;
@@ -10956,7 +10956,7 @@ function generateLegendDashHTML(strokePattern, color, oneEmWidth) {
 }
 var legend_default = Legend;
 
-// ../../../node_modules/dygraphs/src/plugins/range-selector.js
+// node_modules/dygraphs/src/plugins/range-selector.js
 var rangeSelector = function() {
   this.hasTouchInterface_ = typeof TouchEvent != "undefined";
   this.isMobileDevice_ = /mobile|android/gi.test(navigator.appVersion);
@@ -11548,7 +11548,7 @@ rangeSelector.prototype.getZoomHandleStatus_ = function() {
 };
 var range_selector_default = rangeSelector;
 
-// ../../../node_modules/dygraphs/src/dygraph-gviz.js
+// node_modules/dygraphs/src/dygraph-gviz.js
 var GVizChart = function(container) {
   this.container = container;
 };
@@ -11578,7 +11578,7 @@ GVizChart.prototype.getSelection = function() {
 };
 var dygraph_gviz_default = GVizChart;
 
-// ../../../node_modules/dygraphs/src/dygraph.js
+// node_modules/dygraphs/src/dygraph.js
 var Dygraph = function Dygraph2(div, data, opts) {
   this.__init__(div, data, opts);
 };
@@ -13796,7 +13796,7 @@ Dygraph.floatFormat = floatFormat;
 setupDOMready_(Dygraph);
 var dygraph_default = Dygraph;
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/utf8.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/utils/utf8.mjs
 var sharedTextEncoder = new TextEncoder();
 var CHUNK_SIZE = 4096;
 function utf8DecodeJs(bytes, inputOffset, byteLength) {
@@ -13853,7 +13853,7 @@ function utf8Decode(bytes, inputOffset, byteLength) {
   }
 }
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/ExtData.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/ExtData.mjs
 var ExtData = (
   /** @class */
   /* @__PURE__ */ function() {
@@ -13865,7 +13865,7 @@ var ExtData = (
   }()
 );
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/DecodeError.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/DecodeError.mjs
 var __extends = /* @__PURE__ */ function() {
   var extendStatics = function(d, b) {
     extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
@@ -13904,7 +13904,7 @@ var DecodeError = (
   }(Error)
 );
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/int.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/utils/int.mjs
 var UINT32_MAX = 4294967295;
 function setInt64(view, offset, value) {
   var high = Math.floor(value / 4294967296);
@@ -13923,7 +13923,7 @@ function getUint64(view, offset) {
   return high * 4294967296 + low;
 }
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/timestamp.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/timestamp.mjs
 var EXT_TIMESTAMP = -1;
 var TIMESTAMP32_MAX_SEC = 4294967296 - 1;
 var TIMESTAMP64_MAX_SEC = 17179869184 - 1;
@@ -14004,7 +14004,7 @@ var timestampExtension = {
   decode: decodeTimestampExtension
 };
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/ExtensionCodec.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/ExtensionCodec.mjs
 var ExtensionCodec = (
   /** @class */
   function() {
@@ -14065,7 +14065,7 @@ var ExtensionCodec = (
   }()
 );
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/typedArrays.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/utils/typedArrays.mjs
 function ensureUint8Array(buffer) {
   if (buffer instanceof Uint8Array) {
     return buffer;
@@ -14085,12 +14085,12 @@ function createDataView(buffer) {
   return new DataView(bufferView.buffer, bufferView.byteOffset, bufferView.byteLength);
 }
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/utils/prettyByte.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/utils/prettyByte.mjs
 function prettyByte(byte) {
   return "".concat(byte < 0 ? "-" : "", "0x").concat(Math.abs(byte).toString(16).padStart(2, "0"));
 }
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/CachedKeyDecoder.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/CachedKeyDecoder.mjs
 var DEFAULT_MAX_KEY_LENGTH = 16;
 var DEFAULT_MAX_LENGTH_PER_KEY = 16;
 var CachedKeyDecoder = (
@@ -14154,7 +14154,7 @@ var CachedKeyDecoder = (
   }()
 );
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/Decoder.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/Decoder.mjs
 var __awaiter = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
     return value instanceof P ? value : new P(function(resolve) {
@@ -14943,16 +14943,16 @@ var Decoder = (
   }()
 );
 
-// ../../../node_modules/@msgpack/msgpack/dist.es5+esm/decode.mjs
+// node_modules/@msgpack/msgpack/dist.es5+esm/decode.mjs
 function decode(buffer, options) {
   var decoder = new Decoder(options);
   return decoder.decode(buffer);
 }
 
-// ../../rtgraph/assets/rtgraph/dist/ws.js
+// node_modules/rtgraph/assets/rtgraph/dist/ws.js
 var WSConnector = class {
   constructor() {
-    this.url = `ws://${window.location.hostname}:${window.location.port}/rtgraph/ws`;
+    this.url = "/rtgraph/ws";
   }
   connect(handler2) {
     this.connectInternal(handler2);
@@ -14979,7 +14979,7 @@ var WSConnector = class {
   }
 };
 
-// ../../rtgraph/assets/rtgraph/dist/graph.js
+// node_modules/rtgraph/assets/rtgraph/dist/graph.js
 function supplant(s, o) {
   return s.replace(/{([^{}]*)}/g, function(a, b) {
     const r = o[b];
@@ -15163,7 +15163,7 @@ var Graph = class {
   }
 };
 
-// ../../rtgraph/assets/rtgraph/dist/synchronizer.js
+// node_modules/rtgraph/assets/rtgraph/dist/synchronizer.js
 var synchronize = function synchronize2() {
   if (arguments.length === 0) {
     throw "Invalid invocation of synchronize(). Need >= 1 argument.";
@@ -16531,11 +16531,6 @@ export {
   streamEvents,
   synchronizer_default as synchronize
 };
-/**
- * @license
- * Part of dygraphs, see top-level LICENSE.txt file
- * MIT-licenced: https://opensource.org/licenses/MIT
- */
 /*! Bundled license information:
 
 dygraphs/src/dygraph-tickers.js:
@@ -16689,6 +16684,13 @@ dygraphs/src/dygraph.js:
   (**
    * @license
    * Copyright 2006 Dan Vanderkam (danvdk@gmail.com)
+   * MIT-licenced: https://opensource.org/licenses/MIT
+   *)
+
+rtgraph/assets/rtgraph/dist/synchronizer.js:
+  (**
+   * @license
+   * Part of dygraphs, see top-level LICENSE.txt file
    * MIT-licenced: https://opensource.org/licenses/MIT
    *)
 */

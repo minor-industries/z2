@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	cfg2 "github.com/minor-industries/backup/cfg"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
@@ -45,7 +46,7 @@ func run() error {
 		Devices: []cfg.Device{
 			{Kind: "bike"},
 		},
-		Backup: cfg.BackupConfig{
+		Backup: cfg2.BackupConfig{
 			ResticPath: "",
 			SourceHost: "",
 			Targets:    nil,
@@ -74,7 +75,6 @@ func run() error {
 		db,
 		errCh,
 		rtgraph.Opts{},
-		[]string{},
 	)
 	if err != nil {
 		return errors.Wrap(err, "new rtgraph")
