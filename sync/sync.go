@@ -57,12 +57,12 @@ func BucketAll(
 func Sync(src storage.StorageBackend, client *Client, days int, info func(string)) error {
 	info(fmt.Sprintf("staring sync (%d days)", days))
 
-	err := sendSeries(src, client, days, info)
+	err := sendMarkers(src, client, info)
 	if err != nil {
 		return errors.Wrap(err, "send series")
 	}
 
-	err = sendMarkers(src, client, info)
+	err = sendSeries(src, client, days, info)
 	if err != nil {
 		return errors.Wrap(err, "send series")
 	}
