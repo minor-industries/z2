@@ -5,7 +5,9 @@ import (
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/variables"
+	"os"
 	"sync"
+	"time"
 )
 
 type ApiServer struct {
@@ -21,6 +23,14 @@ func NewApiServer(backends handler.Backends, vars *variables.Cache, disconnect c
 		vars:       vars,
 		disconnect: disconnect,
 	}
+}
+
+func (a *ApiServer) Shutdown(ctx context.Context, empty *api.Empty) (*api.Empty, error) {
+	go func() {
+		time.Sleep(1 * time.Second)
+		os.Exit(0)
+	}()
+	return &api.Empty{}, nil
 }
 
 func (a *ApiServer) UpdateVariables(ctx context.Context, req *api.UpdateVariablesReq) (*api.Empty, error) {

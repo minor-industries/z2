@@ -58,4 +58,5 @@ service Api {
   rpc AddMarker (AddMarkerReq) returns (Empty);
   rpc LoadMarkers (LoadMarkersReq) returns (LoadMarkersResp);
   rpc DisconnectBluetoothDevices (Empty) returns (Empty);
+  rpc Shutdown (Empty) returns (Empty);
 }

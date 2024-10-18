@@ -15658,6 +15658,9 @@ var DefaultApiClient2 = class {
   async disconnectBluetoothDevices(req) {
     return rpc2("api.Api", "DisconnectBluetoothDevices", req);
   }
+  async shutdown(req) {
+    return rpc2("api.Api", "Shutdown", req);
+  }
 };
 
 // build/wasm_exec.js

@@ -221,6 +221,7 @@
 <button id="workouts-button" class="pure-button pure-button-primary back-button">workouts</button>
 <button id="backup-button" class="pure-button pure-button-primary back-button">backup</button>
 <button id="sync-button" class="pure-button pure-button-primary back-button">sync</button>
+<button id="shutdown-button" class="pure-button pure-button-primary back-button">shutdown</button>
 
 <script type="module">
     import {getEnv} from "/z2/env.js";
@@ -251,6 +252,13 @@
 
         document.getElementById("sync-button").onclick = () => {
             document.location = "/z2/pages/sync.html";
+        };
+
+        document.getElementById("shutdown-button").onclick = async () => {
+            const resp = confirm("Are you sure you want to shut down?");
+            if (resp) {
+                await env.apiClient.shutdown({});
+            }
         };
     });
 </script>

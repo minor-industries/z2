@@ -58,6 +58,8 @@ export interface ApiClient {
     loadMarkers(req: LoadMarkersReq): Promise<LoadMarkersResp>;
 
     disconnectBluetoothDevices(req: Empty): Promise<Empty>;
+
+    shutdown(req: Empty): Promise<Empty>;
 }
 
 export class DefaultApiClient implements ApiClient {
@@ -83,5 +85,9 @@ export class DefaultApiClient implements ApiClient {
 
     public async disconnectBluetoothDevices(req: Empty): Promise<Empty> {
         return rpc("api.Api", "DisconnectBluetoothDevices", req);
+    }
+
+    public async shutdown(req: Empty): Promise<Empty> {
+        return rpc("api.Api", "Shutdown", req);
     }
 }
