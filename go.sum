@@ -102,6 +102,8 @@ github.com/minor-industries/backup v0.0.0-20241016194005-0cdf84fc9493 h1:SW2rrMx
 github.com/minor-industries/backup v0.0.0-20241016194005-0cdf84fc9493/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
 github.com/minor-industries/backup v0.0.1 h1:5cNBRjd4arTuq7t6y+YiON7Rhat+IscCWuKAItZe954=
 github.com/minor-industries/backup v0.0.1/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
+github.com/minor-industries/backup v0.0.4 h1:fQXgwzVK3nst2zSXYFz5+lhQ5Ky51awr9kWW3Ep444I=
+github.com/minor-industries/backup v0.0.4/go.mod h1:RggHPqXbHhTxy+rcEwfP3zv1CewnvY7nVFsI3Fqv7KA=
 github.com/minor-industries/calendar v0.0.2 h1:z0HSSbS/dC4NktGuWPNYtV7/EMhjaN9nLB0nVxMGIyY=
 github.com/minor-industries/calendar v0.0.2/go.mod h1:ObostlqefZmRtphanxopvWSVW2dhQ2KiJCqC5jZvQZc=
 github.com/minor-industries/rtgraph v0.0.20 h1:/H0xAETtSck3pl7tzNHzeGgykGfVPvl8rxWrsPm+Er0=
