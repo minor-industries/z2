@@ -28,6 +28,7 @@ var enableOnce sync.Once
 type Device struct {
 	Address  string
 	Source   Source
+	Kind     string
 	Callback MessageCallback
 }
 

@@ -23,7 +23,6 @@ import (
 	"github.com/minor-industries/z2/time_series"
 	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
 	webview "github.com/webview/webview_go"
 	"os"
 )
@@ -114,11 +113,6 @@ func run() error {
 		}
 	}
 
-	sources, err := setupSources(opts.Devices)
-	if err != nil {
-		return errors.Wrap(err, "setup source")
-	}
-
 	mainHandler := handler.NewHandler(
 		graph,
 		backends.RawValues,
@@ -127,6 +121,11 @@ func run() error {
 		cancel,
 		ctx,
 	)
+
+	sources, err := setupSources(opts.Devices, mainHandler)
+	if err != nil {
+		return errors.Wrap(err, "setup source")
+	}
 
 	disconnect := make(chan struct{})
 
@@ -150,15 +149,7 @@ func run() error {
 				mainHandler.Handle,
 			)
 		} else if len(sources.connect) > 0 {
-			devices := lo.Map(sources.connect, func(src source.Source, index int) source.Device {
-				return source.Device{
-					Address:  sources.addrs[index],
-					Source:   src,
-					Callback: mainHandler.Handle,
-				}
-			})
-
-			source.Connect(ctx, errCh, devices, disconnect)
+			source.Connect(ctx, errCh, sources.connect, disconnect)
 			fmt.Println("all devices found, source.Connect finished")
 			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 		} else {
@@ -199,11 +190,10 @@ func run() error {
 type SourceInfo struct {
 	primary     source.Source
 	primaryKind string
-	connect     []source.Source
-	addrs       []string
+	connect     []source.Device
 }
 
-func setupSources(devices []cfg.Device) (*SourceInfo, error) {
+func setupSources(devices []cfg.Device, mainHandler *handler.Handler) (*SourceInfo, error) {
 	var primarySources []source.Source
 	result := &SourceInfo{}
 
@@ -229,8 +219,12 @@ func setupSources(devices []cfg.Device) (*SourceInfo, error) {
 		}
 
 		fmt.Printf("looking for %s at address %s\n", dev.Kind, dev.Addr)
-		result.connect = append(result.connect, src)
-		result.addrs = append(result.addrs, dev.Addr)
+		result.connect = append(result.connect, source.Device{
+			Source:   src,
+			Address:  dev.Addr,
+			Kind:     dev.Kind,
+			Callback: mainHandler.Handle,
+		})
 	}
 
 	switch len(primarySources) {
