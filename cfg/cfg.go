@@ -95,5 +95,10 @@ func Load(path string) (*Config, error) {
 	if _, err := toml.DecodeFile(cfgFile, &opts); err != nil {
 		return nil, errors.Wrap(err, "decode file")
 	}
+
+	opts.DBPath = os.ExpandEnv(opts.DBPath)
+	opts.ReplayDB = os.ExpandEnv(opts.ReplayDB)
+	opts.Backup.ResticPath = os.ExpandEnv(opts.Backup.ResticPath)
+
 	return &opts, nil
 }

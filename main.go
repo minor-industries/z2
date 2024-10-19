@@ -143,7 +143,7 @@ func run() error {
 			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 			errCh <- replay.FromDatabase(
 				ctx,
-				os.ExpandEnv(opts.ReplayDB),
+				opts.ReplayDB,
 				mainHandler.Handle,
 			)
 		} else if len(sources.connect) > 0 {
@@ -261,13 +261,11 @@ func getBackends(opts *cfg.Config) (handler.Backends, error) {
 }
 
 func getBackend(opts *cfg.Config) (*sqlite.Backend, error) {
-	dbPath := os.ExpandEnv(opts.DBPath)
-
 	if opts.RemoveDB {
-		_ = os.Remove(dbPath)
+		_ = os.Remove(opts.DBPath)
 	}
 
-	db, err := sqlite.Get(dbPath)
+	db, err := sqlite.Get(opts.DBPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "get database")
 	}
