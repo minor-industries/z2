@@ -218,11 +218,11 @@ func setupSources(devices []cfg.Device, mainHandler *handler.Handler) (*SourceIn
 			return nil, fmt.Errorf("unknown device kind: %s", dev.Kind)
 		}
 
-		fmt.Printf("looking for %s at address %s\n", dev.Kind, dev.Addr)
 		result.connect = append(result.connect, source.Device{
 			Source:   src,
 			Address:  dev.Addr,
 			Kind:     dev.Kind,
+			Name:     dev.Name,
 			Callback: mainHandler.Handle,
 		})
 	}

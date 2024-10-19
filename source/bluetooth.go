@@ -29,6 +29,7 @@ type Device struct {
 	Address  string
 	Source   Source
 	Kind     string
+	Name     string
 	Callback MessageCallback
 }
 
@@ -46,6 +47,8 @@ func Connect(
 	var adapter = bluetooth.DefaultAdapter
 
 	addresses := set.Set[string]{}
+	kinds := set.Set[string]{}
+
 	for _, device := range devices {
 		if device.Address != strings.ToLower(device.Address) {
 			errCh <- errors.New("device addresses must be given in lowercase")
@@ -66,7 +69,10 @@ func Connect(
 			}
 		}
 
+		fmt.Printf("looking for %s (%s) at %s\n", device.Kind, device.Name, device.Address)
+
 		addresses.Add(device.Address)
+		kinds.Add(device.Kind)
 	}
 
 	deviceMap := map[string]Device{}
@@ -76,7 +82,6 @@ func Connect(
 
 	var err error
 	enableOnce.Do(func() {
-		fmt.Println("enabling bluetooth adapter")
 		err = adapter.Enable()
 	})
 	if err != nil {
@@ -93,22 +98,30 @@ func Connect(
 
 			dev, ok := deviceMap[scannedAddr]
 			if !ok {
+				// we're not looking for this address
 				return
 			}
 
 			if !addresses.Has(scannedAddr) {
+				// we've already found this address
 				return
 			}
 
-			fmt.Println("scannedAddr", dev.Address, reflect.TypeOf(dev.Source).String())
+			if !kinds.Has(dev.Kind) {
+				// we've already found one of these kinds of devices
+				return
+			}
+
+			fmt.Printf("found %s (%s) at %s\n", dev.Kind, dev.Name, dev.Address)
 			addresses.Delete(dev.Address)
+			kinds.Delete(dev.Kind)
 
 			ch <- foundDevice{
 				Device: dev,
 				Result: result,
 			}
 
-			if addresses.Len() == 0 {
+			if kinds.Len() == 0 {
 				err := adapter.StopScan()
 				if err != nil {
 					errCh <- errors.Wrap(err, "stop scan")
@@ -153,7 +166,8 @@ func handleDevice(
 		return errors.Wrap(err, "connect")
 	}
 
-	fmt.Println("connected to", found.Result.Address.String(), reflect.TypeOf(found.Device.Source).String())
+	dev := found.Device
+	fmt.Printf("connected to %s (%s) at %s\n", dev.Kind, dev.Name, dev.Address)
 
 	src := found.Device.Source
 	srvcs, err := device.DiscoverServices(lo.Map(src.Services(), func(item UUID, _ int) bluetooth.UUID {
@@ -164,7 +178,7 @@ func handleDevice(
 	}
 
 	for _, srvc := range srvcs {
-		fmt.Println("- service", srvc.UUID().String())
+		//fmt.Println("- service", srvc.UUID().String())
 
 		chars, err := srvc.DiscoverCharacteristics(lo.Map(src.Characteristics(), func(item UUID, _ int) bluetooth.UUID {
 			return mustParseUUID(item)
@@ -173,8 +187,8 @@ func handleDevice(
 			fmt.Println(err)
 		}
 		for _, char := range chars {
-			fmt.Println("-- 16 bit", srvc.Is16Bit())
-			fmt.Println("-- characteristic", char.UUID().String())
+			//fmt.Println("-- 16 bit", srvc.Is16Bit())
+			//fmt.Println("-- characteristic", char.UUID().String())
 
 			fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
 			{
