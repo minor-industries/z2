@@ -36,7 +36,7 @@ type foundDevice struct {
 	Result bluetooth.ScanResult
 }
 
-func Run(
+func Connect(
 	ctx context.Context,
 	errCh chan error,
 	devices []Device,

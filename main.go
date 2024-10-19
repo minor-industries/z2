@@ -158,8 +158,8 @@ func run() error {
 				}
 			})
 
-			source.Run(ctx, errCh, devices, disconnect)
-			fmt.Println("all devices found, source.Run exited")
+			source.Connect(ctx, errCh, devices, disconnect)
+			fmt.Println("all devices found, source.Connect finished")
 			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 		} else {
 			fmt.Println("no sources found")
