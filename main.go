@@ -131,7 +131,10 @@ func run() error {
 	disconnect := make(chan struct{})
 
 	router := gin.New()
-	setupRoutes(router, opts, graph, br, backends, vars, disconnect)
+	err = setupRoutes(router, opts, graph, br, backends, vars, disconnect)
+	if err != nil {
+		return errors.Wrap(err, "setup routes")
+	}
 
 	go func() {
 		errCh <- router.Run(fmt.Sprintf("0.0.0.0:%d", opts.Port))
