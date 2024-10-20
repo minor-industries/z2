@@ -9,5 +9,5 @@ export interface Env {
 
     maybeStartFrontendBLE(): Promise<void>,
 
-    streamEvents(path: string, callback: (event: string) => void): void,
+    streamEvents(path: string, callbacks: { [key: string]: (data: string) => void }): void;
 }

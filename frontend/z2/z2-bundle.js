@@ -16243,11 +16243,15 @@ function localDate() {
 }
 
 // build/stream_events.js
-function streamEvents(path, callback) {
+function streamEvents(path, callbacks) {
   const es = new EventSource(path);
-  es.addEventListener("play-sound", (event) => {
-    callback(event.data);
-  });
+  for (const eventType in callbacks) {
+    if (callbacks.hasOwnProperty(eventType)) {
+      es.addEventListener(eventType, (event) => {
+        callbacks[eventType](event.data);
+      });
+    }
+  }
 }
 
 // build/startup.js

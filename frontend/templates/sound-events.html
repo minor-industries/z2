@@ -1,15 +1,40 @@
-{{ define "sound-events" }}
-
 <script type="module">
     import {getEnv} from "/z2/env.js";
 
+    const bluetoothConnectedHandler = (() => {
+        const seen = {};
+
+        return (data) => {
+            const msg = JSON.parse(data);
+            const key = msg.address;
+            if (key === "") {
+                return;
+            }
+            if (seen[key]) {
+                return;
+            }
+            seen[key] = true;
+
+            const kind = msg.kind;
+            const name = msg.name ? " " + msg.name : "";
+
+            const info = `${kind}${name} is connected`;
+            console.log(info);
+        };
+    })();
+
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
-        env.streamEvents("/events", data => {
-            const audio = document.getElementById(`sound-${data}`);
-            audio.play();
+
+        // Use the `bluetoothConnectedHandler` in `streamEvents`
+        env.streamEvents("/events", {
+            "play-sound": (data) => {
+                const audio = document.getElementById(`sound-${data}`);
+                if (audio) {
+                    audio.play();
+                }
+            },
+            "bluetooth-is-connected": bluetoothConnectedHandler
         });
     });
 </script>
-
-{{ end }}

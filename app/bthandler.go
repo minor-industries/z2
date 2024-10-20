@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/minor-industries/rtgraph"
+	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/lib/data"
 	"github.com/minor-industries/z2/lib/source"
@@ -11,28 +12,31 @@ import (
 	"time"
 )
 
+type BluetoothIsConnected struct {
+	DeviceInfo source.DeviceInfo
+}
+
+func (b *BluetoothIsConnected) Name() string {
+	return "BluetoothIsConnected"
+}
+
 type BTHandler struct {
 	graph     *rtgraph.Graph
+	broker    *broker.Broker
 	rawValues *sqlite.Backend
 	source    source.Source
 	cancel    context.CancelFunc
-	ctx       context.Context
 
+	ctx            context.Context
 	t0             time.Time
 	lastMsg        time.Time
 	writeRawValues bool
 }
 
-func NewBTHandler(
-	graph *rtgraph.Graph,
-	rawValues *sqlite.Backend,
-	source source.Source,
-	writeRawValues bool,
-	cancel context.CancelFunc,
-	ctx context.Context,
-) *BTHandler {
+func NewBTHandler(graph *rtgraph.Graph, br *broker.Broker, rawValues *sqlite.Backend, source source.Source, writeRawValues bool, cancel context.CancelFunc, ctx context.Context) *BTHandler {
 	return &BTHandler{
 		graph:          graph,
+		broker:         br,
 		rawValues:      rawValues,
 		source:         source,
 		cancel:         cancel,
@@ -68,6 +72,11 @@ func (h *BTHandler) Handle(
 		Characteristic: characteristic,
 		Msg:            msg,
 	})
+
+	if len(srs) > 0 {
+		m := &BluetoothIsConnected{DeviceInfo: info}
+		h.broker.Publish(m)
+	}
 
 	for _, s := range srs {
 		err := h.graph.CreateValue(s.Name, s.Timestamp, s.Value)

@@ -101,14 +101,7 @@ func run() error {
 		}
 	}
 
-	btHandler := app.NewBTHandler(
-		graph,
-		nil,
-		multiSource,
-		opts.WriteRawValues,
-		cancel,
-		ctx,
-	)
+	btHandler := app.NewBTHandler(graph, nil, nil, multiSource, opts.WriteRawValues, cancel, ctx)
 
 	br := broker.NewBroker()
 	go br.Start()

@@ -1,9 +1,14 @@
 export function streamEvents(
     path: string,
-    callback: (data: string) => void
+    callbacks: { [key: string]: (data: string) => void }
 ): void {
     const es = new EventSource(path);
-    es.addEventListener("play-sound", (event) => {
-        callback(event.data);
-    });
+
+    for (const eventType in callbacks) {
+        if (callbacks.hasOwnProperty(eventType)) {
+            es.addEventListener(eventType, (event: MessageEvent) => {
+                callbacks[eventType](event.data);
+            });
+        }
+    }
 }

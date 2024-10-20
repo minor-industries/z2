@@ -115,6 +115,7 @@ func run() error {
 
 	btHandler := app.NewBTHandler(
 		graph,
+		br,
 		backends.RawValues,
 		multiSource,
 		opts.WriteRawValues,

@@ -89,9 +89,33 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
-        env.streamEvents("/events", data => {
-            const audio = document.getElementById(`sound-${data}`);
-            audio.play();
+
+        const seen = {};
+
+        env.streamEvents("/events", {
+            "play-sound": (data) => {
+                const audio = document.getElementById(`sound-${data}`);
+                if (audio) {
+                    audio.play();
+                }
+            },
+            "bluetooth-is-connected": (data) => {
+                const msg = JSON.parse(data);
+                const key = msg.address;
+                if (key === "") {
+                    return;
+                }
+                if (seen[key]) {
+                    return;
+                }
+                seen[key] = true;
+
+                const kind = msg.kind;
+                const name = msg.name ? " " + msg.name : "";
+
+                const info = `${kind}${name} is connected`;
+                console.log(info);
+            },
         });
     });
 </script>
