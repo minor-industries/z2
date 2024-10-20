@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
+	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/gen/go/api"
-	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/variables"
 	"os"
 	"sync"
@@ -12,12 +12,12 @@ import (
 
 type ApiServer struct {
 	vars           *variables.Cache
-	backends       handler.Backends
+	backends       app.Backends
 	disconnect     chan struct{}
 	disconnectOnce sync.Once
 }
 
-func NewApiServer(backends handler.Backends, vars *variables.Cache, disconnect chan struct{}) *ApiServer {
+func NewApiServer(backends app.Backends, vars *variables.Cache, disconnect chan struct{}) *ApiServer {
 	return &ApiServer{
 		backends:   backends,
 		vars:       vars,

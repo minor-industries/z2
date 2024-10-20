@@ -16,7 +16,6 @@ import (
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
-	"github.com/minor-industries/z2/handler"
 	genapi "github.com/minor-industries/z2/server/api"
 	"github.com/minor-industries/z2/sync"
 	"github.com/minor-industries/z2/variables"
@@ -48,7 +47,7 @@ func SetupRoutes(
 	opts *cfg.Config,
 	graph *rtgraph.Graph,
 	br *broker.Broker,
-	backends handler.Backends,
+	backends app.Backends,
 	vars *variables.Cache,
 	disconnect chan struct{},
 ) error {

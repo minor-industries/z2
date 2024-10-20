@@ -3,14 +3,14 @@
 package wasm
 
 import (
-	"github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/source"
 	"strings"
 	"syscall/js"
 	"time"
 )
 
-func HandleBTMsg(btHandler *handler.Handler) js.Func {
+func HandleBTMsg(btHandler *app.BTHandler) js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) any {
 		msgBuf := make([]byte, args[2].Length())
 		js.CopyBytesToGo(msgBuf, args[2])

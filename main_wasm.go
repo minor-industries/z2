@@ -12,7 +12,6 @@ import (
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/cfg"
-	handler2 "github.com/minor-industries/z2/handler"
 	genapi "github.com/minor-industries/z2/server/api"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
@@ -102,7 +101,7 @@ func run() error {
 		}
 	}
 
-	btHandler := handler2.NewHandler(
+	btHandler := app.NewBTHandler(
 		graph,
 		nil,
 		multiSource,
@@ -115,7 +114,7 @@ func run() error {
 	go br.Start()
 
 	apiHandler := genapi.NewApiServer(
-		handler2.Backends{
+		app.Backends{
 			Samples: db,
 		},
 		vars,

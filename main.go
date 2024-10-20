@@ -13,7 +13,6 @@ import (
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
-	"github.com/minor-industries/z2/handler"
 	"github.com/minor-industries/z2/server"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
@@ -114,7 +113,7 @@ func run() error {
 		}
 	}
 
-	mainHandler := handler.NewHandler(
+	mainHandler := app.NewBTHandler(
 		graph,
 		backends.RawValues,
 		multiSource,
@@ -194,7 +193,7 @@ type SourceInfo struct {
 	connect     []source.Device
 }
 
-func setupSources(devices []cfg.Device, mainHandler *handler.Handler) (*SourceInfo, error) {
+func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo, error) {
 	var primarySources []source.Source
 	result := &SourceInfo{}
 
@@ -240,19 +239,19 @@ func setupSources(devices []cfg.Device, mainHandler *handler.Handler) (*SourceIn
 	return result, nil
 }
 
-func getBackends(opts *cfg.Config) (handler.Backends, error) {
-	backends := handler.Backends{}
+func getBackends(opts *cfg.Config) (app.Backends, error) {
+	backends := app.Backends{}
 
 	var err error
 
 	backends.Samples, err = getBackend(opts)
 	if err != nil {
-		return handler.Backends{}, errors.Wrap(err, "get backend")
+		return app.Backends{}, errors.Wrap(err, "get backend")
 	}
 
 	backends.RawValues, err = getBackend(opts)
 	if err != nil {
-		return handler.Backends{}, errors.Wrap(err, "get backend")
+		return app.Backends{}, errors.Wrap(err, "get backend")
 	}
 
 	return backends, err
