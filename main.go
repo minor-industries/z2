@@ -219,10 +219,12 @@ func setupSources(devices []cfg.Device, btHandler *app.BTHandler) (*SourceInfo, 
 		}
 
 		result.connect = append(result.connect, source.Device{
+			Info: source.DeviceInfo{
+				Address: dev.Addr,
+				Kind:    dev.Kind,
+				Name:    dev.Name,
+			},
 			Source:   src,
-			Address:  dev.Addr,
-			Kind:     dev.Kind,
-			Name:     dev.Name,
 			Callback: btHandler.Handle,
 		})
 	}

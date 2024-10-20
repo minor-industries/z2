@@ -25,11 +25,15 @@ func mustParseUUID(s UUID) bluetooth.UUID {
 
 var enableOnce sync.Once
 
+type DeviceInfo struct {
+	Address string
+	Kind    string
+	Name    string
+}
+
 type Device struct {
-	Address  string
+	Info     DeviceInfo
 	Source   Source
-	Kind     string
-	Name     string
 	Callback MessageCallback
 }
 
@@ -50,7 +54,7 @@ func Connect(
 	kinds := set.Set[string]{}
 
 	for _, device := range devices {
-		if device.Address != strings.ToLower(device.Address) {
+		if device.Info.Address != strings.ToLower(device.Info.Address) {
 			errCh <- errors.New("device addresses must be given in lowercase")
 			return
 		}
@@ -69,15 +73,15 @@ func Connect(
 			}
 		}
 
-		fmt.Printf("looking for %s (%s) at %s\n", device.Kind, device.Name, device.Address)
+		fmt.Printf("looking for %s (%s) at %s\n", device.Info.Kind, device.Info.Name, device.Info.Address)
 
-		addresses.Add(device.Address)
-		kinds.Add(device.Kind)
+		addresses.Add(device.Info.Address)
+		kinds.Add(device.Info.Kind)
 	}
 
 	deviceMap := map[string]Device{}
 	for _, device := range devices {
-		deviceMap[strings.ToLower(device.Address)] = device
+		deviceMap[strings.ToLower(device.Info.Address)] = device
 	}
 
 	var err error
@@ -107,14 +111,14 @@ func Connect(
 				return
 			}
 
-			if !kinds.Has(dev.Kind) {
+			if !kinds.Has(dev.Info.Kind) {
 				// we've already found one of these kinds of devices
 				return
 			}
 
-			fmt.Printf("found %s (%s) at %s\n", dev.Kind, dev.Name, dev.Address)
-			addresses.Delete(dev.Address)
-			kinds.Delete(dev.Kind)
+			fmt.Printf("found %s (%s) at %s\n", dev.Info.Kind, dev.Info.Name, dev.Info.Address)
+			addresses.Delete(dev.Info.Address)
+			kinds.Delete(dev.Info.Kind)
 
 			ch <- foundDevice{
 				Device: dev,
@@ -167,7 +171,7 @@ func handleDevice(
 	}
 
 	dev := found.Device
-	fmt.Printf("connected to %s (%s) at %s\n", dev.Kind, dev.Name, dev.Address)
+	fmt.Printf("connected to %s (%s) at %s\n", dev.Info.Kind, dev.Info.Name, dev.Info.Address)
 
 	src := found.Device.Source
 	srvcs, err := device.DiscoverServices(lo.Map(src.Services(), func(item UUID, _ int) bluetooth.UUID {
