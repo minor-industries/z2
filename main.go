@@ -14,7 +14,7 @@ import (
 	"github.com/minor-industries/z2/app/time_series"
 	"github.com/minor-industries/z2/cfg"
 	data2 "github.com/minor-industries/z2/lib/data"
-	source2 "github.com/minor-industries/z2/lib/source"
+	"github.com/minor-industries/z2/lib/source"
 	"github.com/minor-industries/z2/lib/source/bike"
 	"github.com/minor-industries/z2/lib/source/heartrate"
 	"github.com/minor-industries/z2/lib/source/multi"
@@ -55,7 +55,7 @@ func run() error {
 	go backends.RawValues.RunWriter(errCh)
 
 	if opts.Scan {
-		return source2.Scan()
+		return source.Scan()
 	}
 
 	if opts.ReplayDB != "" {
@@ -99,7 +99,7 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	allSources := map[string]source2.Source{
+	allSources := map[string]source.Source{
 		"bike":  &bike.BikeSource{},
 		"rower": rower.NewRowerSource(),
 		"hrm":   &heartrate.Source{},
@@ -149,7 +149,7 @@ func run() error {
 				mainHandler.Handle,
 			)
 		} else if len(sources.connect) > 0 {
-			source2.Connect(ctx, errCh, sources.connect, disconnect)
+			source.Connect(ctx, errCh, sources.connect, disconnect)
 			fmt.Println("all devices found, source.Connect finished")
 			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 		} else {
@@ -188,13 +188,13 @@ func run() error {
 }
 
 type SourceInfo struct {
-	primary     source2.Source
+	primary     source.Source
 	primaryKind string
-	connect     []source2.Device
+	connect     []source.Device
 }
 
 func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo, error) {
-	var primarySources []source2.Source
+	var primarySources []source.Source
 	result := &SourceInfo{}
 
 	for _, dev := range devices {
@@ -202,7 +202,7 @@ func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo
 			continue
 		}
 
-		var src source2.Source
+		var src source.Source
 		switch dev.Kind {
 		case "bike":
 			src = &bike.BikeSource{}
@@ -218,7 +218,7 @@ func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo
 			return nil, fmt.Errorf("unknown device kind: %s", dev.Kind)
 		}
 
-		result.connect = append(result.connect, source2.Device{
+		result.connect = append(result.connect, source.Device{
 			Source:   src,
 			Address:  dev.Addr,
 			Kind:     dev.Kind,
