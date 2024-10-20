@@ -91,6 +91,7 @@ func (h *Handler) Monitor(disconnect chan struct{}) {
 	for {
 		select {
 		case <-t.C:
+			//TODO: h.lastMsg access here is not threadsafe
 			if h.lastMsg.Equal(time.Time{}) {
 				break
 			}
