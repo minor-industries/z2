@@ -113,7 +113,7 @@ func run() error {
 		}
 	}
 
-	mainHandler := app.NewBTHandler(
+	btHandler := app.NewBTHandler(
 		graph,
 		backends.RawValues,
 		multiSource,
@@ -122,7 +122,7 @@ func run() error {
 		ctx,
 	)
 
-	sources, err := setupSources(opts.Devices, mainHandler)
+	sources, err := setupSources(opts.Devices, btHandler)
 	if err != nil {
 		return errors.Wrap(err, "setup source")
 	}
@@ -142,16 +142,16 @@ func run() error {
 	go func() {
 		if opts.ReplayDB != "" {
 			fmt.Println("using replay database", opts.ReplayDB)
-			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
+			go btHandler.Monitor(disconnect) // TODO: should monitor each source independently
 			errCh <- replay.FromDatabase(
 				ctx,
 				opts.ReplayDB,
-				mainHandler.Handle,
+				btHandler.Handle,
 			)
 		} else if len(sources.connect) > 0 {
 			source.Connect(ctx, errCh, sources.connect, disconnect)
 			fmt.Println("all devices found, source.Connect finished")
-			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
+			go btHandler.Monitor(disconnect) // TODO: should monitor each source independently
 		} else {
 			fmt.Println("no sources found")
 		}
@@ -193,7 +193,7 @@ type SourceInfo struct {
 	connect     []source.Device
 }
 
-func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo, error) {
+func setupSources(devices []cfg.Device, btHandler *app.BTHandler) (*SourceInfo, error) {
 	var primarySources []source.Source
 	result := &SourceInfo{}
 
@@ -223,7 +223,7 @@ func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo
 			Address:  dev.Addr,
 			Kind:     dev.Kind,
 			Name:     dev.Name,
-			Callback: mainHandler.Handle,
+			Callback: btHandler.Handle,
 		})
 	}
 
