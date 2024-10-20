@@ -11,17 +11,17 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
+	"github.com/minor-industries/z2/app/time_series"
 	"github.com/minor-industries/z2/cfg"
-	"github.com/minor-industries/z2/data"
+	data2 "github.com/minor-industries/z2/lib/data"
+	source2 "github.com/minor-industries/z2/lib/source"
+	"github.com/minor-industries/z2/lib/source/bike"
+	"github.com/minor-industries/z2/lib/source/heartrate"
+	"github.com/minor-industries/z2/lib/source/multi"
+	"github.com/minor-industries/z2/lib/source/replay"
+	"github.com/minor-industries/z2/lib/source/rower"
+	variables2 "github.com/minor-industries/z2/lib/variables"
 	"github.com/minor-industries/z2/server"
-	"github.com/minor-industries/z2/source"
-	"github.com/minor-industries/z2/source/bike"
-	"github.com/minor-industries/z2/source/heartrate"
-	"github.com/minor-industries/z2/source/multi"
-	"github.com/minor-industries/z2/source/replay"
-	"github.com/minor-industries/z2/source/rower"
-	"github.com/minor-industries/z2/time_series"
-	"github.com/minor-industries/z2/variables"
 	"github.com/pkg/errors"
 	webview "github.com/webview/webview_go"
 	"os"
@@ -55,7 +55,7 @@ func run() error {
 	go backends.RawValues.RunWriter(errCh)
 
 	if opts.Scan {
-		return source.Scan()
+		return source2.Scan()
 	}
 
 	if opts.ReplayDB != "" {
@@ -66,13 +66,13 @@ func run() error {
 	gin.SetMode(gin.ReleaseMode)
 
 	if err := backends.RawValues.GetORM().AutoMigrate(
-		&data.RawValue{},
+		&data2.RawValue{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
 
 	if err := samples.GetORM().AutoMigrate(
-		&data.Variable{},
+		&data2.Variable{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
@@ -86,7 +86,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars, err := variables.NewCache(variables.NewSQLiteStorage(samples.GetORM()))
+	vars, err := variables2.NewCache(variables2.NewSQLiteStorage(samples.GetORM()))
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
@@ -99,7 +99,7 @@ func run() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	allSources := map[string]source.Source{
+	allSources := map[string]source2.Source{
 		"bike":  &bike.BikeSource{},
 		"rower": rower.NewRowerSource(),
 		"hrm":   &heartrate.Source{},
@@ -149,7 +149,7 @@ func run() error {
 				mainHandler.Handle,
 			)
 		} else if len(sources.connect) > 0 {
-			source.Connect(ctx, errCh, sources.connect, disconnect)
+			source2.Connect(ctx, errCh, sources.connect, disconnect)
 			fmt.Println("all devices found, source.Connect finished")
 			go mainHandler.Monitor(disconnect) // TODO: should monitor each source independently
 		} else {
@@ -188,13 +188,13 @@ func run() error {
 }
 
 type SourceInfo struct {
-	primary     source.Source
+	primary     source2.Source
 	primaryKind string
-	connect     []source.Device
+	connect     []source2.Device
 }
 
 func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo, error) {
-	var primarySources []source.Source
+	var primarySources []source2.Source
 	result := &SourceInfo{}
 
 	for _, dev := range devices {
@@ -202,7 +202,7 @@ func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo
 			continue
 		}
 
-		var src source.Source
+		var src source2.Source
 		switch dev.Kind {
 		case "bike":
 			src = &bike.BikeSource{}
@@ -218,7 +218,7 @@ func setupSources(devices []cfg.Device, mainHandler *app.BTHandler) (*SourceInfo
 			return nil, fmt.Errorf("unknown device kind: %s", dev.Kind)
 		}
 
-		result.connect = append(result.connect, source.Device{
+		result.connect = append(result.connect, source2.Device{
 			Source:   src,
 			Address:  dev.Addr,
 			Kind:     dev.Kind,

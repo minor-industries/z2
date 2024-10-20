@@ -12,14 +12,14 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
-	"github.com/minor-industries/z2/backup"
+	"github.com/minor-industries/z2/app/workouts"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
+	"github.com/minor-industries/z2/lib/backup"
+	sync2 "github.com/minor-industries/z2/lib/sync"
+	"github.com/minor-industries/z2/lib/variables"
 	genapi "github.com/minor-industries/z2/server/api"
-	"github.com/minor-industries/z2/sync"
-	"github.com/minor-industries/z2/variables"
-	"github.com/minor-industries/z2/workouts"
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"html/template"
@@ -174,9 +174,9 @@ func SetupRoutes(
 			return
 		}
 
-		syncClient := sync.NewClient(host, database)
+		syncClient := sync2.NewClient(host, database)
 
-		err = sync.Sync(samples, syncClient, days, func(s string) {
+		err = sync2.Sync(samples, syncClient, days, func(s string) {
 			_ = send("info", s)
 		})
 
@@ -212,7 +212,7 @@ func SetupRoutes(
 	})
 
 	if opts.SyncServer.Enable {
-		err := sync.SetupRoutes(router, &opts.SyncServer)
+		err := sync2.SetupRoutes(router, &opts.SyncServer)
 		if err != nil {
 			panic(err)
 		}

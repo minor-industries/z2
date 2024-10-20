@@ -6,8 +6,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/minor-industries/rtgraph/database/sqlite"
-	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/gen/go/api"
+	"github.com/minor-industries/z2/lib/data"
 	"time"
 )
 

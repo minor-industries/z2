@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/minor-industries/backup/restic"
-	"github.com/minor-industries/z2/backup"
 	"github.com/minor-industries/z2/cfg"
+	"github.com/minor-industries/z2/lib/backup"
 	"github.com/pkg/errors"
 	"os"
 )

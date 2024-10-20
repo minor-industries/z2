@@ -5,7 +5,7 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
-	"github.com/minor-industries/z2/variables"
+	"github.com/minor-industries/z2/lib/variables"
 	"math"
 	"time"
 )

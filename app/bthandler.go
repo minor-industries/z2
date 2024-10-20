@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/database/sqlite"
-	"github.com/minor-industries/z2/data"
-	"github.com/minor-industries/z2/source"
+	"github.com/minor-industries/z2/lib/data"
+	"github.com/minor-industries/z2/lib/source"
 	"github.com/pkg/errors"
 	"time"
 )

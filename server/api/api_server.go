@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/gen/go/api"
-	"github.com/minor-industries/z2/variables"
+	"github.com/minor-industries/z2/lib/variables"
 	"os"
 	"sync"
 	"time"
