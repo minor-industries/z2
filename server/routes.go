@@ -1,10 +1,9 @@
 //go:build !wasm
 
-package main
+package server
 
 import (
 	"bytes"
-	"embed"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/minor-industries/backup/restic"
@@ -13,12 +12,12 @@ import (
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/sqlite"
 	"github.com/minor-industries/z2/app"
-	handler2 "github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/backup"
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/frontend"
 	"github.com/minor-industries/z2/gen/go/api"
 	"github.com/minor-industries/z2/handler"
+	genapi "github.com/minor-industries/z2/server/api"
 	"github.com/minor-industries/z2/sync"
 	"github.com/minor-industries/z2/variables"
 	"github.com/minor-industries/z2/workouts"
@@ -30,14 +29,8 @@ import (
 	"strconv"
 )
 
-//go:embed frontend/templates/*.html
-var templatesFS embed.FS
-
-//go:embed frontend/env_gin.js
-var envWebJSTemplate []byte
-
 func renderEnvTemplate(data map[string]any) ([]byte, error) {
-	tmpl, err := template.New("env.js").Parse(string(envWebJSTemplate))
+	tmpl, err := template.New("env.js").Parse(string(frontend.EnvWebJSTemplate))
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +43,7 @@ func renderEnvTemplate(data map[string]any) ([]byte, error) {
 	return result.Bytes(), nil
 }
 
-func setupRoutes(
+func SetupRoutes(
 	router *gin.Engine,
 	opts *cfg.Config,
 	graph *rtgraph.Graph,
@@ -75,7 +68,7 @@ func setupRoutes(
 
 	graph.SetupServer(router.Group("/rtgraph"))
 
-	tmpl := template.Must(template.New("").ParseFS(templatesFS, "frontend/templates/*"))
+	tmpl := template.Must(template.New("").ParseFS(frontend.TemplatesFS, "templates/*"))
 	router.SetHTMLTemplate(tmpl)
 
 	router.GET("/workouts.html", func(c *gin.Context) {
@@ -126,7 +119,7 @@ func setupRoutes(
 		}
 	})
 
-	apiHandler := handler2.NewApiServer(backends, vars, disconnect)
+	apiHandler := genapi.NewApiServer(backends, vars, disconnect)
 	router.Any("/twirp/api.Api/*Method", gin.WrapH(api.NewApiServer(apiHandler, nil)))
 
 	router.POST(

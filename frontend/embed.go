@@ -10,3 +10,9 @@ import (
 //go:embed z2/pages/*.html
 //go:embed z2/sounds/*.mp3
 var FS embed.FS
+
+//go:embed env_gin.js
+var EnvWebJSTemplate []byte
+
+//go:embed templates/*.html
+var TemplatesFS embed.FS

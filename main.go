@@ -14,6 +14,7 @@ import (
 	"github.com/minor-industries/z2/cfg"
 	"github.com/minor-industries/z2/data"
 	"github.com/minor-industries/z2/handler"
+	"github.com/minor-industries/z2/server"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
 	"github.com/minor-industries/z2/source/heartrate"
@@ -130,7 +131,7 @@ func run() error {
 	disconnect := make(chan struct{})
 
 	router := gin.New()
-	err = setupRoutes(router, opts, graph, br, backends, vars, disconnect)
+	err = server.SetupRoutes(router, opts, graph, br, backends, vars, disconnect)
 	if err != nil {
 		return errors.Wrap(err, "setup routes")
 	}

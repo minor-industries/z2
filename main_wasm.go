@@ -11,9 +11,9 @@ import (
 	"github.com/minor-industries/rtgraph/messages"
 	"github.com/minor-industries/rtgraph/subscription"
 	"github.com/minor-industries/z2/app"
-	"github.com/minor-industries/z2/app/handler"
 	"github.com/minor-industries/z2/cfg"
 	handler2 "github.com/minor-industries/z2/handler"
+	genapi "github.com/minor-industries/z2/server/api"
 	"github.com/minor-industries/z2/source"
 	"github.com/minor-industries/z2/source/bike"
 	"github.com/minor-industries/z2/source/heartrate"
@@ -114,7 +114,7 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	apiHandler := handler.NewApiServer(
+	apiHandler := genapi.NewApiServer(
 		handler2.Backends{
 			Samples: db,
 		},

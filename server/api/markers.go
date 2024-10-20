@@ -1,6 +1,6 @@
 //go:build !wasm
 
-package handler
+package api
 
 import (
 	"context"
