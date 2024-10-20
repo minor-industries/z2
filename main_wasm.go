@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	cfg2 "github.com/minor-industries/backup/cfg"
+	backupCfg "github.com/minor-industries/backup/cfg"
 	"github.com/minor-industries/rtgraph"
 	"github.com/minor-industries/rtgraph/broker"
 	"github.com/minor-industries/rtgraph/database/capacitor_sqlite"
@@ -19,11 +19,10 @@ import (
 	"github.com/minor-industries/z2/lib/source/multi"
 	"github.com/minor-industries/z2/lib/source/replay"
 	"github.com/minor-industries/z2/lib/source/rower"
-	sync2 "github.com/minor-industries/z2/lib/sync"
-	variables2 "github.com/minor-industries/z2/lib/variables"
-	genapi "github.com/minor-industries/z2/server/api"
-	wasm2 "github.com/minor-industries/z2/server/wasm"
-	"github.com/minor-industries/z2/wasm"
+	"github.com/minor-industries/z2/lib/sync"
+	"github.com/minor-industries/z2/lib/variables"
+	"github.com/minor-industries/z2/server/api"
+	"github.com/minor-industries/z2/server/wasm"
 	"github.com/pkg/errors"
 	"syscall/js"
 	"time"
@@ -46,7 +45,7 @@ func run() error {
 		Devices: []cfg.Device{
 			{Kind: "bike"},
 		},
-		Backup: cfg2.BackupConfig{
+		Backup: backupCfg.BackupConfig{
 			ResticPath: "",
 			SourceHost: "",
 			Targets:    nil,
@@ -80,7 +79,7 @@ func run() error {
 		return errors.Wrap(err, "new rtgraph")
 	}
 
-	vars, err := variables2.NewCache(&variables2.NullStorage{})
+	vars, err := variables.NewCache(&variables.NullStorage{})
 	noErr(err)
 
 	time_series.SetupGraphFunctions(graph, vars)
@@ -114,7 +113,7 @@ func run() error {
 	br := broker.NewBroker()
 	go br.Start()
 
-	apiHandler := genapi.NewApiServer(
+	apiHandler := api.NewApiServer(
 		app.Backends{
 			Samples: db,
 		},
@@ -131,7 +130,7 @@ func run() error {
 		"loadMarkers":     js.FuncOf(goWasmApi.LoadMarkers),
 	}
 
-	goWasmCalendar := wasm2.NewCalendarWasm(apiHandler)
+	goWasmCalendar := wasm.NewCalendarWasm(apiHandler)
 	jsWasmCalendar := map[string]any{
 		"getEvents": js.FuncOf(goWasmCalendar.GetEvents),
 	}
@@ -245,8 +244,8 @@ func run() error {
 				logCallback := args[3]
 
 				go func() {
-					syncClient := sync2.NewClient(host, database)
-					err := sync2.Sync(db, syncClient, lookbackDays, func(s string) {
+					syncClient := sync.NewClient(host, database)
+					err := sync.Sync(db, syncClient, lookbackDays, func(s string) {
 						fmt.Println("sync:", s)
 						logCallback.Invoke(js.ValueOf(s))
 					})

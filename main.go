@@ -13,14 +13,14 @@ import (
 	"github.com/minor-industries/z2/app"
 	"github.com/minor-industries/z2/app/time_series"
 	"github.com/minor-industries/z2/cfg"
-	data2 "github.com/minor-industries/z2/lib/data"
+	"github.com/minor-industries/z2/lib/data"
 	"github.com/minor-industries/z2/lib/source"
 	"github.com/minor-industries/z2/lib/source/bike"
 	"github.com/minor-industries/z2/lib/source/heartrate"
 	"github.com/minor-industries/z2/lib/source/multi"
 	"github.com/minor-industries/z2/lib/source/replay"
 	"github.com/minor-industries/z2/lib/source/rower"
-	variables2 "github.com/minor-industries/z2/lib/variables"
+	"github.com/minor-industries/z2/lib/variables"
 	"github.com/minor-industries/z2/server"
 	"github.com/pkg/errors"
 	webview "github.com/webview/webview_go"
@@ -66,13 +66,13 @@ func run() error {
 	gin.SetMode(gin.ReleaseMode)
 
 	if err := backends.RawValues.GetORM().AutoMigrate(
-		&data2.RawValue{},
+		&data.RawValue{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
 
 	if err := samples.GetORM().AutoMigrate(
-		&data2.Variable{},
+		&data.Variable{},
 	); err != nil {
 		return errors.Wrap(err, "automigrate")
 	}
@@ -86,7 +86,7 @@ func run() error {
 		return errors.Wrap(err, "new graph")
 	}
 
-	vars, err := variables2.NewCache(variables2.NewSQLiteStorage(samples.GetORM()))
+	vars, err := variables.NewCache(variables.NewSQLiteStorage(samples.GetORM()))
 	if err != nil {
 		return errors.Wrap(err, "new cache")
 	}
