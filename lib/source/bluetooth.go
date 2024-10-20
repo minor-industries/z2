@@ -25,12 +25,6 @@ func mustParseUUID(s UUID) bluetooth.UUID {
 
 var enableOnce sync.Once
 
-type DeviceInfo struct {
-	Address string
-	Kind    string
-	Name    string
-}
-
 type Device struct {
 	Info     DeviceInfo
 	Source   Source
@@ -189,6 +183,7 @@ func handleDevice(
 		}))
 		if err != nil {
 			fmt.Println(err)
+			continue
 		}
 		for _, char := range chars {
 			//fmt.Println("-- 16 bit", srvc.Is16Bit())
@@ -197,10 +192,20 @@ func handleDevice(
 			fmt.Println("enabling notifications", srvc.UUID().String(), char.UUID().String())
 			{
 				// capture loop variables for use in closure below
+
+				// TODO: do we actually know if found.Device.Callback is correct? Does this work when connected
+				// TODO: to multiple devices with the same service UUID? Should try multiple HRMs at the same time.
+
 				svUUID := srvc.UUID()
 				chUUID := char.UUID()
 				if err := char.EnableNotifications(func(buf []byte) {
-					err := found.Device.Callback(time.Now(), UUID(svUUID.String()), UUID(chUUID.String()), buf)
+					err := found.Device.Callback(
+						time.Now(),
+						found.Device.Info,
+						UUID(svUUID.String()),
+						UUID(chUUID.String()),
+						buf,
+					)
 					if err != nil {
 						errCh <- errors.Wrap(err, "callback")
 					}

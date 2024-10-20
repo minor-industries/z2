@@ -45,6 +45,7 @@ func NewBTHandler(
 
 func (h *BTHandler) Handle(
 	t time.Time,
+	info source.DeviceInfo,
 	service source.UUID,
 	characteristic source.UUID,
 	msg []byte,

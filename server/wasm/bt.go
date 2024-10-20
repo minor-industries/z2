@@ -16,7 +16,8 @@ func HandleBTMsg(btHandler *app.BTHandler) js.Func {
 		js.CopyBytesToGo(msgBuf, args[2])
 
 		err := btHandler.Handle(
-			time.Now(), // should we pass t in from javascript?
+			time.Now(),          // should we pass t in from javascript?
+			source.DeviceInfo{}, // TODO: populate this somehow?
 			source.UUID(strings.ToLower(args[0].String())),
 			source.UUID(strings.ToLower(args[1].String())),
 			msgBuf,

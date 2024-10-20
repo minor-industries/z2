@@ -34,6 +34,7 @@ func replay(
 			}
 			if err := callback(
 				now,
+				source.DeviceInfo{}, // TODO: fill with dummy values based on ServiceID?
 				source.UUID(row.ServiceID),
 				source.UUID(row.CharacteristicID),
 				row.Message,

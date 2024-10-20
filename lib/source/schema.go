@@ -4,8 +4,15 @@ import "time"
 
 type UUID string
 
+type DeviceInfo struct {
+	Address string
+	Kind    string
+	Name    string
+}
+
 type MessageCallback func(
 	t time.Time,
+	info DeviceInfo,
 	service UUID,
 	characteristic UUID,
 	msg []byte,
