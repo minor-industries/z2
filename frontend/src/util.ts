@@ -1,3 +1,5 @@
+import {Notyf} from 'notyf';
+
 export function runOnce<T extends (...args: any[]) => Promise<any>>(asyncFn: T): T {
     let initialized = false;
     let resultPromise: ReturnType<T>;
@@ -18,4 +20,18 @@ export function localDate(): string {
     const day = now.getDate().toString().padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+}
+
+export function notify(type: 'success' | 'error', message: string) {
+    switch (type) {
+        case "success":
+            new Notyf().success(message);
+            return;
+        case "error":
+            new Notyf().error(message);
+            return;
+        default:
+            new Notyf().error("unknown alert type");
+            return;
+    }
 }

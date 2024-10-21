@@ -1,5 +1,8 @@
+{{ define "sound-events" }}
+
 <script type="module">
     import {getEnv} from "/z2/env.js";
+    import {notify} from "/z2/z2-bundle.js";
 
     const bluetoothConnectedHandler = (() => {
         const seen = {};
@@ -20,6 +23,7 @@
 
             const info = `${kind}${name} is connected`;
             console.log(info);
+            notify("success", info);
         };
     })();
 
@@ -34,7 +38,10 @@
                     audio.play();
                 }
             },
+
             "bluetooth-is-connected": bluetoothConnectedHandler
         });
     });
 </script>
+
+{{end}}

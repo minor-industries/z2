@@ -7,8 +7,9 @@ import {decode} from "@msgpack/msgpack"
 import {DefaultApiClient} from "./api_client";
 import {Env} from "./env"
 import {runGoWasm, WASMConnector} from "./wasm_connector"
-import {localDate, runOnce} from "./util";
+import {localDate, notify, runOnce} from "./util";
 import {streamEvents} from "./stream_events";
+
 
 //@ts-ignore
 import {runWasm} from "./startup.js";
@@ -24,6 +25,7 @@ export {
     calendar,
     decode,
     localDate,
+    notify,
     runGoWasm,
     runOnce,
     runWasm,

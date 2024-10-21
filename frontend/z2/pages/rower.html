@@ -14,6 +14,8 @@
     <link rel="stylesheet" type="text/css" href="/z2/css/purecss/pure-min.css">
     <link rel="stylesheet" type="text/css" href="/z2/css/purecss/grids-responsive-min.css">
 
+    <link rel="stylesheet" type="text/css" href="/z2/css/notyf/notyf.min.css"/>
+
     <style>
         body {
             margin: 0 0 20px;
@@ -86,12 +88,35 @@
 
 <script type="module">
     import {getEnv} from "/z2/env.js";
+    import {notify} from "/z2/z2-bundle.js";
+
+    const bluetoothConnectedHandler = (() => {
+        const seen = {};
+
+        return (data) => {
+            const msg = JSON.parse(data);
+            const key = msg.address;
+            if (key === "") {
+                return;
+            }
+            if (seen[key]) {
+                return;
+            }
+            seen[key] = true;
+
+            const kind = msg.kind;
+            const name = msg.name ? " " + msg.name : "";
+
+            const info = `${kind}${name} is connected`;
+            console.log(info);
+            notify("success", info);
+        };
+    })();
 
     document.addEventListener("DOMContentLoaded", async () => {
         const env = await getEnv();
 
-        const seen = {};
-
+        
         env.streamEvents("/events", {
             "play-sound": (data) => {
                 const audio = document.getElementById(`sound-${data}`);
@@ -99,23 +124,8 @@
                     audio.play();
                 }
             },
-            "bluetooth-is-connected": (data) => {
-                const msg = JSON.parse(data);
-                const key = msg.address;
-                if (key === "") {
-                    return;
-                }
-                if (seen[key]) {
-                    return;
-                }
-                seen[key] = true;
 
-                const kind = msg.kind;
-                const name = msg.name ? " " + msg.name : "";
-
-                const info = `${kind}${name} is connected`;
-                console.log(info);
-            },
+            "bluetooth-is-connected": bluetoothConnectedHandler
         });
     });
 </script>

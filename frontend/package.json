@@ -14,6 +14,7 @@
   "dependencies": {
     "@types/uuid": "^10.0.0",
     "calendar": "github:minor-industries/calendar#v0.0.4",
+    "notyf": "^3.10.0",
     "rtgraph": "github:minor-industries/rtgraph#v0.0.22",
     "uuid": "^10.0.0"
   }
