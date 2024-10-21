@@ -22,16 +22,22 @@ export function localDate(): string {
     return `${year}-${month}-${day}`;
 }
 
+const notyf = new Notyf({
+    duration: 5000,
+    ripple: false,
+    dismissible: true,
+});
+
 export function notify(type: 'success' | 'error', message: string) {
     switch (type) {
         case "success":
-            new Notyf().success(message);
+            notyf.success(message);
             return;
         case "error":
-            new Notyf().error(message);
+            notyf.error(message);
             return;
         default:
-            new Notyf().error("unknown alert type");
+            notyf.error("unknown alert type");
             return;
     }
 }

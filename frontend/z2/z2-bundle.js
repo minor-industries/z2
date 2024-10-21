@@ -16633,16 +16633,21 @@ function localDate() {
   const day = now.getDate().toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+var notyf = new Notyf({
+  duration: 5e3,
+  ripple: false,
+  dismissible: true
+});
 function notify(type, message) {
   switch (type) {
     case "success":
-      new Notyf().success(message);
+      notyf.success(message);
       return;
     case "error":
-      new Notyf().error(message);
+      notyf.error(message);
       return;
     default:
-      new Notyf().error("unknown alert type");
+      notyf.error("unknown alert type");
       return;
   }
 }
