@@ -24,7 +24,7 @@ stats).
 
 ## Bike screenshot
 
-![app screenshot](https://minor-industries.sfo2.digitaloceanspaces.com/sw/z2_screenshot_02.png)
+![app screenshot](docs/z2_screenshot_02.png)
 
 ## Rower screenshot
 
