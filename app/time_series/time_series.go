@@ -6,6 +6,7 @@ import (
 	"github.com/minor-industries/rtgraph/computed_series"
 	"github.com/minor-industries/z2/lib/variables"
 	"github.com/pkg/errors"
+	"strconv"
 	"time"
 )
 
@@ -49,6 +50,29 @@ func SetupGraphFunctions(graph *rtgraph.Graph, vars *variables.Cache) {
 		}, 90*time.Second, time.Time{})
 
 		return fcn, nil
+	})
+
+	graph.Parser.AddFunction("warmup", func(start time.Time, args []string) (computed_series.Operator, error) {
+		if len(args) != 3 {
+			return nil, errors.New("warmup requires 3 arguments: threshold delay sustain")
+		}
+
+		threshold, err := strconv.ParseFloat(args[0], 64)
+		if err != nil {
+			return nil, errors.Wrap(err, "parse threshold")
+		}
+
+		delay, err := time.ParseDuration(args[1])
+		if err != nil {
+			return nil, errors.Wrap(err, "parse delay")
+		}
+
+		sustain, err := time.ParseDuration(args[2])
+		if err != nil {
+			return nil, errors.Wrap(err, "parse sustain")
+		}
+
+		return &OpWarmup{threshold: threshold, delay: delay, sustain: sustain}, nil
 	})
 
 	graph.Parser.AddFunction("time-bin", func(start time.Time, args []string) (computed_series.Operator, error) {
